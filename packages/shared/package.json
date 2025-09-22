@@ -1,0 +1,19 @@
+{
+  "name": "@lyricnote/shared",
+  "version": "1.0.0",
+  "description": "Shared types, constants, and utilities for LyricNote",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

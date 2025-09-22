@@ -1,0 +1,46 @@
+{
+  "name": "@lyricnote/backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@lyricnote/shared": "file:../shared",
+    "@prisma/client": "^6.16.2",
+    "bcryptjs": "^3.0.2",
+    "ioredis": "^5.7.0",
+    "jsonwebtoken": "^9.0.2",
+    "kuroshiro": "^1.2.0",
+    "kuroshiro-analyzer-mecab": "^1.0.1",
+    "multer": "^2.0.2",
+    "next": "15.5.3",
+    "next-auth": "^4.24.11",
+    "prisma": "^6.16.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "redis": "^5.8.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.3",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
