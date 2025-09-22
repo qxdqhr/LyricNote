@@ -1,4 +1,4 @@
-name: 🎌 LyricNote CI/CD Pipeline
+name: 🎌 LyricNote 持续集成和部署
 
 on:
   push:
@@ -15,39 +15,39 @@ env:
 jobs:
   # 🧪 测试和代码质量检查
   test:
-    name: 🧪 Test & Quality Check
+    name: 🧪 代码测试和质量检查
     runs-on: ubuntu-latest
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
-    - name: 📦 Setup Node.js
+    - name: 📦 设置 Node.js 环境
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         
-    - name: 📚 Install dependencies
+    - name: 📚 安装项目依赖
       run: |
         npm ci
         npm run build:shared
         
-    - name: 🔍 Lint check
+    - name: 🔍 代码质量检查
       run: |
-        npm run lint || echo "Linting completed with warnings"
+        npm run lint || echo "代码检查完成（有警告）"
         
-    - name: 🧪 Run tests
+    - name: 🧪 运行单元测试
       run: |
-        npm run test || echo "Tests completed"
+        npm run test || echo "测试完成"
         
-    - name: 🏥 Health check build
+    - name: 🏥 构建健康检查
       run: |
-        npm run build || echo "Build test completed"
+        npm run build || echo "构建测试完成"
 
   # 🐳 构建Docker镜像
   build-docker:
-    name: 🐳 Build Docker Images
+    name: 🐳 构建Docker镜像
     runs-on: ubuntu-latest
     needs: test
     if: github.event_name == 'push'
@@ -57,20 +57,20 @@ jobs:
       image-digest: ${{ steps.build.outputs.digest }}
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
-    - name: 🐳 Set up Docker Buildx
+    - name: 🐳 设置 Docker Buildx
       uses: docker/setup-buildx-action@v3
       
-    - name: 🔐 Login to Container Registry
+    - name: 🔐 登录容器注册表
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: 📋 Extract metadata
+    - name: 📋 提取镜像元数据
       id: meta
       uses: docker/metadata-action@v5
       with:
@@ -82,12 +82,12 @@ jobs:
           type=semver,pattern={{major}}.{{minor}}
           type=sha,prefix={{branch}}-
           
-    - name: 🔨 Build shared package
+    - name: 🔨 构建共享包
       run: |
         npm ci
         npm run build:shared
         
-    - name: 🐳 Build and push Docker image
+    - name: 🐳 构建并推送Docker镜像
       id: build
       uses: docker/build-push-action@v5
       with:
@@ -101,54 +101,54 @@ jobs:
 
   # 📱 构建移动端应用
   build-mobile:
-    name: 📱 Build Mobile App
+    name: 📱 构建移动端应用
     runs-on: ubuntu-latest
     needs: test
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
-    - name: 📦 Setup Node.js
+    - name: 📦 设置 Node.js 环境
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         
-    - name: 📚 Install dependencies
+    - name: 📚 安装项目依赖
       run: |
         npm ci
         npm run build:shared
         
-    - name: 🔧 Setup Expo CLI
+    - name: 🔧 设置 Expo CLI
       run: npm install -g @expo/cli eas-cli
       
-    - name: 📱 Configure Expo
+    - name: 📱 配置 Expo 认证
       working-directory: ./packages/mobile
       run: |
         # 配置Expo认证
         echo "${{ secrets.EXPO_TOKEN }}" | npx expo login --non-interactive
         
-    - name: 🔨 Build Android APK (Preview)
+    - name: 🔨 构建Android预览版
       if: github.ref == 'refs/heads/main'
       working-directory: ./packages/mobile
       run: |
         eas build --platform android --profile preview --non-interactive
         
-    - name: 🔨 Build Production (Tags only)
+    - name: 🔨 构建生产版本（仅标签）
       if: startsWith(github.ref, 'refs/tags/')
       working-directory: ./packages/mobile
       run: |
         eas build --platform all --profile production --non-interactive
         
-    - name: 📊 Upload build info
+    - name: 📊 生成构建信息
       if: always()
       working-directory: ./packages/mobile
       run: |
         eas build:list --limit=5 --json > build-info.json || echo "[]" > build-info.json
         
-    - name: 📤 Upload build artifacts
+    - name: 📤 上传构建产物
       uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -157,14 +157,14 @@ jobs:
 
   # 🚀 部署到生产环境
   deploy-production:
-    name: 🚀 Deploy to Production
+    name: 🚀 部署到生产环境
     runs-on: ubuntu-latest
     needs: [build-docker, build-mobile]
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
     environment: production
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
     - name: 🔐 Setup SSH key
@@ -194,7 +194,7 @@ jobs:
     - name: 📤 Upload files to server
       run: |
         # 创建部署目录
-        ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
+        ssh -o StrictHostKey检查ing=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
           mkdir -p /opt/lyricnote/backup/\$(date +%Y%m%d_%H%M%S)
           if [ -d /opt/lyricnote/current ]; then
             cp -r /opt/lyricnote/current/* /opt/lyricnote/backup/\$(date +%Y%m%d_%H%M%S)/
@@ -213,9 +213,9 @@ jobs:
         # 上传环境配置
         scp .env.production ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/lyricnote/current/.env
         
-    - name: 🐳 Deploy with Docker
+    - name: 🐳 部署 with Docker
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
+        ssh -o StrictHostKey检查ing=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
           cd /opt/lyricnote/current
           
           # 更新Docker镜像
@@ -232,9 +232,9 @@ jobs:
           
           # 健康检查
           if curl -f http://localhost:3000/api/health; then
-            echo '✅ Deployment successful!'
+            echo '✅ 部署ment successful!'
           else
-            echo '❌ Deployment failed - rolling back'
+            echo '❌ 部署ment failed - rolling back'
             docker-compose down
             # 这里可以添加回滚逻辑
             exit 1
@@ -245,10 +245,10 @@ jobs:
       if: always()
       run: |
         if [ "${{ job.status }}" == "success" ]; then
-          echo "🎉 Deployment successful!"
+          echo "🎉 部署ment successful!"
           # 这里可以添加成功通知，如Slack、邮件等
         else
-          echo "❌ Deployment failed!"
+          echo "❌ 部署ment failed!"
           # 这里可以添加失败通知
         fi
 
@@ -262,7 +262,7 @@ jobs:
     steps:
     - name: 🗑️ Cleanup old Docker images
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
+        ssh -o StrictHostKey检查ing=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
           # 清理无用的Docker镜像
           docker image prune -f
           
@@ -281,10 +281,10 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
-    - name: 📤 Download mobile build info
+    - name: 📤 下载 mobile build info
       uses: actions/download-artifact@v4
       with:
         name: mobile-build-info
@@ -308,7 +308,7 @@ jobs:
           
           ### 📱 移动端下载
           - **Android APK**: 查看EAS构建页面
-          - **iOS TestFlight**: 即将发布
+          - **iOS 测试Flight**: 即将发布
           
           ### 🌐 在线体验
           - **API服务**: https://${{ secrets.DOMAIN }}/api

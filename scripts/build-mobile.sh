@@ -3,7 +3,7 @@
 # 🎌 LyricNote 移动端构建脚本
 set -e
 
-echo "📱 LyricNote Mobile Build Script"
+echo "📱 LyricNote 移动端构建脚本"
 
 # 颜色定义
 RED='\033[0;31m'

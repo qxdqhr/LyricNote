@@ -3,7 +3,7 @@
 # 🎌 LyricNote 生产环境部署脚本
 set -e
 
-echo "🎌 LyricNote Production Deployment Starting..."
+echo "🎌 LyricNote 生产环境部署开始..."
 
 # 颜色定义
 RED='\033[0;31m'

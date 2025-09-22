@@ -1,4 +1,4 @@
-name: 📱 Mobile App Build
+name: 📱 移动端应用构建
 
 on:
   push:
@@ -11,10 +11,10 @@ on:
     paths:
       - 'packages/mobile/**'
       - 'packages/shared/**'
-  workflow_dispatch:
+      workflow_dispatch:
     inputs:
       platform:
-        description: 'Build platform'
+        description: '构建平台'
         required: true
         default: 'android'
         type: choice
@@ -23,7 +23,7 @@ on:
           - ios
           - all
       profile:
-        description: 'Build profile'
+        description: '构建配置'
         required: true
         default: 'preview'
         type: choice
@@ -38,7 +38,7 @@ env:
 jobs:
   # 📱 移动端构建
   mobile-build:
-    name: 📱 Build Mobile App
+    name: 📱 构建移动端应用
     runs-on: ubuntu-latest
     
     strategy:
@@ -47,21 +47,21 @@ jobs:
         profile: ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', github.event.inputs.profile)) || fromJSON('["preview"]') }}
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
-    - name: 📦 Setup Node.js
+    - name: 📦 设置 Node.js 环境
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         
-    - name: 📚 Install dependencies
+    - name: 📚 安装项目依赖
       run: |
         npm ci
         npm run build:shared
         
-    - name: 🔧 Setup Expo CLI
+    - name: 🔧 设置 Expo CLI
       run: |
         npm install -g @expo/cli eas-cli
         
@@ -76,14 +76,14 @@ jobs:
         npx expo config --type=public
         npx expo doctor
         
-    - name: 🔨 Build Android
+    - name: 🔨 构建Android
       if: matrix.platform == 'android' || matrix.platform == 'all'
       working-directory: ./packages/mobile
       run: |
         echo "🤖 Building Android app with profile: ${{ matrix.profile }}"
         eas build --platform android --profile ${{ matrix.profile }} --non-interactive --wait
         
-    - name: 🔨 Build iOS
+    - name: 🔨 构建iOS
       if: matrix.platform == 'ios' || matrix.platform == 'all'
       working-directory: ./packages/mobile
       run: |
@@ -97,7 +97,7 @@ jobs:
         eas build:list --limit=5 --json > build-info.json
         cat build-info.json
         
-    - name: 📤 Upload build artifacts
+    - name: 📤 上传构建 artifacts
       uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -124,7 +124,7 @@ jobs:
               **Status**: ${latestBuild.status}
               **Build ID**: ${latestBuild.id}
               
-              ${latestBuild.artifacts ? `**Download**: [${latestBuild.artifacts.buildUrl}](${latestBuild.artifacts.buildUrl})` : ''}
+              ${latestBuild.artifacts ? `**下载**: [${latestBuild.artifacts.buildUrl}](${latestBuild.artifacts.buildUrl})` : ''}
               
               **Build Time**: ${new Date(latestBuild.createdAt).toLocaleString()}
               `;
@@ -148,16 +148,16 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event.inputs.profile == 'production'
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
-    - name: 📦 Setup Node.js
+    - name: 📦 设置 Node.js 环境
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         
-    - name: 🔧 Setup Expo CLI
+    - name: 🔧 设置 Expo CLI
       run: npm install -g @expo/cli eas-cli
       
     - name: 📱 Expo Authentication
@@ -185,12 +185,12 @@ jobs:
     if: always()
     
     steps:
-    - name: 📤 Download build artifacts
+    - name: 📤 下载 build artifacts
       uses: actions/download-artifact@v4
       with:
         path: ./build-artifacts
         
-    - name: 📊 Generate build report
+    - name: 📊 生成 build report
       run: |
         echo "# 📱 Mobile Build Report" > build-report.md
         echo "" >> build-report.md
@@ -207,7 +207,7 @@ jobs:
         echo "- [EAS Build Dashboard](https://expo.dev/accounts/${{ secrets.EXPO_USERNAME }}/projects/lyricnote/builds)" >> build-report.md
         echo "- [GitHub Repository](https://github.com/${{ github.repository }})" >> build-report.md
         
-    - name: 📤 Upload build report
+    - name: 📤 上传构建 report
       uses: actions/upload-artifact@v4
       with:
         name: build-report

@@ -3,7 +3,7 @@
 # 🎌 LyricNote 部署测试脚本
 set -e
 
-echo "🧪 LyricNote Deployment Test Script"
+echo "🧪 LyricNote 部署测试脚本"
 
 # 颜色定义
 RED='\033[0;31m'

@@ -1,4 +1,4 @@
-name: 🧪 Test Suite
+name: 🧪 测试套件
 
 on:
   push:
@@ -15,20 +15,20 @@ env:
 jobs:
   # 🔍 代码质量检查
   lint-and-format:
-    name: 🔍 Lint & Format Check
+    name: 🔍 代码质量和格式检查
     runs-on: ubuntu-latest
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
-    - name: 📦 Setup Node.js
+    - name: 📦 设置 Node.js 环境
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         
-    - name: 📚 Install dependencies
+    - name: 📚 安装项目依赖
       run: |
         npm ci
         npm run build:shared
@@ -48,7 +48,7 @@ jobs:
         # 检查移动端
         cd ../mobile && npx tsc --noEmit
         
-    - name: 📊 Generate lint report
+    - name: 📊 生成 lint report
       run: |
         echo "# 🔍 Code Quality Report" > lint-report.md
         echo "" >> lint-report.md
@@ -69,7 +69,7 @@ jobs:
 
   # 🧪 单元测试
   unit-tests:
-    name: 🧪 Unit Tests
+    name: 🧪 单元测试
     runs-on: ubuntu-latest
     
     strategy:
@@ -77,16 +77,16 @@ jobs:
         package: [shared, backend, mobile]
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
-    - name: 📦 Setup Node.js
+    - name: 📦 设置 Node.js 环境
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         
-    - name: 📚 Install dependencies
+    - name: 📚 安装项目依赖
       run: |
         npm ci
         npm run build:shared
@@ -94,7 +94,7 @@ jobs:
     - name: 🧪 Run tests for ${{ matrix.package }}
       run: |
         cd packages/${{ matrix.package }}
-        npm test || echo "Tests completed for ${{ matrix.package }}"
+        npm test || echo "测试s completed for ${{ matrix.package }}"
         
     - name: 📊 Upload test results
       uses: actions/upload-artifact@v4
@@ -105,27 +105,27 @@ jobs:
 
   # 🔒 安全扫描
   security-scan:
-    name: 🔒 Security Scan
+    name: 🔒 安全扫描
     runs-on: ubuntu-latest
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
-    - name: 📦 Setup Node.js
+    - name: 📦 设置 Node.js 环境
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         
-    - name: 📚 Install dependencies
+    - name: 📚 安装项目依赖
       run: npm ci
       
     - name: 🔒 Run security audit
       run: |
         npm audit --audit-level=moderate || true
         
-    - name: 🔍 Check for vulnerabilities
+    - name: 🔍 检查 for vulnerabilities
       run: |
         # 检查高危漏洞
         if npm audit --audit-level=high --json > audit-results.json; then
@@ -144,7 +144,7 @@ jobs:
 
   # 🏗 构建测试
   build-test:
-    name: 🏗 Build Test
+    name: 🏗 构建测试
     runs-on: ubuntu-latest
     
     strategy:
@@ -152,16 +152,16 @@ jobs:
         package: [shared, backend]
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
-    - name: 📦 Setup Node.js
+    - name: 📦 设置 Node.js 环境
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         
-    - name: 📚 Install dependencies
+    - name: 📚 安装项目依赖
       run: npm ci
       
     - name: 🔨 Build ${{ matrix.package }}
@@ -184,11 +184,11 @@ jobs:
 
   # 🐳 Docker构建测试
   docker-build-test:
-    name: 🐳 Docker Build Test
+    name: 🐳 Docker Build 测试
     runs-on: ubuntu-latest
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
     - name: 🐳 Set up Docker Buildx
@@ -199,7 +199,7 @@ jobs:
         npm ci
         npm run build:shared
         
-    - name: 🔨 Test Docker build
+    - name: 🔨 测试 Docker build
       run: |
         docker build -f packages/backend/Dockerfile -t lyricnote-test .
         
@@ -210,28 +210,28 @@ jobs:
 
   # 📱 移动端编译测试
   mobile-compile-test:
-    name: 📱 Mobile Compile Test
+    name: 📱 Mobile Compile 测试
     runs-on: ubuntu-latest
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
-    - name: 📦 Setup Node.js
+    - name: 📦 设置 Node.js 环境
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         
-    - name: 📚 Install dependencies
+    - name: 📚 安装项目依赖
       run: |
         npm ci
         npm run build:shared
         
-    - name: 🔧 Setup Expo CLI
+    - name: 🔧 设置 Expo CLI
       run: npm install -g @expo/cli
       
-    - name: 📱 Test mobile compilation
+    - name: 📱 测试 mobile compilation
       working-directory: ./packages/mobile
       run: |
         # 测试TypeScript编译
@@ -251,41 +251,41 @@ jobs:
 
   # 📊 测试报告汇总
   test-summary:
-    name: 📊 Test Summary
+    name: 📊 测试 Summary
     runs-on: ubuntu-latest
     needs: [lint-and-format, unit-tests, security-scan, build-test, docker-build-test, mobile-compile-test]
     if: always()
     
     steps:
-    - name: 📤 Download all test artifacts
+    - name: 📤 下载 all test artifacts
       uses: actions/download-artifact@v4
       with:
         path: ./test-results
         
-    - name: 📊 Generate test summary
+    - name: 📊 生成 test summary
       run: |
-        echo "# 🧪 Test Summary Report" > test-summary.md
+        echo "# 🧪 测试 Summary Report" > test-summary.md
         echo "" >> test-summary.md
         echo "**Date**: $(date)" >> test-summary.md
         echo "**Commit**: ${{ github.sha }}" >> test-summary.md
         echo "**Branch**: ${{ github.ref_name }}" >> test-summary.md
         echo "" >> test-summary.md
         
-        echo "## 📋 Test Results" >> test-summary.md
+        echo "## 📋 测试 Results" >> test-summary.md
         echo "" >> test-summary.md
         
         # 检查各个job的状态
-        echo "| Test Suite | Status |" >> test-summary.md
+        echo "| 测试 Suite | Status |" >> test-summary.md
         echo "|------------|--------|" >> test-summary.md
         echo "| Lint & Format | ${{ needs.lint-and-format.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> test-summary.md
-        echo "| Unit Tests | ${{ needs.unit-tests.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> test-summary.md
+        echo "| Unit 测试s | ${{ needs.unit-tests.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> test-summary.md
         echo "| Security Scan | ${{ needs.security-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> test-summary.md
-        echo "| Build Test | ${{ needs.build-test.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> test-summary.md
+        echo "| Build 测试 | ${{ needs.build-test.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> test-summary.md
         echo "| Docker Build | ${{ needs.docker-build-test.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> test-summary.md
         echo "| Mobile Compile | ${{ needs.mobile-compile-test.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> test-summary.md
         
         echo "" >> test-summary.md
-        echo "## 📁 Test Artifacts" >> test-summary.md
+        echo "## 📁 测试 Artifacts" >> test-summary.md
         find ./test-results -type f -name "*.md" -o -name "*.json" | head -10 | while read file; do
           echo "- \`$file\`" >> test-summary.md
         done

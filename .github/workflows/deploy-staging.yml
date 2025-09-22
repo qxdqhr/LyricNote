@@ -1,4 +1,4 @@
-name: 🚧 Deploy to Staging
+name: 🚧 部署到测试环境
 
 on:
   push:
@@ -13,21 +13,21 @@ env:
 jobs:
   # 🚧 部署到测试环境
   deploy-staging:
-    name: 🚧 Deploy to Staging
+    name: 🚧 部署到测试环境
     runs-on: ubuntu-latest
     environment: staging
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 检出代码
       uses: actions/checkout@v4
       
-    - name: 📦 Setup Node.js
+    - name: 📦 设置 Node.js 环境
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
         
-    - name: 📚 Install dependencies
+    - name: 📚 安装项目依赖
       run: |
         npm ci
         npm run build:shared
@@ -53,10 +53,10 @@ jobs:
         # 更新Nginx配置
         sed -i "s/your-domain.com/${{ secrets.STAGING_DOMAIN }}/g" nginx/nginx.conf
         
-    - name: 🚧 Deploy to staging server
+    - name: 🚧 部署 to staging server
       run: |
         # 部署到测试服务器
-        ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} "
+        ssh -o StrictHostKey检查ing=no ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} "
           mkdir -p /opt/lyricnote-staging
           cd /opt/lyricnote-staging
           
@@ -79,7 +79,7 @@ jobs:
         
     - name: 🚀 Start staging services
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} "
+        ssh -o StrictHostKey检查ing=no ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} "
           cd /opt/lyricnote-staging/current
           
           # 停止旧服务
@@ -122,10 +122,10 @@ jobs:
           exit 1
         fi
         
-    - name: 📊 Generate staging report
+    - name: 📊 生成 staging report
       if: always()
       run: |
-        echo "# 🚧 Staging Deployment Report" > staging-report.md
+        echo "# 🚧 Staging 部署ment Report" > staging-report.md
         echo "" >> staging-report.md
         echo "**Environment**: Staging" >> staging-report.md
         echo "**Date**: $(date)" >> staging-report.md
@@ -137,14 +137,14 @@ jobs:
         echo "- **Frontend**: https://${{ secrets.STAGING_DOMAIN }}" >> staging-report.md
         echo "- **API**: https://${{ secrets.STAGING_DOMAIN }}/api" >> staging-report.md
         echo "- **Admin**: https://${{ secrets.STAGING_DOMAIN }}/admin" >> staging-report.md
-        echo "- **Health Check**: https://${{ secrets.STAGING_DOMAIN }}/api/health" >> staging-report.md
+        echo "- **Health 检查**: https://${{ secrets.STAGING_DOMAIN }}/api/health" >> staging-report.md
         echo "" >> staging-report.md
         
         if [ "${{ job.status }}" == "success" ]; then
-          echo "## ✅ Deployment Status: SUCCESS" >> staging-report.md
+          echo "## ✅ 部署ment Status: SUCCESS" >> staging-report.md
           echo "Staging environment is ready for testing!" >> staging-report.md
         else
-          echo "## ❌ Deployment Status: FAILED" >> staging-report.md
+          echo "## ❌ 部署ment Status: FAILED" >> staging-report.md
           echo "Please check the logs for more details." >> staging-report.md
         fi
         
