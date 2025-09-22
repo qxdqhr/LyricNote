@@ -30,7 +30,12 @@
     "setup": "npm install && npm run db:generate",
     "reset": "npm run clean && npm run setup",
     "quick-setup": "./scripts/setup.sh",
-    "quick-dev": "./scripts/dev.sh"
+    "quick-dev": "./scripts/dev.sh",
+    "ci:test": "npm run test",
+    "ci:build": "npm run build",
+    "ci:lint": "npm run lint",
+    "docker:build": "docker build -f packages/backend/Dockerfile -t lyricnote .",
+    "docker:run": "docker run -p 3000:3000 lyricnote"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",

@@ -1,0 +1,166 @@
+name: 🚧 Deploy to Staging
+
+on:
+  push:
+    branches: [ develop ]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # 🚧 部署到测试环境
+  deploy-staging:
+    name: 🚧 Deploy to Staging
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📚 Install dependencies
+      run: |
+        npm ci
+        npm run build:shared
+        
+    - name: 🔐 Setup SSH key
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+        
+    - name: 📋 Prepare staging environment
+      run: |
+        # 创建测试环境配置
+        cp env.production.example .env.staging
+        
+        # 配置测试环境变量
+        sed -i "s/your_secure_password_here/${{ secrets.STAGING_POSTGRES_PASSWORD }}/g" .env.staging
+        sed -i "s/your_redis_password_here/${{ secrets.STAGING_REDIS_PASSWORD }}/g" .env.staging
+        sed -i "s/your_jwt_secret_key_minimum_32_characters/${{ secrets.STAGING_JWT_SECRET }}/g" .env.staging
+        sed -i "s/your_nextauth_secret_minimum_32_characters/${{ secrets.STAGING_NEXTAUTH_SECRET }}/g" .env.staging
+        sed -i "s/your_deepseek_api_key/${{ secrets.DEEPSEEK_API_KEY }}/g" .env.staging
+        sed -i "s/your-domain.com/${{ secrets.STAGING_DOMAIN }}/g" .env.staging
+        
+        # 更新Nginx配置
+        sed -i "s/your-domain.com/${{ secrets.STAGING_DOMAIN }}/g" nginx/nginx.conf
+        
+    - name: 🚧 Deploy to staging server
+      run: |
+        # 部署到测试服务器
+        ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} "
+          mkdir -p /opt/lyricnote-staging
+          cd /opt/lyricnote-staging
+          
+          # 备份当前版本
+          if [ -d current ]; then
+            mv current backup-\$(date +%Y%m%d_%H%M%S)
+          fi
+          mkdir -p current
+        "
+        
+        # 上传代码
+        rsync -avz --delete \
+          --exclude='node_modules' \
+          --exclude='.git' \
+          --exclude='packages/*/node_modules' \
+          ./ ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:/opt/lyricnote-staging/current/
+        
+        # 上传环境配置
+        scp .env.staging ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:/opt/lyricnote-staging/current/.env
+        
+    - name: 🚀 Start staging services
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} "
+          cd /opt/lyricnote-staging/current
+          
+          # 停止旧服务
+          docker-compose -f docker-compose.yml -f docker-compose.staging.yml down || true
+          
+          # 构建并启动服务
+          docker-compose -f docker-compose.yml -f docker-compose.staging.yml up -d --build
+          
+          # 等待服务启动
+          sleep 30
+          
+          # 健康检查
+          if curl -f http://localhost:3000/api/health; then
+            echo '✅ Staging deployment successful!'
+          else
+            echo '❌ Staging deployment failed'
+            docker-compose -f docker-compose.yml -f docker-compose.staging.yml logs
+            exit 1
+          fi
+        "
+        
+    - name: 🧪 Run smoke tests
+      run: |
+        # 运行基础的冒烟测试
+        sleep 10
+        
+        # 测试API健康状态
+        if curl -f "https://${{ secrets.STAGING_DOMAIN }}/api/health"; then
+          echo "✅ API health check passed"
+        else
+          echo "❌ API health check failed"
+          exit 1
+        fi
+        
+        # 测试管理页面
+        if curl -f "https://${{ secrets.STAGING_DOMAIN }}/admin"; then
+          echo "✅ Admin page accessible"
+        else
+          echo "❌ Admin page not accessible"
+          exit 1
+        fi
+        
+    - name: 📊 Generate staging report
+      if: always()
+      run: |
+        echo "# 🚧 Staging Deployment Report" > staging-report.md
+        echo "" >> staging-report.md
+        echo "**Environment**: Staging" >> staging-report.md
+        echo "**Date**: $(date)" >> staging-report.md
+        echo "**Commit**: ${{ github.sha }}" >> staging-report.md
+        echo "**Branch**: ${{ github.ref_name }}" >> staging-report.md
+        echo "" >> staging-report.md
+        
+        echo "## 🔗 Access Links" >> staging-report.md
+        echo "- **Frontend**: https://${{ secrets.STAGING_DOMAIN }}" >> staging-report.md
+        echo "- **API**: https://${{ secrets.STAGING_DOMAIN }}/api" >> staging-report.md
+        echo "- **Admin**: https://${{ secrets.STAGING_DOMAIN }}/admin" >> staging-report.md
+        echo "- **Health Check**: https://${{ secrets.STAGING_DOMAIN }}/api/health" >> staging-report.md
+        echo "" >> staging-report.md
+        
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "## ✅ Deployment Status: SUCCESS" >> staging-report.md
+          echo "Staging environment is ready for testing!" >> staging-report.md
+        else
+          echo "## ❌ Deployment Status: FAILED" >> staging-report.md
+          echo "Please check the logs for more details." >> staging-report.md
+        fi
+        
+    - name: 📤 Upload staging report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: staging-report
+        path: staging-report.md
+        
+    - name: 🔔 Notify team
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "🎉 Staging deployment successful!"
+          echo "🔗 Access at: https://${{ secrets.STAGING_DOMAIN }}"
+        else
+          echo "❌ Staging deployment failed!"
+        fi
