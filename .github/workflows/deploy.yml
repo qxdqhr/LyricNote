@@ -1,347 +1,70 @@
-name: 🎌 LyricNote后台管理系统 + 后端服务 部署到生产环境
+name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ main, develop ]
-    tags: [ 'v*' ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
-
-env:
-  NODE_VERSION: '18'
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+    branches:
+      - main
 
 jobs:
-  # 🧪 测试和代码质量检查
-  test:
-    name: 🧪 代码测试和质量检查
+  build:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: 📥 检出代码
-      uses: actions/checkout@v4
-      
-    - name: 📦 设置 pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: latest
-        
-    - name: 📦 设置 Node.js 环境
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'pnpm'
-        
-    - name: 📚 安装项目依赖
-      run: |
-        pnpm install --frozen-lockfile
-        pnpm run build:shared
-        
-    - name: 🔍 代码质量检查
-      run: |
-        pnpm run lint || echo "代码检查完成（有警告）"
-        
-    - name: 🧪 运行单元测试
-      run: |
-        pnpm run test || echo "测试完成"
-        
-    - name: 🏥 构建健康检查
-      run: |
-        pnpm run build || echo "构建测试完成"
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-  # 🐳 构建Docker镜像
-  build-docker:
-    name: 🐳 构建Docker镜像
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'push'
-    
-    outputs:
-      image-tag: ${{ steps.meta.outputs.tags }}
-      image-digest: ${{ steps.build.outputs.digest }}
-    
-    steps:
-    - name: 📥 检出代码
-      uses: actions/checkout@v4
-      
-    - name: 🐳 设置 Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: 🔐 登录容器注册表
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: 📋 提取镜像元数据
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=sha,prefix={{branch}}-
-          
-    - name: 📦 设置 pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: latest
-        
-    - name: 📦 设置 Node.js 环境
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'pnpm'
-        
-    - name: 🔨 构建共享包
-      run: |
-        pnpm install --frozen-lockfile
-        pnpm run build:shared
-        
-    - name: 🐳 构建并推送Docker镜像
-      id: build
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./packages/backend/Dockerfile
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
 
-  # 📱 构建移动端应用
-  build-mobile:
-    name: 📱 构建移动端应用
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
-    
-    steps:
-    - name: 📥 检出代码
-      uses: actions/checkout@v4
-      
-    - name: 📦 设置 pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: latest
-        
-    - name: 📦 设置 Node.js 环境
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'pnpm'
-        
-    - name: 📚 安装项目依赖
-      run: |
-        pnpm install --frozen-lockfile
-        pnpm run build:shared
-        
-    - name: 🔧 设置 Expo CLI
-      run: pnpm install -g @expo/cli eas-cli
-      
-    - name: 📱 配置 Expo 认证
-      working-directory: ./packages/mobile
-      run: |
-        # 配置Expo认证
-        echo "${{ secrets.EXPO_TOKEN }}" | npx expo login --non-interactive
-        
-    - name: 🔨 构建Android预览版
-      if: github.ref == 'refs/heads/main'
-      working-directory: ./packages/mobile
-      run: |
-        eas build --platform android --profile preview --non-interactive
-        
-    - name: 🔨 构建生产版本（仅标签）
-      if: startsWith(github.ref, 'refs/tags/')
-      working-directory: ./packages/mobile
-      run: |
-        eas build --platform all --profile production --non-interactive
-        
-    - name: 📊 生成构建信息
-      if: always()
-      working-directory: ./packages/mobile
-      run: |
-        eas build:list --limit=5 --json > build-info.json || echo "[]" > build-info.json
-        
-    - name: 📤 上传构建产物
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: mobile-build-info
-        path: packages/mobile/build-info.json
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
 
-  # 🚀 部署到生产环境
-  deploy-production:
-    name: 🚀 部署到生产环境
-    runs-on: ubuntu-latest
-    needs: [build-docker, build-mobile]
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
-    environment: production
-    
-    steps:
-    - name: 📥 检出代码
-      uses: actions/checkout@v4
-      
-    - name: 🔐 Setup SSH key
-      uses: webfactory/ssh-agent@v0.9.0
-      with:
-        ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
-        
-    - name: 📋 Prepare deployment files
-      run: |
-        # 创建部署配置
-        cp env.production.example .env.production
-        
-        # 替换环境变量占位符
-        sed -i "s/your_secure_password_here/${{ secrets.POSTGRES_PASSWORD }}/g" .env.production
-        sed -i "s/your_redis_password_here/${{ secrets.REDIS_PASSWORD }}/g" .env.production
-        sed -i "s/your_jwt_secret_key_minimum_32_characters/${{ secrets.JWT_SECRET }}/g" .env.production
-        sed -i "s/your_nextauth_secret_minimum_32_characters/${{ secrets.NEXTAUTH_SECRET }}/g" .env.production
-        sed -i "s/your_deepseek_api_key/${{ secrets.DEEPSEEK_API_KEY }}/g" .env.production
-        sed -i "s/your_aliyun_access_key_id/${{ secrets.ALIYUN_OSS_ACCESS_KEY_ID }}/g" .env.production
-        sed -i "s/your_aliyun_access_key_secret/${{ secrets.ALIYUN_OSS_ACCESS_KEY_SECRET }}/g" .env.production
-        sed -i "s/your_bucket_name/${{ secrets.ALIYUN_OSS_BUCKET }}/g" .env.production
-        sed -i "s/your-domain.com/${{ secrets.DOMAIN }}/g" .env.production
-        
-        # 更新Nginx配置中的域名
-        sed -i "s/qhr062.top/${{ secrets.DOMAIN }}/g" nginx/nginx.conf
-        
-    - name: 📤 Upload files to server
-      run: |
-        # 创建部署目录
-        ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
-          mkdir -p /opt/lyricnote/backup/\$(date +%Y%m%d_%H%M%S)
-          if [ -d /opt/lyricnote/current ]; then
-            cp -r /opt/lyricnote/current/* /opt/lyricnote/backup/\$(date +%Y%m%d_%H%M%S)/
-          fi
-          mkdir -p /opt/lyricnote/current
-        "
-        
-        # 上传项目文件
-        rsync -avz --delete \
-          --exclude='node_modules' \
-          --exclude='.git' \
-          --exclude='packages/*/node_modules' \
-          --exclude='packages/shared/dist' \
-          ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/lyricnote/current/
-        
-        # 上传环境配置
-        scp .env.production ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/lyricnote/current/.env
-        
-    - name: 🐳 部署 with Docker
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
-          cd /opt/lyricnote/current
-          
-          # 更新Docker镜像
-          docker-compose pull
-          
-          # 停止旧服务
-          docker-compose down
-          
-          # 构建并启动新服务
-          docker-compose up -d --build
-          
-          # 等待服务启动
-          sleep 30
-          
-          # 健康检查
-          if curl -f http://localhost:3000/api/health; then
-            echo '✅ 部署ment successful!'
-          else
-            echo '❌ 部署ment failed - rolling back'
-            docker-compose down
-            # 这里可以添加回滚逻辑
-            exit 1
-          fi
-        "
-        
-    - name: 🔔 Notify deployment status
-      if: always()
-      run: |
-        if [ "${{ job.status }}" == "success" ]; then
-          echo "🎉 部署ment successful!"
-          # 这里可以添加成功通知，如Slack、邮件等
-        else
-          echo "❌ 部署ment failed!"
-          # 这里可以添加失败通知
-        fi
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build:shared
 
-  # 🧹 清理旧资源
-  cleanup:
-    name: 🧹 Cleanup Old Resources
-    runs-on: ubuntu-latest
-    needs: deploy-production
-    if: always() && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
-    
-    steps:
-    - name: 🗑️ Cleanup old Docker images
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
-          # 清理无用的Docker镜像
-          docker image prune -f
-          
-          # 保留最近3个备份
-          cd /opt/lyricnote/backup
-          ls -t | tail -n +4 | xargs -r rm -rf
-          
-          echo '🧹 Cleanup completed'
-        "
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-  # 📊 发布Release (仅限tags)
-  release:
-    name: 📊 Create Release
-    runs-on: ubuntu-latest
-    needs: [deploy-production]
-    if: startsWith(github.ref, 'refs/tags/')
-    
-    steps:
-    - name: 📥 检出代码
-      uses: actions/checkout@v4
-      
-    - name: 📤 下载 mobile build info
-      uses: actions/download-artifact@v4
-      with:
-        name: mobile-build-info
-        path: ./
-        
-    - name: 📊 Create Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref_name }}
-        release_name: 🎌 LyricNote ${{ github.ref_name }}
-        body: |
-          ## 🎉 LyricNote ${{ github.ref_name }} 发布
-          
-          ### ✨ 新功能
-          - 完整的日语音乐识别系统
-          - React Native移动端应用
-          - Next.js后端管理系统
-          - Docker容器化部署
-          
-          ### 📱 移动端下载
-          - **Android APK**: 查看EAS构建页面
-          - **iOS 测试Flight**: 即将发布
-          
-          ### 🌐 在线体验
-          - **API服务**: https://${{ secrets.DOMAIN }}/api
-          - **管理后台**: https://${{ secrets.DOMAIN }}/admin
-          
-          ### 🚀 部署信息
-          - **Docker镜像**: `${{ needs.build-docker.outputs.image-tag }}`
-          - **构建时间**: ${{ github.event.head_commit.timestamp }}
-          - **提交SHA**: ${{ github.sha }}
-          
-          ---
-          
-          🎌 **感谢使用LyricNote！**
-        draft: false
-        prerelease: false
+      - name: Login to Aliyun Registry
+        run: |
+          echo "${{ secrets.ALIYUN_PASSWORD }}" | docker login \
+            -u "${{ secrets.ALIYUN_USERNAME }}" \
+            --password-stdin crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com || exit 1
+
+      - name: Build Docker image
+        run: |
+          docker buildx build --platform linux/amd64 -t lyricnote-backend:amd64 --load ./packages/backend
+
+      - name: Tag Docker image
+        run: |
+          NEW_TAG=${{ github.run_number }}
+          docker tag lyricnote-backend:amd64 crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/qhrqht/lyricnote-backend:${NEW_TAG}
+
+      - name: Push Docker image
+        run: |
+          NEW_TAG=${{ github.run_number }}
+          docker push crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/qhrqht/lyricnote-backend:${NEW_TAG}
+
+      - name: Deploy to remote server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_SERVER_HOST }}
+          username: ${{ secrets.DEPLOY_SERVER_USERNAME }}
+          key: ${{ secrets.DEPLOY_SERVER_SSH_KEY }}
+          script: |
+            NEW_TAG=${{ github.run_number }}
+            docker pull crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/qhrqht/lyricnote-backend:${NEW_TAG}
+            docker stop lyricnote-backend || true
+            docker rm lyricnote-backend || true
+            docker run -d -p 3000:3000 --name lyricnote-backend crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/qhrqht/lyricnote-backend:${NEW_TAG}
