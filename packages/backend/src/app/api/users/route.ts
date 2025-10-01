@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/database'
-import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
+import { db } from '@/lib/drizzle/db'
+import { user, session } from '../../../../drizzle/migrations/schema'
+import { eq, or, ilike, count, desc } from 'drizzle-orm'
+import { DrizzleAuthService } from '@/lib/auth/drizzle-auth'
 
-// 用户注册
+// 用户注册 - 使用 DrizzleAuthService
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -34,87 +35,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 检查邮箱是否已存在
-    const existingUserByEmail = await prisma.user.findUnique({
-      where: { email }
-    })
-
-    if (existingUserByEmail) {
-      return NextResponse.json(
-        { error: '邮箱已被注册' },
-        { status: 409 }
-      )
-    }
-
-    // 检查用户名是否已存在
-    const existingUserByUsername = await prisma.user.findUnique({
-      where: { username }
-    })
-
-    if (existingUserByUsername) {
-      return NextResponse.json(
-        { error: '用户名已被使用' },
-        { status: 409 }
-      )
-    }
-
-    // 加密密码
-    const hashedPassword = await bcrypt.hash(password, 12)
-
-    // 创建用户
-    const user = await prisma.user.create({
-      data: {
-        email,
-        username,
-        password: hashedPassword,
-        nickname: nickname || username,
-        preferences: {
-          language: 'zh-CN',
-          defaultLyricMode: 'kanji',
-          autoTranslate: true,
-          enableKTVMode: false
-        }
-      },
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        nickname: true,
-        avatar: true,
-        role: true,
-        preferences: true,
-        createdAt: true
-      }
-    })
-
-    // 生成 JWT token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
-    )
-
-    // 创建会话记录
-    await prisma.session.create({
-      data: {
-        userId: user.id,
-        token,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7天后过期
-      }
-    })
+    // 使用 DrizzleAuthService 注册用户
+    const result = await DrizzleAuthService.signUp(email, password, username || nickname)
 
     return NextResponse.json({
       success: true,
-      data: {
-        user,
-        token
-      }
+      data: result
     })
 
   } catch (error) {
     console.error('Registration error:', error)
     return NextResponse.json(
-      { error: '注册失败，请重试' },
+      { error: (error as any).message || '注册失败，请重试' },
       { status: 500 }
     )
   }
@@ -127,50 +59,55 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
     const search = searchParams.get('search') || ''
-    const role = searchParams.get('role') || ''
-    const skip = (page - 1) * limit
+    const roleFilter = searchParams.get('role') || ''
+    const offset = (page - 1) * limit
 
     // 构建查询条件
-    const where: any = {}
+    let whereConditions = []
 
     if (search) {
-      where.OR = [
-        { email: { contains: search, mode: 'insensitive' } },
-        { username: { contains: search, mode: 'insensitive' } },
-        { nickname: { contains: search, mode: 'insensitive' } }
-      ]
+      whereConditions.push(
+        or(
+          ilike(user.email, `%${search}%`),
+          ilike(user.username, `%${search}%`),
+          ilike(user.nickname, `%${search}%`)
+        )
+      )
     }
 
-    if (role) {
-      where.role = role
+    if (roleFilter) {
+      whereConditions.push(eq(user.role, roleFilter as any))
     }
 
-    const [users, total] = await Promise.all([
-      prisma.user.findMany({
-        where,
-        select: {
-          id: true,
-          email: true,
-          username: true,
-          nickname: true,
-          avatar: true,
-          role: true,
-          createdAt: true,
-          updatedAt: true,
-          _count: {
-            select: {
-              recognitions: true,
-              collections: true,
-              favorites: true
-            }
-          }
-        },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit
-      }),
-      prisma.user.count({ where })
-    ])
+    // 获取用户列表
+    const usersQuery = db.select({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      nickname: user.nickname,
+      avatar: user.avatar,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    }).from(user)
+
+    if (whereConditions.length > 0) {
+      usersQuery.where(whereConditions.length === 1 ? whereConditions[0] : or(...whereConditions))
+    }
+
+    const users = await usersQuery
+      .orderBy(desc(user.createdAt))
+      .limit(limit)
+      .offset(offset)
+
+    // 获取总数
+    const totalQuery = db.select({ count: count() }).from(user)
+    if (whereConditions.length > 0) {
+      totalQuery.where(whereConditions.length === 1 ? whereConditions[0] : or(...whereConditions))
+    }
+    
+    const [totalResult] = await totalQuery
+    const total = totalResult?.count || 0
 
     return NextResponse.json({
       success: true,

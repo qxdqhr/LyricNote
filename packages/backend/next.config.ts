@@ -7,13 +7,6 @@ const nextConfig: NextConfig = {
   // Workspace configuration
   outputFileTracingRoot: process.env.NODE_ENV === 'production' ? undefined : '../../',
   
-  // API configuration
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
-  
   // Image optimization
   images: {
     domains: ['localhost'],

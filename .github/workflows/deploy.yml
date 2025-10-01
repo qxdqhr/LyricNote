@@ -189,12 +189,12 @@ jobs:
         sed -i "s/your-domain.com/${{ secrets.DOMAIN }}/g" .env.production
         
         # 更新Nginx配置中的域名
-        sed -i "s/your-domain.com/${{ secrets.DOMAIN }}/g" nginx/nginx.conf
+        sed -i "s/qhr062.top/${{ secrets.DOMAIN }}/g" nginx/nginx.conf
         
     - name: 📤 Upload files to server
       run: |
         # 创建部署目录
-        ssh -o StrictHostKey检查ing=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
+        ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
           mkdir -p /opt/lyricnote/backup/\$(date +%Y%m%d_%H%M%S)
           if [ -d /opt/lyricnote/current ]; then
             cp -r /opt/lyricnote/current/* /opt/lyricnote/backup/\$(date +%Y%m%d_%H%M%S)/
@@ -215,7 +215,7 @@ jobs:
         
     - name: 🐳 部署 with Docker
       run: |
-        ssh -o StrictHostKey检查ing=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
+        ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
           cd /opt/lyricnote/current
           
           # 更新Docker镜像
@@ -262,7 +262,7 @@ jobs:
     steps:
     - name: 🗑️ Cleanup old Docker images
       run: |
-        ssh -o StrictHostKey检查ing=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
+        ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "
           # 清理无用的Docker镜像
           docker image prune -f
           

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/database'
-// import cacheService from '@/lib/redis'
+import { db } from '@/lib/drizzle/db'
+import { sql } from 'drizzle-orm'
 
 export async function GET() {
   try {
@@ -11,7 +11,7 @@ export async function GET() {
     let databaseLatency = 0
     try {
       const dbStart = Date.now()
-      await prisma.$queryRaw`SELECT 1`
+      await db.execute(sql`SELECT 1`)
       databaseLatency = Date.now() - dbStart
     } catch (error) {
       databaseStatus = 'unhealthy'

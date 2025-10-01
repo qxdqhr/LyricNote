@@ -6,6 +6,7 @@ import { texts } from '../constants/texts';
 import HomeScreen from '../screens/HomeScreen';
 import LyricsScreen from '../screens/LyricsScreen';
 import CollectionScreen from '../screens/CollectionScreen';
+import { UIShowcase } from '../screens/UIShowcase';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -76,9 +77,9 @@ export default function TabNavigator() {
       />
       <Tab.Screen
         name="Create"
-        children={() => <PlaceholderScreen title="创作" />}
+        component={UIShowcase}
         options={{
-          tabBarLabel: texts.navigation.create,
+          tabBarLabel: 'UI展示',
         }}
       />
       <Tab.Screen

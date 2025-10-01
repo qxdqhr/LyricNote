@@ -2,13 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, Alert } from 'react-native';
 import { Audio } from 'expo-av';
 import { texts } from '../constants/texts';
+import { apiService } from '../services/api';
+import { Recognition, Song } from '@lyricnote/shared';
 
 export default function HomeScreen() {
   const [isRecording, setIsRecording] = useState(false);
   const [isKTVMode, setIsKTVMode] = useState(false);
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
-  const [recognitionResult, setRecognitionResult] = useState<string | null>(null);
+  const [recognitionResult, setRecognitionResult] = useState<{recognition: Recognition, song: Song} | null>(null);
   const [isRecognizing, setIsRecognizing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     requestPermissions();
@@ -48,19 +51,36 @@ export default function HomeScreen() {
     console.log('Stopping recording...');
     setIsRecording(false);
     setIsRecognizing(true);
+    setError(null);
     
     if (recording) {
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
-      console.log('Recording stopped and stored at', uri);
-      
-      // 模拟音乐识别过程
-      setTimeout(() => {
-        setRecognitionResult('夜に駆ける - YOASOBI');
+      try {
+        await recording.stopAndUnloadAsync();
+        const uri = recording.getURI();
+        console.log('Recording stopped and stored at', uri);
+        
+        if (uri) {
+          // 调用API进行音乐识别
+          const response = await apiService.recognizeAudio(uri);
+          
+          if (response.success && response.data) {
+            setRecognitionResult(response.data);
+            console.log('Recognition successful:', response.data);
+          } else {
+            throw new Error(response.error || '识别失败');
+          }
+        } else {
+          throw new Error('录音文件无效');
+        }
+      } catch (error) {
+        console.error('Recognition failed:', error);
+        const errorMessage = error instanceof Error ? error.message : '识别失败，请重试';
+        setError(errorMessage);
+        Alert.alert('识别失败', errorMessage);
+      } finally {
         setIsRecognizing(false);
-      }, 3000);
-      
-      setRecording(null);
+        setRecording(null);
+      }
     }
   };
 
@@ -68,8 +88,16 @@ export default function HomeScreen() {
     if (isRecording) {
       stopRecording();
     } else {
+      // 清除之前的结果和错误
+      setRecognitionResult(null);
+      setError(null);
       startRecording();
     }
+  };
+
+  const clearResult = () => {
+    setRecognitionResult(null);
+    setError(null);
   };
 
   return (
@@ -136,28 +164,46 @@ export default function HomeScreen() {
           }}>
             {isRecording ? texts.home.recording : 
              isRecognizing ? texts.home.recognizing :
-             recognitionResult ? `🎵 ${recognitionResult}` :
+             error ? `❌ ${error}` :
+             recognitionResult ? `🎵 ${recognitionResult.song.title} - ${recognitionResult.song.artist}` :
              texts.home.tapToRecord}
           </Text>
           
-          {recognitionResult && (
-            <TouchableOpacity
-              onPress={() => {
-                // 跳转到歌词页面
-                console.log('Navigate to lyrics screen');
-              }}
-              style={{
-                marginTop: 16,
-                paddingHorizontal: 24,
-                paddingVertical: 12,
-                backgroundColor: '#8b5cf6',
-                borderRadius: 25,
-              }}
-            >
-              <Text style={{ color: 'white', fontWeight: '600' }}>
-                {texts.home.viewLyrics}
-              </Text>
-            </TouchableOpacity>
+          {(recognitionResult || error) && (
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 16 }}>
+              {recognitionResult && (
+                <TouchableOpacity
+                  onPress={() => {
+                    // 跳转到歌词页面
+                    console.log('Navigate to lyrics screen with song:', recognitionResult.song);
+                  }}
+                  style={{
+                    paddingHorizontal: 24,
+                    paddingVertical: 12,
+                    backgroundColor: '#8b5cf6',
+                    borderRadius: 25,
+                  }}
+                >
+                  <Text style={{ color: 'white', fontWeight: '600' }}>
+                    {texts.home.viewLyrics}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              
+              <TouchableOpacity
+                onPress={clearResult}
+                style={{
+                  paddingHorizontal: 24,
+                  paddingVertical: 12,
+                  backgroundColor: '#6b7280',
+                  borderRadius: 25,
+                }}
+              >
+                <Text style={{ color: 'white', fontWeight: '600' }}>
+                  {error ? '重试' : '清除'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
 

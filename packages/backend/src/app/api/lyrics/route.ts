@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/database'
-import cacheService from '@/lib/redis'
+import { db } from '@/lib/drizzle/db'
+import { lyrics, songs, userLyrics } from '../../../../drizzle/migrations/schema'
+import { eq, and } from 'drizzle-orm'
 import aiService from '@/services/ai'
-import japaneseService from '@/services/japanese'
+import crypto from 'crypto'
 
 // 获取歌词
 export async function GET(request: NextRequest) {
@@ -18,29 +19,16 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // 检查缓存
-    const cacheKey = `lyrics:${songId}:${format}`
-    const cachedLyrics = await cacheService.get(cacheKey)
-    if (cachedLyrics) {
-      return NextResponse.json({
-        success: true,
-        data: cachedLyrics,
-        cached: true
-      })
-    }
+    // 从数据库获取歌词（简化查询）
+    const [lyricData] = await db.select()
+      .from(lyrics)
+      .where(and(
+        eq(lyrics.songId, songId),
+        eq(lyrics.status, 'APPROVED')
+      ))
+      .limit(1)
 
-    // 从数据库获取歌词
-    const lyrics = await prisma.lyric.findFirst({
-      where: {
-        songId,
-        status: 'APPROVED'
-      },
-      include: {
-        song: true
-      }
-    })
-
-    if (!lyrics) {
+    if (!lyricData) {
       return NextResponse.json(
         { error: '未找到歌词' },
         { status: 404 }
@@ -48,49 +36,23 @@ export async function GET(request: NextRequest) {
     }
 
     // 根据格式返回相应的歌词版本
-    let result: any = {
-      id: lyrics.id,
-      songId: lyrics.songId,
-      song: lyrics.song,
-      timeStamps: lyrics.timeStamps,
-      version: lyrics.version,
-      createdAt: lyrics.createdAt,
-      updatedAt: lyrics.updatedAt
+    let responseData = lyricData
+    if (format !== 'all') {
+      responseData = {
+        ...lyricData,
+        content: (lyricData as any)[format] || lyricData.content
+      }
     }
-
-    switch (format) {
-      case 'kanji':
-        result.content = lyrics.kanji || lyrics.content
-        break
-      case 'hiragana':
-        result.content = lyrics.hiragana || lyrics.content
-        break
-      case 'romaji':
-        result.content = lyrics.romaji || lyrics.content
-        break
-      default:
-        result = {
-          ...result,
-          original: lyrics.content,
-          kanji: lyrics.kanji,
-          hiragana: lyrics.hiragana,
-          romaji: lyrics.romaji,
-          translation: lyrics.translation
-        }
-    }
-
-    // 缓存结果
-    await cacheService.set(cacheKey, result, 86400) // 24小时
 
     return NextResponse.json({
       success: true,
-      data: result
+      data: responseData
     })
 
   } catch (error) {
-    console.error('API error:', error)
+    console.error('获取歌词失败:', error)
     return NextResponse.json(
-      { error: '服务器内部错误' },
+      { error: '获取歌词失败' },
       { status: 500 }
     )
   }
@@ -100,7 +62,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { songId, content, userId, isUpdate = false, lyricId } = body
+    const { songId, userId, content, type = 'user_contribution' } = body
 
     if (!songId || !content) {
       return NextResponse.json(
@@ -109,11 +71,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 验证歌曲存在
-    const song = await prisma.song.findUnique({
-      where: { id: songId }
-    })
-
+    // 检查歌曲是否存在
+    const [song] = await db.select().from(songs).where(eq(songs.id, songId)).limit(1)
     if (!song) {
       return NextResponse.json(
         { error: '歌曲不存在' },
@@ -121,103 +80,68 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    let lyrics: any
+    let lyricData
+    
+    // 检查是否已有歌词
+    const [existingLyric] = await db.select()
+      .from(lyrics)
+      .where(eq(lyrics.songId, songId))
+      .limit(1)
 
-    if (isUpdate && lyricId) {
+    if (existingLyric) {
       // 更新现有歌词
-      lyrics = await prisma.lyric.findUnique({
-        where: { id: lyricId }
-      })
+      [lyricData] = await db.update(lyrics)
+        .set({
+          content,
+          status: 'PENDING',
+          updatedAt: new Date().toISOString()
+        })
+        .where(eq(lyrics.id, existingLyric.id))
+        .returning()
+    } else {
+      // 创建新歌词
+      [lyricData] = await db.insert(lyrics).values({
+        id: crypto.randomBytes(16).toString('hex'),
+        songId,
+        content,
+        status: 'PENDING',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }).returning()
+    }
 
-      if (!lyrics) {
-        return NextResponse.json(
-          { error: '歌词不存在' },
-          { status: 404 }
-        )
+    // 如果提供了用户ID，记录用户贡献
+    if (userId && lyricData) {
+      try {
+        await db.insert(userLyrics).values({
+          id: crypto.randomBytes(16).toString('hex'),
+          userId,
+          lyricId: lyricData.id,
+          content: content,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }).onConflictDoUpdate({
+          target: [userLyrics.userId, userLyrics.lyricId],
+          set: {
+            content: content,
+            updatedAt: new Date().toISOString()
+          }
+        })
+      } catch (error) {
+        console.warn('记录用户贡献失败:', error)
       }
     }
 
-    // 使用日语处理服务处理歌词
-    const processedLyrics = await japaneseService.processLyrics(content)
-
-    // 使用 AI 服务进行翻译和优化
-    let aiProcessedLyrics
-    try {
-      aiProcessedLyrics = await aiService.convertLyrics(content)
-    } catch (error) {
-      console.warn('AI processing failed, using local processing:', error)
-      aiProcessedLyrics = processedLyrics
-    }
-
-    const lyricData = {
-      songId,
-      content: content,
-      kanji: aiProcessedLyrics.kanji || processedLyrics.kanji,
-      hiragana: aiProcessedLyrics.hiragana || processedLyrics.hiragana,
-      romaji: aiProcessedLyrics.romaji || processedLyrics.romaji,
-      translation: aiProcessedLyrics.translation,
-      status: 'PENDING' as const,
-      version: lyrics ? lyrics.version + 1 : 1
-    }
-
-    if (isUpdate && lyricId) {
-      // 更新歌词
-      lyrics = await prisma.lyric.update({
-        where: { id: lyricId },
-        data: lyricData,
-        include: {
-          song: true
-        }
-      })
-    } else {
-      // 创建新歌词
-      lyrics = await prisma.lyric.create({
-        data: lyricData,
-        include: {
-          song: true
-        }
-      })
-    }
-
-    // 如果提供了用户ID，创建用户歌词记录
-    if (userId) {
-      await prisma.userLyric.upsert({
-        where: {
-          userId_lyricId: {
-            userId,
-            lyricId: lyrics.id
-          }
-        },
-        update: {
-          content,
-          updatedAt: new Date()
-        },
-        create: {
-          userId,
-          lyricId: lyrics.id,
-          content,
-          isPublic: false
-        }
-      })
-    }
-
-    // 清除相关缓存
-    await Promise.all([
-      cacheService.del(`lyrics:${songId}:all`),
-      cacheService.del(`lyrics:${songId}:kanji`),
-      cacheService.del(`lyrics:${songId}:hiragana`),
-      cacheService.del(`lyrics:${songId}:romaji`)
-    ])
-
     return NextResponse.json({
       success: true,
-      data: lyrics
+      data: lyricData,
+      message: existingLyric ? '歌词已更新' : '歌词已创建'
     })
 
   } catch (error) {
-    console.error('API error:', error)
+    console.error('创建/更新歌词失败:', error)
     return NextResponse.json(
-      { error: '服务器内部错误' },
+      { error: '创建/更新歌词失败' },
       { status: 500 }
     )
   }

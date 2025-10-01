@@ -1,87 +1,126 @@
-import React from 'react';
-import { TouchableOpacity, Text, View, TextStyle, ViewStyle } from 'react-native';
+import React from 'react'
+import { 
+  TouchableOpacity, 
+  Text, 
+  ActivityIndicator, 
+  TouchableOpacityProps,
+  ViewStyle,
+  TextStyle 
+} from 'react-native'
 
-interface ButtonProps {
-  title: string;
-  onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  disabled?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+interface ButtonProps extends TouchableOpacityProps {
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
+  size?: 'default' | 'sm' | 'lg' | 'icon'
+  children: React.ReactNode
+  loading?: boolean
+  icon?: React.ReactNode
 }
 
-export const Button: React.FC<ButtonProps> = ({
-  title,
-  onPress,
-  variant = 'primary',
-  size = 'md',
-  disabled = false,
+const getVariantClasses = (variant: ButtonProps['variant']) => {
+  switch (variant) {
+    case 'destructive':
+      return 'bg-red-500 active:bg-red-600'
+    case 'outline':
+      return 'bg-transparent border border-gray-300 active:bg-gray-50'
+    case 'secondary':
+      return 'bg-gray-100 active:bg-gray-200'
+    case 'ghost':
+      return 'bg-transparent active:bg-gray-50'
+    case 'link':
+      return 'bg-transparent'
+    default:
+      return 'bg-purple-600 active:bg-purple-700'
+  }
+}
+
+const getSizeClasses = (size: ButtonProps['size']) => {
+  switch (size) {
+    case 'sm':
+      return 'h-9 px-3 rounded-md'
+    case 'lg':
+      return 'h-12 px-8 rounded-md'
+    case 'icon':
+      return 'h-10 w-10 rounded-md'
+    default:
+      return 'h-10 px-4 py-2 rounded-md'
+  }
+}
+
+const getTextVariantClasses = (variant: ButtonProps['variant']) => {
+  switch (variant) {
+    case 'destructive':
+      return 'text-white font-medium'
+    case 'outline':
+      return 'text-gray-900 font-medium'
+    case 'secondary':
+      return 'text-gray-900 font-medium'
+    case 'ghost':
+      return 'text-gray-900 font-medium'
+    case 'link':
+      return 'text-purple-600 font-medium underline'
+    default:
+      return 'text-white font-medium'
+  }
+}
+
+const getTextSizeClasses = (size: ButtonProps['size']) => {
+  switch (size) {
+    case 'sm':
+      return 'text-sm'
+    case 'lg':
+      return 'text-base'
+    default:
+      return 'text-sm'
+  }
+}
+
+export function Button({ 
+  variant = 'default', 
+  size = 'default', 
+  children, 
+  loading = false,
+  icon,
+  disabled,
   style,
-  textStyle,
-}) => {
-  const getButtonStyle = (): ViewStyle => {
-    const baseStyle: ViewStyle = {
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 3,
-    };
+  ...props 
+}: ButtonProps) {
+  const variantClasses = getVariantClasses(variant)
+  const sizeClasses = getSizeClasses(size)
+  const textVariantClasses = getTextVariantClasses(variant)
+  const textSizeClasses = getTextSizeClasses(size)
+  
+  const buttonClasses = `
+    flex-row items-center justify-center
+    ${sizeClasses}
+    ${variantClasses}
+    ${disabled || loading ? 'opacity-50' : ''}
+  `.trim()
 
-    const variantStyle: ViewStyle = 
-      variant === 'primary' ? { backgroundColor: '#8b5cf6' } :
-      variant === 'secondary' ? { backgroundColor: 'transparent', borderWidth: 2, borderColor: '#8b5cf6' } :
-      { backgroundColor: 'transparent' };
-
-    const sizeStyle: ViewStyle = 
-      size === 'sm' ? { paddingHorizontal: 12, paddingVertical: 8 } :
-      size === 'lg' ? { paddingHorizontal: 24, paddingVertical: 16 } :
-      { paddingHorizontal: 16, paddingVertical: 12 };
-
-    return {
-      ...baseStyle,
-      ...variantStyle,
-      ...sizeStyle,
-      opacity: disabled ? 0.5 : 1,
-      ...style,
-    };
-  };
-
-  const getTextStyle = (): TextStyle => {
-    const baseStyle: TextStyle = {
-      fontWeight: '600',
-      textAlign: 'center',
-    };
-
-    const variantStyle: TextStyle = 
-      variant === 'primary' ? { color: 'white' } :
-      { color: '#8b5cf6' };
-
-    const sizeStyle: TextStyle = 
-      size === 'lg' ? { fontSize: 18 } :
-      { fontSize: 16 };
-
-    return {
-      ...baseStyle,
-      ...variantStyle,
-      ...sizeStyle,
-      ...textStyle,
-    };
-  };
+  const textClasses = `
+    ${textVariantClasses}
+    ${textSizeClasses}
+    ${icon ? 'ml-2' : ''}
+  `.trim()
 
   return (
     <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled}
-      style={getButtonStyle()}
+      className={buttonClasses}
+      disabled={disabled || loading}
+      style={style}
+      {...props}
     >
-      <Text style={getTextStyle()}>
-        {title}
-      </Text>
+      {loading && (
+        <ActivityIndicator 
+          size="small" 
+          color={variant === 'outline' || variant === 'secondary' || variant === 'ghost' ? '#6B7280' : 'white'} 
+        />
+      )}
+      {!loading && icon && icon}
+      {!loading && (
+        <Text className={textClasses}>
+          {children}
+        </Text>
+      )}
     </TouchableOpacity>
-  );
-};
+  )
+}
