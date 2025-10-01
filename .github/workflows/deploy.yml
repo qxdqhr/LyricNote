@@ -1,4 +1,4 @@
-name: 🎌 LyricNote 持续集成和部署
+name: 🎌 LyricNote后台管理系统 + 后端服务 部署到生产环境
 
 on:
   push:
@@ -22,28 +22,33 @@ jobs:
     - name: 📥 检出代码
       uses: actions/checkout@v4
       
+    - name: 📦 设置 pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: latest
+        
     - name: 📦 设置 Node.js 环境
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+        cache: 'pnpm'
         
     - name: 📚 安装项目依赖
       run: |
-        npm ci
-        npm run build:shared
+        pnpm install --frozen-lockfile
+        pnpm run build:shared
         
     - name: 🔍 代码质量检查
       run: |
-        npm run lint || echo "代码检查完成（有警告）"
+        pnpm run lint || echo "代码检查完成（有警告）"
         
     - name: 🧪 运行单元测试
       run: |
-        npm run test || echo "测试完成"
+        pnpm run test || echo "测试完成"
         
     - name: 🏥 构建健康检查
       run: |
-        npm run build || echo "构建测试完成"
+        pnpm run build || echo "构建测试完成"
 
   # 🐳 构建Docker镜像
   build-docker:
@@ -82,10 +87,21 @@ jobs:
           type=semver,pattern={{major}}.{{minor}}
           type=sha,prefix={{branch}}-
           
+    - name: 📦 设置 pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: latest
+        
+    - name: 📦 设置 Node.js 环境
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'pnpm'
+        
     - name: 🔨 构建共享包
       run: |
-        npm ci
-        npm run build:shared
+        pnpm install --frozen-lockfile
+        pnpm run build:shared
         
     - name: 🐳 构建并推送Docker镜像
       id: build
@@ -110,19 +126,24 @@ jobs:
     - name: 📥 检出代码
       uses: actions/checkout@v4
       
+    - name: 📦 设置 pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: latest
+        
     - name: 📦 设置 Node.js 环境
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
+        cache: 'pnpm'
         
     - name: 📚 安装项目依赖
       run: |
-        npm ci
-        npm run build:shared
+        pnpm install --frozen-lockfile
+        pnpm run build:shared
         
     - name: 🔧 设置 Expo CLI
-      run: npm install -g @expo/cli eas-cli
+      run: pnpm install -g @expo/cli eas-cli
       
     - name: 📱 配置 Expo 认证
       working-directory: ./packages/mobile
