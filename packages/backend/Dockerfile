@@ -18,14 +18,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
 
-# Copy source code (exclude node_modules)
-COPY src ./src
-COPY public ./public
-COPY next.config.ts ./
-COPY tsconfig.json ./
-COPY tailwind.config.ts ./
-COPY postcss.config.mjs ./
-COPY drizzle ./drizzle
+# Copy source code (exclude node_modules and other build artifacts)
+COPY . ./
 
 # Build the application
 ENV NEXT_TELEMETRY_DISABLED=1
