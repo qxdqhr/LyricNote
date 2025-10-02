@@ -16,7 +16,7 @@ function getDatabaseConfig() {
       user: url.username,
       password: url.password,
       database: url.pathname.slice(1), // 移除开头的 '/'
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl: false,
     }
   }
   
@@ -27,7 +27,7 @@ function getDatabaseConfig() {
     user: process.env.DB_USER || 'lyricnote_dev',
     password: process.env.DB_PASSWORD || 'dev_password_123',
     database: process.env.DB_NAME || 'lyricnote_dev',
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: false,
   }
 }
 
