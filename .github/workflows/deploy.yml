@@ -68,7 +68,17 @@ jobs:
             docker pull crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/lyricnote/lyricnote:${NEW_TAG}
             docker stop lyricnote-backend || true
             docker rm lyricnote-backend || true
-            docker run -d -p 3001:3000 --name lyricnote-backend crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/lyricnote/lyricnote:${NEW_TAG}
+            # 确保环境文件存在
+            if [ -f ".env.production" ]; then
+              echo "找到 .env.production 文件"
+              docker run -d -p 3001:3000 --name lyricnote-backend \
+                --env-file .env.production \
+                crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/lyricnote/lyricnote:${NEW_TAG}
+            else
+              echo "未找到 .env.production 文件，使用默认配置"
+              docker run -d -p 3001:3000 --name lyricnote-backend \
+                crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/lyricnote/lyricnote:${NEW_TAG}
+            fi
             
             # 等待容器启动并进行健康检查
             echo "等待容器启动..."
