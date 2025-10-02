@@ -126,7 +126,7 @@ class ApiService {
 
   // 用户注册
   async register(email: string, password: string, username: string): Promise<ApiResponse<AuthResponse>> {
-    const response = await this.request<AuthResponse>('/register', {
+    const response = await this.request<AuthResponse>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, username }),
     });

@@ -2,14 +2,14 @@
 export class DrizzleAuthClient {
   private baseURL: string
 
-  constructor(baseURL = '/api/auth/drizzle') {
+  constructor(baseURL = '/api/auth') {
     this.baseURL = baseURL
   }
 
   // 用户登录
   async signIn(email: string, password: string) {
     try {
-      const response = await fetch(`${this.baseURL}/sign-in`, {
+      const response = await fetch(`${this.baseURL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -24,12 +24,13 @@ export class DrizzleAuthClient {
       }
 
       // 保存 token 到 localStorage（用于客户端状态管理）
-      if (data.token) {
-        localStorage.setItem('auth-token', data.token)
-        localStorage.setItem('auth-user', JSON.stringify(data.user))
+      if (data.data?.token) {
+        localStorage.setItem('auth-token', data.data.token)
+        localStorage.setItem('auth-user', JSON.stringify(data.data.user))
+        return { data: data.data, error: null }
       }
 
-      return { data, error: null }
+      return { data: null, error: '登录响应格式错误' }
     } catch (error) {
       console.error('登录错误:', error)
       return { data: null, error: (error as any).message || '登录失败' }
@@ -39,7 +40,7 @@ export class DrizzleAuthClient {
   // 用户注册
   async signUp(email: string, password: string, username?: string) {
     try {
-      const response = await fetch(`${this.baseURL}/sign-up`, {
+      const response = await fetch(`${this.baseURL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,12 +55,13 @@ export class DrizzleAuthClient {
       }
 
       // 保存 token 到 localStorage
-      if (data.token) {
-        localStorage.setItem('auth-token', data.token)
-        localStorage.setItem('auth-user', JSON.stringify(data.user))
+      if (data.data?.token) {
+        localStorage.setItem('auth-token', data.data.token)
+        localStorage.setItem('auth-user', JSON.stringify(data.data.user))
+        return { data: data.data, error: null }
       }
 
-      return { data, error: null }
+      return { data: null, error: '注册响应格式错误' }
     } catch (error) {
       console.error('注册错误:', error)
       return { data: null, error: (error as any).message || '注册失败' }
@@ -74,7 +76,7 @@ export class DrizzleAuthClient {
         return { data: null, error: '未找到认证令牌' }
       }
 
-      const response = await fetch(`${this.baseURL}/session`, {
+      const response = await fetch(`${this.baseURL}/me`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -92,7 +94,7 @@ export class DrizzleAuthClient {
         throw new Error(data.error || '获取会话失败')
       }
 
-      return { data, error: null }
+      return { data: data.data, error: null }
     } catch (error) {
       console.error('获取会话错误:', error)
       return { data: null, error: (error as any).message || '获取会话失败' }
@@ -102,14 +104,11 @@ export class DrizzleAuthClient {
   // 用户登出
   async signOut() {
     try {
-      // 清除本地存储
-      localStorage.removeItem('auth-token')
-      localStorage.removeItem('auth-user')
-
-      // 可以选择调用服务器端登出 API
       const token = localStorage.getItem('auth-token')
+      
+      // 调用服务器端登出 API
       if (token) {
-        await fetch(`${this.baseURL}/sign-out`, {
+        await fetch(`${this.baseURL}/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -117,6 +116,10 @@ export class DrizzleAuthClient {
           },
         })
       }
+
+      // 清除本地存储
+      localStorage.removeItem('auth-token')
+      localStorage.removeItem('auth-user')
 
       return { data: { success: true }, error: null }
     } catch (error) {
