@@ -71,6 +71,7 @@ export async function GET(request: NextRequest) {
         }
       }
       
+      console.log('allConfigs', allConfigs)
       // 将连接信息添加到database配置的开头
       allConfigs.database = { ...connectionItems, ...allConfigs.database }
     }
