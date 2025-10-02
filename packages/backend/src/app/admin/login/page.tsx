@@ -20,6 +20,26 @@ export default function AdminLogin() {
   const [autoFilled, setAutoFilled] = useState(false)
   const router = useRouter()
 
+  // 检查登录状态
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      // 检查本地存储是否有 token
+      if (drizzleAuthClient.isAuthenticated()) {
+        // 验证服务器端会话
+        const { data, error } = await drizzleAuthClient.getSession()
+        
+        if (data?.user && ['ADMIN', 'SUPER_ADMIN'].includes(data.user.role)) {
+          console.log('用户已登录，跳转到管理后台')
+          router.push('/admin/config')
+          router.refresh()
+          return
+        }
+      }
+    }
+
+    checkLoginStatus()
+  }, [router])
+
   // 检测开发环境
   useEffect(() => {
     const isDevEnv = process.env.NODE_ENV === 'development' || 
@@ -92,8 +112,7 @@ export default function AdminLogin() {
         console.log('登录成功，准备跳转到dashboard')
         
         // Drizzle 认证已自动保存 token 和用户信息到 localStorage
-        // 登录成功，重定向到仪表板
-        router.push('/admin/dashboard')
+        router.push('/admin/config')
         router.refresh()
       } else {
         setError('登录失败：未获取到用户信息')

@@ -11,7 +11,7 @@ export default function AdminRedirect() {
     const token = localStorage.getItem('auth-token')
     if (token) {
       // 已登录，直接跳转到仪表板
-      router.replace('/admin/dashboard')
+      router.replace('/admin/config')
     } else {
       // 未登录，跳转到登录页面
       router.replace('/admin/login')

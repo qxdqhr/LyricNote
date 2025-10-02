@@ -145,8 +145,7 @@ export function getDatabaseConfigForDisplay(): Record<string, any> {
     port: config.port,
     database: config.database,
     username: config.username,
-    // 敏感信息用掩码显示
-    password: config.password ? '*'.repeat(config.password.length) : '未设置',
+    password: config.password,
     ssl: config.ssl || false,
     poolSize: config.poolSize,
     queryTimeout: config.queryTimeout,

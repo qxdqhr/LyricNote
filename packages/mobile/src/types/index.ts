@@ -28,8 +28,5 @@ export type RootStackParamList = {
 
 export type TabParamList = {
   Home: undefined;
-  Lyrics: { songId?: string };
-  Create: undefined;
-  Collection: undefined;
   Profile: undefined;
 };

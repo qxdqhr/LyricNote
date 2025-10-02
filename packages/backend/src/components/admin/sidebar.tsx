@@ -53,36 +53,6 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
-    title: '仪表板',
-    icon: Home,
-    href: '/admin/dashboard',
-    description: '系统概览和统计'
-  },
-  {
-    title: '内容管理',
-    icon: FileText,
-    items: [
-      {
-        title: '用户管理',
-        icon: Users,
-        href: '/admin/users',
-        description: '管理用户账户'
-      },
-      {
-        title: '歌曲管理',
-        icon: Music,
-        href: '/admin/songs',
-        description: '管理歌曲库'
-      },
-      {
-        title: '歌词管理',
-        icon: FileText,
-        href: '/admin/lyrics',
-        description: '审核和编辑歌词'
-      }
-    ]
-  },
-  {
     title: '系统管理',
     icon: Settings,
     items: [
@@ -117,42 +87,6 @@ const menuItems: MenuItem[] = [
         description: 'Expo构建配置'
       }
     ]
-  },
-  {
-    title: '数据分析',
-    icon: BarChart3,
-    items: [
-      {
-        title: '使用统计',
-        icon: BarChart3,
-        href: '/admin/analytics',
-        description: '用户使用数据分析'
-      },
-      {
-        title: '系统日志',
-        icon: FileSearch,
-        href: '/admin/logs',
-        description: '系统操作日志'
-      },
-      {
-        title: '性能监控',
-        icon: Activity,
-        href: '/admin/monitoring',
-        description: '系统性能监控'
-      }
-    ]
-  },
-  {
-    title: '系统维护',
-    icon: HardDrive,
-    items: [
-      {
-        title: '数据备份',
-        icon: HardDrive,
-        href: '/admin/backup',
-        description: '数据备份和恢复'
-      }
-    ]
   }
 ]
 
@@ -183,8 +117,8 @@ export function Sidebar({ user }: SidebarProps) {
   }
 
   const isActive = (href: string) => {
-    if (href === '/admin/dashboard') {
-      return pathname === '/admin/dashboard'
+    if (href === '/admin/config') {
+      return pathname === '/admin/config'
     }
     
     // 处理带查询参数的配置页面

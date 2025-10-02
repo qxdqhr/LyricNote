@@ -9,7 +9,7 @@ import { RootStackParamList } from './src/types';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
-export default function App() {
+export default function App(): React.JSX.Element {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
