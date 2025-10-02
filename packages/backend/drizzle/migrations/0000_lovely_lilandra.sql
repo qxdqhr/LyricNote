@@ -1,6 +1,4 @@
--- Current sql file was generated after introspecting the database
--- If you want to run this migration please uncomment this code before executing migrations
-/*
+-- Migration to create all tables and types for LyricNote
 CREATE TYPE "public"."LyricStatus" AS ENUM('PENDING', 'APPROVED', 'REJECTED', 'PROCESSING');--> statement-breakpoint
 CREATE TYPE "public"."RecognitionStatus" AS ENUM('PROCESSING', 'SUCCESS', 'FAILED', 'TIMEOUT');--> statement-breakpoint
 CREATE TYPE "public"."UserRole" AS ENUM('USER', 'ADMIN', 'SUPER_ADMIN');--> statement-breakpoint
@@ -182,4 +180,3 @@ CREATE UNIQUE INDEX "collection_songs_collectionId_songId_key" ON "collection_so
 CREATE UNIQUE INDEX "favorites_userId_songId_key" ON "favorites" USING btree ("userId" text_ops,"songId" text_ops);--> statement-breakpoint
 CREATE UNIQUE INDEX "system_configs_key_key" ON "system_configs" USING btree ("key" text_ops);--> statement-breakpoint
 CREATE UNIQUE INDEX "verifications_identifier_value_key" ON "verifications" USING btree ("identifier" text_ops,"value" text_ops);
-*/
