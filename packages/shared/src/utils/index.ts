@@ -1,4 +1,3 @@
-import { JAPANESE_REGEX } from '../constants'
 
 // 时间格式化工具
 export const formatTime = {
@@ -48,34 +47,6 @@ export const formatTime = {
 
 // 日语文本处理工具
 export const japaneseUtils = {
-  /**
-   * 检测文本是否包含日语字符
-   */
-  isJapanese(text: string): boolean {
-    return JAPANESE_REGEX.japanese.test(text)
-  },
-
-  /**
-   * 检测文本是否包含平假名
-   */
-  hasHiragana(text: string): boolean {
-    return JAPANESE_REGEX.hiragana.test(text)
-  },
-
-  /**
-   * 检测文本是否包含片假名
-   */
-  hasKatakana(text: string): boolean {
-    return JAPANESE_REGEX.katakana.test(text)
-  },
-
-  /**
-   * 检测文本是否包含汉字
-   */
-  hasKanji(text: string): boolean {
-    return JAPANESE_REGEX.kanji.test(text)
-  },
-
   /**
    * 提取文本中的汉字
    */
