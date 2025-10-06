@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Loader2, Mail, Lock, Eye, EyeOff, TestTube, Zap, Info, Copy } from 'lucide-react'
 import { drizzleAuthClient } from '@/lib/auth/drizzle-client'
+import { APP_TITLES, APP_CONFIG } from '@lyricnote/shared'
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('')
@@ -109,7 +110,6 @@ export default function AdminLogin() {
         }
 
         console.log('登录成功，用户信息:', user.email, user.role)
-        console.log('登录成功，准备跳转到dashboard')
         
         // Drizzle 认证已自动保存 token 和用户信息到 localStorage
         router.push('/admin/config')
@@ -146,7 +146,7 @@ export default function AdminLogin() {
             )}
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            LyricNote 管理后台
+            {APP_TITLES.admin}
             {isDevelopment && (
               <span className="text-lg text-orange-600 ml-2 font-normal">
                 开发环境
@@ -154,7 +154,7 @@ export default function AdminLogin() {
             )}
           </h1>
           <p className="text-gray-600">
-            日语音乐识别应用管理系统
+            {APP_CONFIG.description}
           </p>
           <p className="text-sm text-gray-500 mt-2">
             Powered by Better Auth
@@ -295,9 +295,9 @@ export default function AdminLogin() {
                 仅限管理员访问 • 系统安全保护
               </p>
               <div className="flex items-center justify-center space-x-2 text-xs text-gray-400">
-                <span>LyricNote v1.0</span>
+                <span>{APP_TITLES.withVersion}</span>
                 <span>•</span>
-                <span>日语音乐识别专家</span>
+                <span>{APP_CONFIG.description}</span>
               </div>
             </div>
           </CardContent>

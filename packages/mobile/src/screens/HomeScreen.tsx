@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, SafeAreaView, StatusBar, StyleSheet } from 'react-native';
+import { APP_TITLES, APP_CONFIG } from '@lyricnote/shared';
 
 export default function HomeScreen(): React.JSX.Element {
   return (
@@ -8,14 +9,14 @@ export default function HomeScreen(): React.JSX.Element {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🎌 LyricNote</Text>
+        <Text style={styles.headerTitle}>{APP_TITLES.main}</Text>
       </View>
 
       {/* Main Content */}
       <View style={styles.content}>
         <Text style={styles.emoji}>🎵</Text>
-        <Text style={styles.title}>欢迎使用 LyricNote</Text>
-        <Text style={styles.subtitle}>日语音乐识别应用</Text>
+        <Text style={styles.title}>{APP_TITLES.welcome}</Text>
+        <Text style={styles.subtitle}>{APP_CONFIG.description}</Text>
       </View>
     </SafeAreaView>
   );

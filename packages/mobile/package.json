@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
+    "predev": "cd ../shared && pnpm build",
     "dev": "expo start",
+    "prestart": "cd ../shared && pnpm build",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",

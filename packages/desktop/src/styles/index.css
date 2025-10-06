@@ -1,0 +1,385 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ========== 布局 ========== */
+
+.app-container {
+  display: flex;
+  height: 100vh;
+  background-color: #f9fafb;
+}
+
+.sidebar {
+  width: 240px;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 24px 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 24px;
+}
+
+.logo-icon {
+  font-size: 32px;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.nav-link.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: 600;
+}
+
+.nav-icon {
+  font-size: 20px;
+}
+
+.nav-text {
+  font-size: 16px;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ========== 页面通用样式 ========== */
+
+.page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  padding: 24px 32px;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #111827;
+}
+
+.page-content {
+  flex: 1;
+  padding: 48px;
+  overflow-y: auto;
+}
+
+/* ========== 首页 ========== */
+
+.home-page .page-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-section {
+  text-align: center;
+  max-width: 600px;
+}
+
+.emoji-large {
+  font-size: 120px;
+  margin-bottom: 32px;
+}
+
+.welcome-title {
+  font-size: 36px;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.welcome-subtitle {
+  font-size: 18px;
+  color: #6b7280;
+  margin-bottom: 32px;
+}
+
+.user-welcome {
+  display: inline-block;
+  padding: 16px 48px;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 30px;
+  margin-top: 24px;
+}
+
+.auth-hint {
+  display: inline-block;
+  padding: 16px 48px;
+  background-color: #e5e7eb;
+  color: #6b7280;
+  font-size: 16px;
+  border-radius: 30px;
+  margin-top: 24px;
+}
+
+/* ========== Profile 页面 ========== */
+
+.profile-page.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-container {
+  text-align: center;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.profile-page.logged-in .page-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.user-info {
+  text-align: center;
+  padding: 48px;
+}
+
+.avatar-large {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+  color: white;
+  margin: 0 auto 24px;
+}
+
+.user-info .username {
+  font-size: 32px;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.user-info .email {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.role-badge {
+  display: inline-block;
+  background-color: #8b5cf6;
+  color: white;
+  padding: 8px 24px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.logout-btn {
+  width: 100%;
+  max-width: 400px;
+  padding: 16px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logout-btn:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.logout-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ========== 认证表单 ========== */
+
+.auth-container {
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.auth-tabs {
+  display: flex;
+  background-color: #e5e7eb;
+  border-radius: 25px;
+  padding: 4px;
+  margin-bottom: 32px;
+}
+
+.auth-tabs .tab {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.auth-tabs .tab.active {
+  background-color: #8b5cf6;
+  color: white;
+}
+
+.auth-form {
+  background-color: white;
+  padding: 48px;
+  border-radius: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 8px;
+}
+
+.submit-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hint {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.hint .link {
+  background: none;
+  border: none;
+  color: #8b5cf6;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0;
+}
+
+.hint .link:hover {
+  text-decoration: underline;
+}
+

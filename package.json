@@ -1,19 +1,21 @@
 {
   "name": "lyricnote-monorepo",
   "version": "1.0.0",
-  "description": "🎌 LyricNote - 专注日语歌曲的AI智能听歌识曲应用",
+  "description": "多端应用框架 - Multi-platform Application Framework",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:mobile\"",
-    "dev:backend": "cd packages/backend && npm run dev",
-    "dev:mobile": "cd packages/mobile && npm run dev",
-    "build": "npm run build:shared && npm run build:backend && npm run build:mobile",
-    "build:shared": "cd packages/shared && npm run build",
-    "build:backend": "cd packages/backend && npm run build",
-    "build:mobile": "cd packages/mobile && npm run build",
+    "dev": "pnpm build:shared && concurrently \"pnpm dev:backend\" \"pnpm dev:mobile\"",
+    "dev:backend": "cd packages/backend && pnpm dev",
+    "dev:mobile": "cd packages/mobile && pnpm dev",
+    "dev:desktop": "cd packages/desktop && pnpm electron:dev",
+    "dev:miniapp": "cd packages/miniapp && pnpm dev",
+    "build": "pnpm build:shared && pnpm build:backend && pnpm build:mobile",
+    "build:shared": "cd packages/shared && pnpm build",
+    "build:backend": "cd packages/backend && pnpm build",
+    "build:mobile": "cd packages/mobile && pnpm build",
     "test": "npm run test:backend && npm run test:mobile",
     "test:backend": "cd packages/backend && npm run test",
     "test:mobile": "cd packages/mobile && npm run test",
@@ -42,8 +44,8 @@
     "ci:test": "npm run test",
     "ci:build": "npm run build",
     "ci:lint": "npm run lint",
-    "docker:build": "docker build -f packages/backend/Dockerfile -t lyricnote .",
-    "docker:run": "docker run -p 3000:3000 lyricnote"
+    "docker:build": "docker build -f packages/backend/Dockerfile -t app .",
+    "docker:run": "docker run -p 3000:3000 app"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",
@@ -60,14 +62,20 @@
     "nextjs",
     "monorepo"
   ],
-  "author": "LyricNote Team",
+  "author": "",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/lyricnote"
+    "url": "https://github.com/your-org/your-app"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "~18.2.43",
+      "@types/react-dom": "~18.2.17"
+    }
   }
 }

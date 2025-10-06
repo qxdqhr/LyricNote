@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { TabParamList } from '../types';
+import { UI_TEXT } from '@lyricnote/shared';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
@@ -41,14 +42,14 @@ export default function TabNavigator(): React.JSX.Element {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarLabel: '首页',
+          tabBarLabel: UI_TEXT.navigation.home,
         }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarLabel: '我的',
+          tabBarLabel: UI_TEXT.navigation.profile,
         }}
       />
     </Tab.Navigator>

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { APP_CONFIG } from '@lyricnote/shared'
 
 export default function HomePage() {
   return (
@@ -7,7 +8,7 @@ export default function HomePage() {
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            🎌 LyricNote Backend
+            {APP_CONFIG.icon} {APP_CONFIG.name} Backend
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             日语音乐识别应用后端系统 + Web 管理平台
@@ -141,7 +142,7 @@ export default function HomePage() {
         {/* Footer */}
         <div className="text-center mt-16 pt-8 border-t border-gray-200">
           <p className="text-gray-500">
-            LyricNote Backend v1.0.0 • 专注日语音乐识别和歌词处理
+            {APP_CONFIG.name} Backend v{APP_CONFIG.version} • {APP_CONFIG.description}
           </p>
           <p className="text-sm text-gray-400 mt-2">
             Built with ❤️ using Next.js, TypeScript, and modern web technologies

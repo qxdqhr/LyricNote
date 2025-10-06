@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { APP_TITLES, APP_CONFIG } from "@lyricnote/shared";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LyricNote 管理后台",
-  description: "日语音乐识别应用管理系统",
+  title: APP_TITLES.admin,
+  description: APP_CONFIG.description,
 };
 
 export default function RootLayout({

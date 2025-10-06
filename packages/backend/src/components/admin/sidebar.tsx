@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { drizzleAuthClient } from '@/lib/auth/drizzle-client'
+import { APP_CONFIG } from '@lyricnote/shared'
 import {
   Settings,
   Users,
@@ -149,7 +150,7 @@ export function Sidebar({ user }: SidebarProps) {
                 <span className="text-white font-bold text-sm">🎌</span>
               </div>
               <div>
-                <h1 className="font-semibold text-gray-900">LyricNote</h1>
+                <h1 className="font-semibold text-gray-900">{APP_CONFIG.name}</h1>
                 <p className="text-xs text-gray-500">管理后台</p>
               </div>
             </div>

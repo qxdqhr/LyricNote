@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { APP_TITLES } from '@lyricnote/shared'
 
 export default function AdminRedirect() {
   const router = useRouter()
@@ -26,7 +27,7 @@ export default function AdminRedirect() {
           <span className="text-3xl">🎌</span>
         </div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          LyricNote 管理后台
+          {APP_TITLES.admin}
         </h1>
         <p className="text-gray-600 mb-4">
           正在跳转...

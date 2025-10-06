@@ -8,6 +8,7 @@ import { Bell, Search, Settings } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { drizzleAuthClient } from '@/lib/auth/drizzle-client'
+import { APP_CONFIG } from '@lyricnote/shared'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -70,7 +71,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   // 获取页面标题
   const getPageTitle = () => {
-    if (pathname === '/admin/dashboard') return '仪表板'
     if (pathname === '/admin/config') return '系统配置'
     if (pathname === '/admin/users') return '用户管理'
     if (pathname === '/admin/songs') return '歌曲管理'
@@ -83,7 +83,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   const getPageDescription = () => {
-    if (pathname === '/admin/dashboard') return '系统概览、统计数据和快速操作'
     if (pathname === '/admin/config') return '动态配置管理，实时修改系统设置'
     if (pathname === '/admin/users') return '管理用户账户、权限和个人信息'
     if (pathname === '/admin/songs') return '管理歌曲库、元数据和分类'
@@ -185,8 +184,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <footer className="bg-white border-t border-gray-200 px-6 py-3">
           <div className="flex items-center justify-between text-xs text-gray-500">
             <div className="flex items-center space-x-4">
-              <span>© 2024 LyricNote</span>
-              <span>v1.0.0</span>
+              <span>{APP_CONFIG.copyright}</span>
+              <span>v{APP_CONFIG.version}</span>
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span>系统正常运行</span>
