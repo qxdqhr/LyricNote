@@ -1,4 +1,3 @@
-import React from 'react'
 import { Outlet, NavLink } from 'react-router-dom'
 import { APP_CONFIG, UI_TEXT } from '@lyricnote/shared'
 

@@ -3,6 +3,7 @@ import { db } from '../drizzle/db'
 import { systemConfigs } from '../../../drizzle/migrations/schema'
 import { eq } from 'drizzle-orm'
 import { NEW_CONFIG_TEMPLATES } from './config-templates-new'
+import { configLogger } from '../logger'
 
 // 导出新的配置模板作为默认配置模板  
 export const CONFIG_TEMPLATES = NEW_CONFIG_TEMPLATES
@@ -323,16 +324,16 @@ export class ConfigService {
           try {
             value = this.decrypt(config.value as string)
           } catch (error) {
-            console.warn(`Failed to decrypt config ${config.key}:`, error)
+            configLogger.warn(`Failed to decrypt config ${config.key}`, error)
           }
         }
         
         this.configCache.set(config.key, value)
       })
       
-      console.log(`✅ 已加载 ${configs.length} 个配置项`)
+      configLogger.info(`已加载 ${configs.length} 个配置项`)
     } catch (error) {
-      console.error('❌ 加载配置失败:', error)
+      configLogger.error('加载配置失败', error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -368,7 +369,7 @@ export class ConfigService {
         return value
       }
     } catch (error) {
-      console.error(`获取配置 ${key} 失败:`, error)
+      configLogger.error(`获取配置 ${key} 失败`, error instanceof Error ? error : new Error(String(error)))
     }
     
     return defaultValue
@@ -412,9 +413,9 @@ export class ConfigService {
       // 更新缓存
       this.configCache.set(key, validatedValue)
       
-      console.log(`✅ 配置 ${key} 已更新`)
+      configLogger.info(`配置 ${key} 已更新`)
     } catch (error) {
-      console.error(`设置配置 ${key} 失败:`, error)
+      configLogger.error(`设置配置 ${key} 失败`, error instanceof Error ? error : new Error(String(error)))
       throw error
     }
   }
@@ -444,9 +445,9 @@ export class ConfigService {
       await db.delete(systemConfigs).where(eq(systemConfigs.key, key))
       
       this.configCache.delete(key)
-      console.log(`✅ 配置 ${key} 已删除`)
+      configLogger.info(`配置 ${key} 已删除`)
     } catch (error) {
-      console.error(`删除配置 ${key} 失败:`, error)
+      configLogger.error(`删除配置 ${key} 失败`, error instanceof Error ? error : new Error(String(error)))
       throw error
     }
   }
@@ -472,7 +473,7 @@ export class ConfigService {
 
   // 初始化默认配置
   public async initializeDefaultConfigs(): Promise<void> {
-    console.log('🔧 初始化默认配置...')
+    configLogger.info('初始化默认配置...')
     
     for (const [category, items] of Object.entries(NEW_CONFIG_TEMPLATES)) {
       for (const item of items) {
@@ -484,7 +485,7 @@ export class ConfigService {
       }
     }
     
-    console.log('✅ 默认配置初始化完成')
+    configLogger.info('默认配置初始化完成')
   }
 
   // 刷新配置缓存

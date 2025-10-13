@@ -3,6 +3,7 @@ import { db } from '@/lib/drizzle/db'
 import { aiProcessLogs } from '../../drizzle/migrations/schema'
 import { gte, lte, eq, sql } from 'drizzle-orm'
 import crypto from 'crypto'
+import { aiLogger } from '@/lib/logger'
 
 export interface DeepSeekResponse {
   choices: Array<{
@@ -57,7 +58,7 @@ export class AIService {
         this.apiUrl = apiUrl
       }
     } catch (error) {
-      console.warn('从配置数据库加载AI服务配置失败，使用环境变量:', error)
+      aiLogger.warn('从配置数据库加载AI服务配置失败，使用环境变量', error)
     }
   }
 
@@ -71,7 +72,7 @@ export class AIService {
   private async callDeepSeekAPI(prompt: string, systemPrompt?: string): Promise<DeepSeekResponse> {
     // 在开发环境下，如果没有API密钥，返回模拟响应
     if (process.env.NODE_ENV === 'development' && (!this.apiKey || this.apiKey === '')) {
-      console.log('🧪 开发模式：返回模拟API响应');
+      aiLogger.debug('开发模式：返回模拟API响应');
       return {
         choices: [{
           message: {
@@ -157,7 +158,7 @@ export class AIService {
 
   async recognizeSong(audioFeatures: any): Promise<SongRecognitionResult> {
     // 临时强制使用模拟数据进行测试
-    console.log('🧪 强制使用模拟识别结果进行测试');
+    aiLogger.debug('强制使用模拟识别结果进行测试');
     return {
       success: true,
       title: '夜に駆ける',
@@ -296,7 +297,7 @@ ${japaneseText}`
         createdAt: new Date().toISOString()
       })
     } catch (error) {
-      console.error('Failed to log AI process:', error)
+      aiLogger.error('Failed to log AI process', error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -328,7 +329,7 @@ ${japaneseText}`
 
       return stats.rows || []
     } catch (error) {
-      console.error('Failed to get AI usage stats:', error)
+      aiLogger.error('Failed to get AI usage stats', error instanceof Error ? error : new Error(String(error)))
       return []
     }
   }

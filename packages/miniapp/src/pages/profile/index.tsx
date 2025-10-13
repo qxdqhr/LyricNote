@@ -1,86 +1,51 @@
-import { useState, useEffect } from 'react'
-import { View, Text, Button, Input } from '@tarojs/components'
-import Taro, { useLoad } from '@tarojs/taro'
+import { View, Text, Input, Button } from '@tarojs/components'
+import { useState } from 'react'
+import Taro from '@tarojs/taro'
+import { useAuth, useAuthForm } from '@lyricnote/shared'
 import { apiService } from '../../services/api'
 import './index.scss'
 
-interface User {
-  id: string
-  email: string
-  username: string
-  nickname?: string
-  role: string
-}
-
 export default function Profile() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
-  const [isLogin, setIsLogin] = useState(true) // true: 登录模式, false: 注册模式
-  const [loading, setLoading] = useState(false)
-  const [checkingAuth, setCheckingAuth] = useState(true)
-
-  // 表单数据
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [username, setUsername] = useState('')
-
-  useLoad(() => {
-    console.log('Profile page loaded.')
-    checkAuthStatus()
+  // 使用统一的 useAuth Hook
+  const { user, isLoggedIn, loading, checkingAuth, login, register, logout } = useAuth(apiService)
+  
+  // 登录/注册模式切换
+  const [isLogin, setIsLogin] = useState(true)
+  
+  // 登录表单
+  const loginForm = useAuthForm({
+    email: '',
+    password: ''
+  })
+  
+  // 注册表单
+  const registerForm = useAuthForm({
+    email: '',
+    password: '',
+    username: ''
   })
 
-  const checkAuthStatus = async () => {
-    try {
-      setCheckingAuth(true)
-      const isAuth = await apiService.isAuthenticated()
-      
-      if (isAuth) {
-        // 验证 token 并获取用户信息
-        const response = await apiService.getCurrentUser()
-        if (response.success && response.data) {
-          setUser(response.data.user)
-          setIsLoggedIn(true)
-        } else {
-          // Token 无效，清除登录状态
-          await apiService.clearUserData()
-        }
-      }
-    } catch (error) {
-      console.error('检查登录状态失败:', error)
-      // 出错时也清除可能无效的数据
-      await apiService.clearUserData()
-    } finally {
-      setCheckingAuth(false)
-    }
-  }
-
+  // 处理登录
   const handleLogin = async () => {
+    const { email, password } = loginForm.values
     if (!email || !password) {
       Taro.showToast({ title: '请输入邮箱和密码', icon: 'none' })
       return
     }
 
-    setLoading(true)
-    try {
-      const response = await apiService.login(email, password)
-      
-      if (response.success && response.data) {
-        setUser(response.data.user)
-        setIsLoggedIn(true)
-        setEmail('')
-        setPassword('')
-        Taro.showToast({ title: '登录成功！', icon: 'success' })
-      } else {
-        Taro.showToast({ title: response.error || '登录失败', icon: 'none' })
-      }
-    } catch (error) {
-      Taro.showToast({ title: '登录失败，请重试', icon: 'none' })
-    } finally {
-      setLoading(false)
+    const result = await login(email, password)
+    
+    if (result.success) {
+      loginForm.reset()
+      Taro.showToast({ title: '登录成功！', icon: 'success' })
+    } else {
+      Taro.showToast({ title: result.error || '登录失败', icon: 'none' })
     }
   }
 
+  // 处理注册
   const handleRegister = async () => {
+    const { email, password, username } = registerForm.values
     if (!email || !password || !username) {
       Taro.showToast({ title: '请填写所有字段', icon: 'none' })
       return
@@ -91,53 +56,35 @@ export default function Profile() {
       return
     }
 
-    setLoading(true)
-    try {
-      const response = await apiService.register(email, password, username)
-      
-      if (response.success && response.data) {
-        setUser(response.data.user)
-        setIsLoggedIn(true)
-        setEmail('')
-        setPassword('')
-        setUsername('')
-        Taro.showToast({ title: '注册成功！', icon: 'success' })
-      } else {
-        Taro.showToast({ title: response.error || '注册失败', icon: 'none' })
-      }
-    } catch (error) {
-      Taro.showToast({ title: '注册失败，请重试', icon: 'none' })
-    } finally {
-      setLoading(false)
+    const result = await register(email, password, username)
+    
+    if (result.success) {
+      registerForm.reset()
+      Taro.showToast({ title: '注册成功！', icon: 'success' })
+    } else {
+      Taro.showToast({ title: result.error || '注册失败', icon: 'none' })
     }
   }
 
+  // 处理登出
   const handleLogout = async () => {
     const res = await Taro.showModal({
-      title: '确认登出',
+      title: '确认',
       content: '确定要退出登录吗？'
     })
-
+    
     if (res.confirm) {
-      setLoading(true)
-      try {
-        await apiService.logout()
-        setUser(null)
-        setIsLoggedIn(false)
-        Taro.showToast({ title: '已退出登录', icon: 'success' })
-      } catch (error) {
-        Taro.showToast({ title: '登出失败', icon: 'none' })
-      } finally {
-        setLoading(false)
-      }
+      await logout()
     }
   }
 
   // 加载中状态
   if (checkingAuth) {
     return (
-      <View className='profile loading'>
-        <Text>加载中...</Text>
+      <View className='profile-container'>
+        <View className='loading-container'>
+          <Text className='loading-text'>正在加载...</Text>
+        </View>
       </View>
     )
   }
@@ -145,105 +92,169 @@ export default function Profile() {
   // 已登录状态
   if (isLoggedIn && user) {
     return (
-      <View className='profile logged-in'>
-        <View className='user-info'>
-          <View className='avatar'>
-            <Text className='avatar-text'>{user.username?.[0]?.toUpperCase() || 'U'}</Text>
-          </View>
-          <Text className='username'>{user.username}</Text>
-          <Text className='email'>{user.email}</Text>
-          {user.role && (
-            <View className='role-badge'>
-              <Text className='role-text'>
-                {user.role === 'ADMIN' ? '管理员' : user.role === 'SUPER_ADMIN' ? '超级管理员' : '普通用户'}
+      <View className='profile-container'>
+        <View className='profile-card'>
+          <Text className='title'>个人信息</Text>
+          
+          <View className='user-info'>
+            <View className='avatar'>
+              <Text className='avatar-text'>
+                {user.username?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
               </Text>
             </View>
-          )}
+            
+            <View className='user-details'>
+              <Text className='user-name'>{user.username || '未设置用户名'}</Text>
+              <Text className='user-email'>{user.email}</Text>
+              {user.role && (
+                <View className='role-container'>
+                  {user.role === 'SUPER_ADMIN' && (
+                    <View className='role-badge super-admin'>
+                      <Text className='role-text'>超级管理员</Text>
+                    </View>
+                  )}
+                  {user.role === 'ADMIN' && (
+                    <View className='role-badge admin'>
+                      <Text className='role-text'>管理员</Text>
+                    </View>
+                  )}
+                  {user.role === 'USER' && (
+                    <View className='role-badge user'>
+                      <Text className='role-text'>普通用户</Text>
+                    </View>
+                  )}
+                </View>
+              )}
+            </View>
+          </View>
+          
+          <Button 
+            className='logout-button' 
+            onClick={handleLogout}
+            loading={loading}
+            disabled={loading}
+          >
+            {loading ? '退出中...' : '退出登录'}
+          </Button>
         </View>
-
-        <Button 
-          className='logout-btn'
-          onClick={handleLogout}
-          loading={loading}
-          disabled={loading}
-        >
-          退出登录
-        </Button>
       </View>
     )
   }
 
   // 未登录状态 - 登录/注册表单
   return (
-    <View className='profile'>
-      <View className='auth-tabs'>
-        <View 
-          className={`tab ${isLogin ? 'active' : ''}`}
-          onClick={() => setIsLogin(true)}
-        >
-          <Text>登录</Text>
+    <View className='profile-container'>
+      <View className='profile-card'>
+        <View className='tabs'>
+          <View 
+            className={`tab ${isLogin ? 'active' : ''}`}
+            onClick={() => setIsLogin(true)}
+          >
+            <Text className={`tab-text ${isLogin ? 'active' : ''}`}>登录</Text>
+          </View>
+          <View 
+            className={`tab ${!isLogin ? 'active' : ''}`}
+            onClick={() => setIsLogin(false)}
+          >
+            <Text className={`tab-text ${!isLogin ? 'active' : ''}`}>注册</Text>
+          </View>
         </View>
-        <View 
-          className={`tab ${!isLogin ? 'active' : ''}`}
-          onClick={() => setIsLogin(false)}
-        >
-          <Text>注册</Text>
-        </View>
-      </View>
 
-      <View className='form'>
-        {!isLogin && (
-          <View className='input-group'>
-            <Text className='label'>用户名</Text>
-            <Input
-              className='input'
-              placeholder='请输入用户名'
-              value={username}
-              onInput={(e) => setUsername(e.detail.value)}
-            />
+        {isLogin ? (
+          <View className='form'>
+            <Text className='form-title'>登录账号</Text>
+            
+            <View className='form-group'>
+              <Text className='label'>邮箱</Text>
+              <Input
+                className='input'
+                type='text'
+                value={loginForm.values.email}
+                onInput={(e) => loginForm.handleChange('email', e.detail.value)}
+                onBlur={() => loginForm.handleBlur('email')}
+                placeholder='请输入邮箱'
+                disabled={loading}
+              />
+            </View>
+
+            <View className='form-group'>
+              <Text className='label'>密码</Text>
+              <Input
+                className='input'
+                type='text'
+                value={loginForm.values.password}
+                onInput={(e) => loginForm.handleChange('password', e.detail.value)}
+                onBlur={() => loginForm.handleBlur('password')}
+                placeholder='请输入密码'
+                password
+                disabled={loading}
+              />
+            </View>
+
+            <Button 
+              className='submit-button' 
+              onClick={handleLogin}
+              loading={loading}
+              disabled={loading}
+            >
+              {loading ? '登录中...' : '登录'}
+            </Button>
+          </View>
+        ) : (
+          <View className='form'>
+            <Text className='form-title'>注册账号</Text>
+            
+            <View className='form-group'>
+              <Text className='label'>用户名</Text>
+              <Input
+                className='input'
+                type='text'
+                value={registerForm.values.username}
+                onInput={(e) => registerForm.handleChange('username', e.detail.value)}
+                onBlur={() => registerForm.handleBlur('username')}
+                placeholder='请输入用户名'
+                disabled={loading}
+              />
+            </View>
+
+            <View className='form-group'>
+              <Text className='label'>邮箱</Text>
+              <Input
+                className='input'
+                type='text'
+                value={registerForm.values.email}
+                onInput={(e) => registerForm.handleChange('email', e.detail.value)}
+                onBlur={() => registerForm.handleBlur('email')}
+                placeholder='请输入邮箱'
+                disabled={loading}
+              />
+            </View>
+
+            <View className='form-group'>
+              <Text className='label'>密码</Text>
+              <Input
+                className='input'
+                type='text'
+                value={registerForm.values.password}
+                onInput={(e) => registerForm.handleChange('password', e.detail.value)}
+                onBlur={() => registerForm.handleBlur('password')}
+                placeholder='请输入密码（至少6位）'
+                password
+                disabled={loading}
+              />
+            </View>
+
+            <Button 
+              className='submit-button' 
+              onClick={handleRegister}
+              loading={loading}
+              disabled={loading}
+            >
+              {loading ? '注册中...' : '注册'}
+            </Button>
           </View>
         )}
-
-        <View className='input-group'>
-          <Text className='label'>邮箱</Text>
-          <Input
-            className='input'
-            type='text'
-            placeholder='请输入邮箱'
-            value={email}
-            onInput={(e) => setEmail(e.detail.value)}
-          />
-        </View>
-
-        <View className='input-group'>
-          <Text className='label'>密码</Text>
-          <Input
-            className='input'
-            password
-            placeholder='请输入密码'
-            value={password}
-            onInput={(e) => setPassword(e.detail.value)}
-          />
-        </View>
-
-        <Button
-          className='submit-btn'
-          onClick={isLogin ? handleLogin : handleRegister}
-          loading={loading}
-          disabled={loading}
-        >
-          {isLogin ? '登录' : '注册'}
-        </Button>
-
-        <View className='hint'>
-          <Text>{isLogin ? '还没有账号？' : '已有账号？'}</Text>
-          <Text className='link' onClick={() => setIsLogin(!isLogin)}>
-            {isLogin ? ' 立即注册' : ' 立即登录'}
-          </Text>
-        </View>
       </View>
     </View>
   )
 }
-
-

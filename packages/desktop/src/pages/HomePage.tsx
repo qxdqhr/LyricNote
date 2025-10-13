@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { apiService, User } from '../services/api'
 import { APP_TITLES, APP_CONFIG } from '@lyricnote/shared'
 
@@ -18,7 +18,7 @@ export default function HomePage() {
       if (isAuth) {
         const response = await apiService.getCurrentUser()
         if (response.success && response.data) {
-          setUser(response.data.user)
+          setUser(response.data)
         }
       }
     } catch (error) {

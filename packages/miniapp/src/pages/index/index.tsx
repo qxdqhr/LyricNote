@@ -3,6 +3,7 @@ import { View, Text } from '@tarojs/components'
 import { useLoad } from '@tarojs/taro'
 import { apiService } from '../../services/api'
 import { APP_TITLES, APP_CONFIG } from '@lyricnote/shared'
+import { logger } from '../../lib/logger'
 import './index.scss'
 
 interface User {
@@ -18,7 +19,7 @@ export default function Index() {
   const [loading, setLoading] = useState(true)
 
   useLoad(() => {
-    console.log('Index page loaded.')
+    logger.debug('Index page loaded')
     checkAuthStatus()
   })
 
@@ -30,11 +31,11 @@ export default function Index() {
       if (isAuth) {
         const response = await apiService.getCurrentUser()
         if (response.success && response.data) {
-          setUser(response.data.user)
+          setUser(response.data)
         }
       }
     } catch (error) {
-      console.error('检查登录状态失败:', error)
+      logger.error('检查登录状态失败', error instanceof Error ? error : new Error(String(error)))
     } finally {
       setLoading(false)
     }
