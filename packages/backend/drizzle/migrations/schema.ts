@@ -243,3 +243,10 @@ export const verifications = pgTable("verifications", {
 }, (table) => [
 	uniqueIndex("verifications_identifier_value_key").using("btree", table.identifier.asc().nullsLast().op("text_ops"), table.value.asc().nullsLast().op("text_ops")),
 ]);
+
+// 从 shared 包导入埋点事件表定义
+// @ts-ignore - 临时忽略类型错误，等待 shared 包构建完成
+import { analyticsEvents as baseAnalyticsEvents } from '@lyricnote/shared/analytics/server';
+
+// 添加外键关系
+export const analyticsEvents = baseAnalyticsEvents;

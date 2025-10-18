@@ -8,7 +8,9 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
+  Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth, useAuthForm } from '@lyricnote/shared';
 import { apiService } from '../services/api';
 
@@ -36,7 +38,11 @@ export default function ProfileScreen(): React.JSX.Element {
   const handleLogin = async () => {
     const { email, password } = loginForm.values;
     if (!email || !password) {
-      Alert.alert('提示', '请输入邮箱和密码');
+      if (Platform.OS === 'web') {
+        alert('请输入邮箱和密码');
+      } else {
+        Alert.alert('提示', '请输入邮箱和密码');
+      }
       return;
     }
 
@@ -44,9 +50,17 @@ export default function ProfileScreen(): React.JSX.Element {
     
     if (result.success) {
       loginForm.reset();
-      Alert.alert('成功', '登录成功！');
+      if (Platform.OS === 'web') {
+        alert('登录成功！');
+      } else {
+        Alert.alert('成功', '登录成功！');
+      }
     } else {
-      Alert.alert('登录失败', result.error || '请检查邮箱和密码');
+      if (Platform.OS === 'web') {
+        alert(result.error || '登录失败，请检查邮箱和密码');
+      } else {
+        Alert.alert('登录失败', result.error || '请检查邮箱和密码');
+      }
     }
   };
 
@@ -54,12 +68,20 @@ export default function ProfileScreen(): React.JSX.Element {
   const handleRegister = async () => {
     const { email, password, username } = registerForm.values;
     if (!email || !password || !username) {
-      Alert.alert('提示', '请填写所有字段');
+      if (Platform.OS === 'web') {
+        alert('请填写所有字段');
+      } else {
+        Alert.alert('提示', '请填写所有字段');
+      }
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('提示', '密码长度至少6位');
+      if (Platform.OS === 'web') {
+        alert('密码长度至少6位');
+      } else {
+        Alert.alert('提示', '密码长度至少6位');
+      }
       return;
     }
 
@@ -67,44 +89,61 @@ export default function ProfileScreen(): React.JSX.Element {
     
     if (result.success) {
       registerForm.reset();
-      Alert.alert('成功', '注册成功！');
+      if (Platform.OS === 'web') {
+        alert('注册成功！');
+      } else {
+        Alert.alert('成功', '注册成功！');
+      }
     } else {
-      Alert.alert('注册失败', result.error || '请重试');
+      if (Platform.OS === 'web') {
+        alert(result.error || '注册失败，请重试');
+      } else {
+        Alert.alert('注册失败', result.error || '请重试');
+      }
     }
   };
 
   // 处理登出
   const handleLogout = () => {
-    Alert.alert(
-      '确认',
-      '确定要退出登录吗？',
-      [
-        { text: '取消', style: 'cancel' },
-        { 
-          text: '退出', 
-          style: 'destructive',
-          onPress: logout
-        },
-      ]
-    );
+    // Web 端使用浏览器确认对话框
+    if (Platform.OS === 'web') {
+      if (window.confirm('确定要退出登录吗？')) {
+        logout();
+      }
+    } else {
+      // Native 端使用 Alert.alert
+      Alert.alert(
+        '确认',
+        '确定要退出登录吗？',
+        [
+          { text: '取消', style: 'cancel' },
+          { 
+            text: '退出', 
+            style: 'destructive',
+            onPress: logout
+          },
+        ]
+      );
+    }
   };
 
   // 加载中状态
   if (checkingAuth) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#8b5cf6" />
           <Text style={styles.loadingText}>正在加载...</Text>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   // 已登录状态
   if (isLoggedIn && user) {
     return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      <SafeAreaView style={styles.safeContainer} edges={['top', 'left', 'right']}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.card}>
           <Text style={styles.title}>个人信息</Text>
           
@@ -153,12 +192,14 @@ export default function ProfileScreen(): React.JSX.Element {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      </SafeAreaView>
     );
   }
 
   // 未登录状态 - 登录/注册表单
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView style={styles.safeContainer} edges={['top', 'left', 'right']}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
       <View style={styles.card}>
         <View style={styles.tabs}>
           <TouchableOpacity
@@ -187,6 +228,7 @@ export default function ProfileScreen(): React.JSX.Element {
                 onChangeText={(text) => loginForm.handleChange('email', text)}
                 onBlur={() => loginForm.handleBlur('email')}
                 placeholder="请输入邮箱"
+                placeholderTextColor="#9ca3af"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 editable={!loading}
@@ -201,6 +243,7 @@ export default function ProfileScreen(): React.JSX.Element {
                 onChangeText={(text) => loginForm.handleChange('password', text)}
                 onBlur={() => loginForm.handleBlur('password')}
                 placeholder="请输入密码"
+                placeholderTextColor="#9ca3af"
                 secureTextEntry
                 editable={!loading}
               />
@@ -230,6 +273,7 @@ export default function ProfileScreen(): React.JSX.Element {
                 onChangeText={(text) => registerForm.handleChange('username', text)}
                 onBlur={() => registerForm.handleBlur('username')}
                 placeholder="请输入用户名"
+                placeholderTextColor="#9ca3af"
                 autoCapitalize="none"
                 editable={!loading}
               />
@@ -243,6 +287,7 @@ export default function ProfileScreen(): React.JSX.Element {
                 onChangeText={(text) => registerForm.handleChange('email', text)}
                 onBlur={() => registerForm.handleBlur('email')}
                 placeholder="请输入邮箱"
+                placeholderTextColor="#9ca3af"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 editable={!loading}
@@ -257,6 +302,7 @@ export default function ProfileScreen(): React.JSX.Element {
                 onChangeText={(text) => registerForm.handleChange('password', text)}
                 onBlur={() => registerForm.handleBlur('password')}
                 placeholder="请输入密码（至少6位）"
+                placeholderTextColor="#9ca3af"
                 secureTextEntry
                 editable={!loading}
               />
@@ -277,18 +323,27 @@ export default function ProfileScreen(): React.JSX.Element {
         )}
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+    backgroundColor: '#f9fafb',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f9fafb',
+  },
+  scrollView: {
+    flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
     padding: 16,
+    paddingBottom: 24, // 额外的底部间距
   },
   loadingContainer: {
     flex: 1,
@@ -422,13 +477,17 @@ const styles = StyleSheet.create({
     color: '#374151',
   },
   input: {
-    paddingVertical: 12,
+    height: 48,
     paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: '#d1d5db',
     borderRadius: 8,
     fontSize: 16,
     color: '#111827',
+    backgroundColor: '#ffffff',
+    // Android 特殊处理
+    textAlignVertical: 'center',
+    includeFontPadding: false,
   },
   submitButton: {
     backgroundColor: '#8b5cf6',

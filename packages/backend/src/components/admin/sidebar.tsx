@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { drizzleAuthClient } from '@/lib/auth/drizzle-client'
-import { APP_CONFIG } from '@lyricnote/shared'
+import { useAuth } from '@lyricnote/shared'
+import { apiClient } from '@/lib/auth/api-client'
+import { APP_CONFIG, Analytics, webAdapter } from '@lyricnote/shared'
 import {
   Settings,
   Users,
@@ -86,6 +87,18 @@ const menuItems: MenuItem[] = [
         icon: Smartphone,
         href: '/admin/config?category=mobile',
         description: 'Expo构建配置'
+      },
+      {
+        title: '埋点数据分析',
+        icon: BarChart3,
+        href: '/admin/config?category=analytics',
+        description: '用户行为数据分析'
+      },
+      {
+        title: '开发者调试',
+        icon: Settings,
+        href: '/admin/config?category=developer',
+        description: '日志和埋点输出控制'
       }
     ]
   }
@@ -95,18 +108,96 @@ export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { logout } = useAuth(apiClient)
   const [collapsed, setCollapsed] = useState(false)
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['内容管理', '系统管理'])
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [analytics, setAnalytics] = useState<Analytics | null>(null)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  const handleLogout = async () => {
+  // 初始化埋点 SDK
+  useEffect(() => {
+    const analyticsInstance = new Analytics({
+      appId: 'lyricnote-admin',
+      serverUrl: '/api/analytics/events',
+      platform: 'web',
+      adapter: webAdapter,
+      enableAutoPageView: true,
+      appVersion: '1.0.0',
+    })
+    
+    // 设置用户信息
+    if (user) {
+      analyticsInstance.setUser({
+        userId: user.id,
+        email: user.email || '',
+        role: user.role,
+      })
+    }
+    
+    setAnalytics(analyticsInstance)
+  }, [user])
+
+  const handleLogoutClick = () => {
+    // 显示确认对话框
+    setShowLogoutConfirm(true)
+    
+    // 记录退出登录按钮点击埋点
+    analytics?.track('logout_button_clicked', {
+      userId: user?.id,
+      userRole: user?.role,
+      location: 'sidebar',
+    })
+  }
+
+  const handleLogoutConfirm = async () => {
     try {
-      await drizzleAuthClient.signOut()
+      setIsLoggingOut(true)
+      
+      // 记录退出登录开始埋点
+      analytics?.track('user_logout_initiated', {
+        userId: user?.id,
+        email: user?.email,
+        userRole: user?.role,
+        logoutMethod: 'manual',
+      })
+      
+      // 使用统一的 logout 方法
+      await logout()
+      
+      // 记录退出登录成功埋点（客户端）
+      analytics?.track('user_logout_success', {
+        userId: user?.id,
+        email: user?.email,
+        userRole: user?.role,
+        logoutMethod: 'manual',
+      })
+      
       router.push('/admin/login')
     } catch (error) {
       console.error('退出登录失败:', error)
+      
+      // 记录退出登录失败埋点
+      analytics?.track('user_logout_error', {
+        userId: user?.id,
+        errorMessage: error instanceof Error ? error.message : String(error),
+      })
+      
       // 即使退出失败也跳转到登录页
       router.push('/admin/login')
+    } finally {
+      setIsLoggingOut(false)
+      setShowLogoutConfirm(false)
     }
+  }
+
+  const handleLogoutCancel = () => {
+    setShowLogoutConfirm(false)
+    
+    // 记录取消退出登录埋点
+    analytics?.track('logout_cancelled', {
+      userId: user?.id,
+    })
   }
 
   const toggleGroup = (title: string) => {
@@ -278,17 +369,69 @@ export function Sidebar({ user }: SidebarProps) {
       <div className="p-4 border-t border-gray-200">
         <Button
           variant="ghost"
-          onClick={handleLogout}
+          onClick={handleLogoutClick}
+          disabled={isLoggingOut}
           className={cn(
             "w-full justify-start text-red-600 transition-all duration-200",
             "hover:text-red-700 hover:bg-red-50 hover:border-r-2 hover:border-red-300",
-            collapsed && "justify-center"
+            collapsed && "justify-center",
+            isLoggingOut && "opacity-50 cursor-not-allowed"
           )}
         >
           <LogOut className="h-4 w-4" />
-          {!collapsed && <span className="ml-2">退出登录</span>}
+          {!collapsed && <span className="ml-2">{isLoggingOut ? '退出中...' : '退出登录'}</span>}
         </Button>
       </div>
+
+      {/* 退出登录确认对话框 */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={handleLogoutCancel}>
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 p-6 animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <LogOut className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">确认退出登录</h3>
+                <p className="text-sm text-gray-500">您确定要退出管理后台吗？</p>
+              </div>
+            </div>
+            
+            <div className="bg-gray-50 rounded-lg p-3 mb-4">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-600">当前用户：</span>
+                <span className="font-medium text-gray-900">{user?.email || user?.username}</span>
+                <Badge variant="secondary" className="ml-auto">{user?.role}</Badge>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={handleLogoutCancel}
+                disabled={isLoggingOut}
+                className="flex-1"
+              >
+                取消
+              </Button>
+              <Button
+                onClick={handleLogoutConfirm}
+                disabled={isLoggingOut}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+              >
+                {isLoggingOut ? (
+                  <span className="flex items-center gap-2">
+                    <span className="animate-spin">⏳</span>
+                    退出中...
+                  </span>
+                ) : (
+                  '确认退出'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

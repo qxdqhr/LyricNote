@@ -163,6 +163,20 @@ export class BaseApiClient {
     if (response.success && response.data) {
       await this.setToken(response.data.token)
       await this.setUser(response.data.user)
+      
+      // 客户端埋点 - 登录成功
+      // 注意：客户端需要自己初始化 Analytics 并调用 track
+      // 这里只是提供数据，具体埋点由使用方决定
+      if (typeof window !== 'undefined') {
+        // 可以通过事件通知使用方
+        window.dispatchEvent(new CustomEvent('user_login_success', {
+          detail: {
+            userId: response.data.user.id,
+            email: response.data.user.email,
+            role: response.data.user.role,
+          }
+        }))
+      }
     }
 
     return response

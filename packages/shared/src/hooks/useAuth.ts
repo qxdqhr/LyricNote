@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect, useCallback } from 'react'
 import type { User } from '../types'
 import type { BaseApiClient } from '../api/base-api-client'
@@ -46,35 +48,6 @@ export interface UseAuthReturn {
   clearError: () => void
 }
 
-/**
- * 统一的认证 Hook
- * 
- * 用于管理用户认证状态和操作，消除各端重复的登录逻辑
- * 
- * @param apiClient - API 客户端实例
- * @returns 认证状态和操作方法
- * 
- * @example
- * ```typescript
- * import { useAuth } from '@lyricnote/shared/hooks/useAuth'
- * import { apiService } from '@/services/api'
- * 
- * function ProfilePage() {
- *   const { user, isLoggedIn, loading, login, logout } = useAuth(apiService)
- *   
- *   const handleLogin = async () => {
- *     const result = await login(email, password)
- *     if (result.success) {
- *       alert('登录成功')
- *     } else {
- *       alert(result.error)
- *     }
- *   }
- *   
- *   // ... UI 渲染
- * }
- * ```
- */
 export function useAuth(apiClient: BaseApiClient): UseAuthReturn {
   const [user, setUser] = useState<User | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)

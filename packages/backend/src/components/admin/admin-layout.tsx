@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Bell, Search, Settings } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { drizzleAuthClient } from '@/lib/auth/drizzle-client'
-import { APP_CONFIG } from '@lyricnote/shared'
+import { apiClient } from '@/lib/auth/api-client'
+import { Analytics, APP_CONFIG, webAdapter, useAuth } from '@lyricnote/shared'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -24,50 +24,71 @@ type User = {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [analytics, setAnalytics] = useState<Analytics | null>(null)
   const router = useRouter()
   const pathname = usePathname()
+  
+  // 使用统一的 useAuth Hook
+  const { user, isLoggedIn, checkingAuth: loading } = useAuth(apiClient)
 
+  // 初始化埋点 SDK
   useEffect(() => {
-    // 使用 Drizzle 认证检查认证状态
-    const checkAuth = async () => {
-      try {
-        // 首先检查本地存储
-        if (!drizzleAuthClient.isAuthenticated()) {
-          router.push('/admin/login')
-          return
-        }
+    const analyticsInstance = new Analytics({
+      appId: 'lyricnote-admin',
+      serverUrl: '/api/analytics/events',
+      platform: 'web',
+      appVersion: '1.0.0',
+      adapter: webAdapter,
+      enableAutoPageView: false, // 手动控制页面浏览埋点
+      debug: process.env.NODE_ENV === 'development',
+    })
+    
+    setAnalytics(analyticsInstance)
+  }, [])
 
-        // 验证服务器端会话
-        const { data, error } = await drizzleAuthClient.getSession()
-        
-        if (error || !data?.user) {
-          console.error('会话验证失败:', error)
-          router.push('/admin/login')
-          return
-        }
-
-        const user = data.user
-        // 检查管理员权限
-        if (!['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-          console.error('权限不足:', user.role)
-          router.push('/admin/login')
-          return
-        }
-
-        setUser(user)
-      } catch (error) {
-        console.error('认证检查失败:', error)
+  // 检查认证状态和权限
+  useEffect(() => {
+    if (!loading && analytics) {
+      if (!isLoggedIn || !user) {
         router.push('/admin/login')
         return
-      } finally {
-        setLoading(false)
       }
-    }
 
-    checkAuth()
-  }, [router])
+      // 检查管理员权限
+      if (!['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
+        console.error('权限不足:', user.role)
+        router.push('/admin/login')
+        return
+      }
+
+      // 设置用户信息到埋点
+      analytics.setUser({
+        userId: user.id,
+        email: user.email || '',
+        role: user.role,
+      })
+      
+      // 记录进入管理员界面埋点
+      analytics.track('admin_dashboard_entered', {
+        userId: user.id,
+        userRole: user.role,
+        entryPath: window.location.pathname,
+        entryTime: new Date().toISOString(),
+      })
+    }
+  }, [loading, isLoggedIn, user, router, analytics])
+
+  // 页面切换埋点
+  useEffect(() => {
+    if (user && analytics && pathname) {
+      analytics.track('admin_page_view', {
+        pagePath: pathname,
+        pageTitle: getPageTitle(),
+        userId: user.id,
+        userRole: user.role,
+      })
+    }
+  }, [pathname, user, analytics])
 
   // 获取页面标题
   const getPageTitle = () => {

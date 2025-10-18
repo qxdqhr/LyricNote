@@ -16,5 +16,14 @@ export * from './hooks'
 // 导出日志系统
 export * from './logger'
 
+// 导出埋点系统
+export * from './analytics'
+
+// 导出平台适配器
+export * from './adapters'
+
+// 导出业务逻辑
+export * from './business'
+
 // 版本信息
 export const SHARED_VERSION = '1.0.0'

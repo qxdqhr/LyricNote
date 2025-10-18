@@ -20,8 +20,10 @@ import {
   Check,
   AlertTriangle,
   Eye,
-  EyeOff
+  EyeOff,
+  BarChart3
 } from 'lucide-react'
+import { AnalyticsDashboard } from '@lyricnote/shared/analytics/components'
 
 interface ConfigItem {
   key: string
@@ -72,10 +74,208 @@ const CONFIG_CATEGORIES = {
     icon: Smartphone, 
     description: 'Expo移动端构建配置',
     color: 'text-orange-600 bg-orange-100'
+  },
+  analytics: { 
+    name: '埋点数据分析', 
+    icon: BarChart3, 
+    description: '查看和分析用户行为数据',
+    color: 'text-indigo-600 bg-indigo-100'
+  },
+  developer: { 
+    name: '开发者调试', 
+    icon: Settings, 
+    description: '日志和埋点输出控制',
+    color: 'text-gray-600 bg-gray-100'
   }
 } as const
 
 type ConfigCategoryKey = keyof typeof CONFIG_CATEGORIES
+
+// 开发者调试配置组件
+function DeveloperDebugConfig() {
+  const [loggerDebug, setLoggerDebug] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('logger-debug') === 'true'
+    }
+    return false
+  })
+  
+  const [analyticsDebug, setAnalyticsDebug] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('analytics-debug') === 'true'
+    }
+    return false
+  })
+  
+  const [saved, setSaved] = useState(false)
+
+  const handleLoggerDebugChange = (enabled: boolean) => {
+    setLoggerDebug(enabled)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('logger-debug', enabled.toString())
+      // 触发自定义事件，通知其他组件配置已更改
+      window.dispatchEvent(new CustomEvent('logger-debug-changed', { detail: { enabled } }))
+    }
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  const handleAnalyticsDebugChange = (enabled: boolean) => {
+    setAnalyticsDebug(enabled)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('analytics-debug', enabled.toString())
+      // 触发自定义事件，通知其他组件配置已更改
+      window.dispatchEvent(new CustomEvent('analytics-debug-changed', { detail: { enabled } }))
+    }
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  const clearAllLogs = () => {
+    if (typeof window !== 'undefined') {
+      console.clear()
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
+                <Settings className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle>开发者调试配置</CardTitle>
+                <CardDescription>
+                  控制日志库和埋点库在浏览器控制台的输出
+                </CardDescription>
+              </div>
+            </div>
+            {saved && (
+              <Badge variant="default" className="bg-green-600">
+                <Check className="h-3 w-3 mr-1" />
+                已保存
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* 日志调试开关 */}
+          <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-medium text-gray-900">日志调试模式</span>
+                <Badge variant={loggerDebug ? "default" : "secondary"} className="text-xs">
+                  {loggerDebug ? "已启用" : "已关闭"}
+                </Badge>
+              </div>
+              <p className="text-sm text-gray-600">
+                启用后，日志库会将所有日志输出到浏览器控制台（包括 info、warn、error 等级别）
+              </p>
+            </div>
+            <button
+              onClick={() => handleLoggerDebugChange(!loggerDebug)}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ml-4 ${
+                loggerDebug ? 'bg-purple-600' : 'bg-gray-200'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  loggerDebug ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* 埋点调试开关 */}
+          <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-medium text-gray-900">埋点调试模式</span>
+                <Badge variant={analyticsDebug ? "default" : "secondary"} className="text-xs">
+                  {analyticsDebug ? "已启用" : "已关闭"}
+                </Badge>
+              </div>
+              <p className="text-sm text-gray-600">
+                启用后，埋点库会将所有事件信息输出到浏览器控制台（包括事件追踪、上传等）
+              </p>
+            </div>
+            <button
+              onClick={() => handleAnalyticsDebugChange(!analyticsDebug)}
+              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ml-4 ${
+                analyticsDebug ? 'bg-indigo-600' : 'bg-gray-200'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  analyticsDebug ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* 清除控制台按钮 */}
+          <div className="flex items-center justify-between p-4 rounded-lg border border-amber-200 bg-amber-50">
+            <div className="flex-1">
+              <span className="font-medium text-gray-900 block mb-1">清除控制台日志</span>
+              <p className="text-sm text-gray-600">
+                清空浏览器控制台中的所有日志输出
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={clearAllLogs}
+              className="ml-4 border-amber-300 hover:bg-amber-100"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              清除
+            </Button>
+          </div>
+
+          {/* 提示信息 */}
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>注意：</strong>这些设置保存在浏览器本地存储中，仅影响当前浏览器。
+              在生产环境中，建议关闭调试模式以提高性能。
+            </AlertDescription>
+          </Alert>
+
+          {/* 当前状态总结 */}
+          <Card className="bg-gray-50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">当前调试状态</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">日志调试：</span>
+                  <Badge variant={loggerDebug ? "default" : "secondary"}>
+                    {loggerDebug ? "开启" : "关闭"}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">埋点调试：</span>
+                  <Badge variant={analyticsDebug ? "default" : "secondary"}>
+                    {analyticsDebug ? "开启" : "关闭"}
+                  </Badge>
+                </div>
+                <Separator className="my-2" />
+                <div className="text-xs text-gray-500">
+                  按 F12 或 Cmd+Option+I (Mac) 打开开发者工具查看控制台输出
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
 
 function ConfigManagementContent() {
   const searchParams = useSearchParams()
@@ -319,6 +519,14 @@ function ConfigManagementContent() {
               </p>
             </CardContent>
           </Card>
+        ) : activeCategory === 'analytics' ? (
+          // 埋点数据分析特殊处理
+          <div className="space-y-6">
+            <AnalyticsDashboard apiBaseUrl="/api/analytics" />
+          </div>
+        ) : activeCategory === 'developer' ? (
+          // 开发者调试配置特殊处理
+          <DeveloperDebugConfig />
         ) : !configs[activeCategory] ? (
           <Card>
             <CardContent className="p-6 text-center">

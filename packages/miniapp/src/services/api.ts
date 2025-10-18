@@ -3,9 +3,8 @@
  * 使用 shared 包的统一 API 客户端 + Miniapp 平台适配器
  */
 
-import { BaseApiClient } from '@lyricnote/shared'
-import { MiniappStorageAdapter } from '../adapters/storage'
-import { MiniappRequestAdapter } from '../adapters/request'
+import Taro from '@tarojs/taro'
+import { BaseApiClient, ApiMiniappStorageAdapter, ApiMiniappRequestAdapter } from '@lyricnote/shared'
 
 // API 配置
 const API_BASE_URL = process.env.TARO_APP_API_URL || 'http://localhost:3000/api'
@@ -14,8 +13,8 @@ const API_BASE_URL = process.env.TARO_APP_API_URL || 'http://localhost:3000/api'
  * 创建 Miniapp 端 API 客户端实例
  */
 const apiClient = new BaseApiClient(
-  new MiniappStorageAdapter(),
-  new MiniappRequestAdapter(),
+  new ApiMiniappStorageAdapter(Taro),  // 注入 Taro 实例
+  new ApiMiniappRequestAdapter(Taro),  // 注入 Taro 实例
   API_BASE_URL
 )
 

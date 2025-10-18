@@ -8,40 +8,38 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, Mail, Lock, Eye, EyeOff, TestTube, Zap, Info, Copy } from 'lucide-react'
-import { drizzleAuthClient } from '@/lib/auth/drizzle-client'
-import { APP_TITLES, APP_CONFIG } from '@lyricnote/shared'
+import { APP_TITLES, APP_CONFIG, Analytics, webAdapter, useAuth } from '@lyricnote/shared'
+import { apiClient } from '@/lib/auth/api-client'
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
   const [isDevelopment, setIsDevelopment] = useState(false)
   const [autoFilled, setAutoFilled] = useState(false)
+  const [analytics, setAnalytics] = useState<Analytics | null>(null)
   const router = useRouter()
+  
+  // 使用统一的 useAuth Hook
+  const { user, isLoggedIn, loading: isLoading, error: authError, login, clearError } = useAuth(apiClient)
+  
+  // 本地错误状态
+  const [localError, setLocalError] = useState('')
+  const error = authError || localError
 
   // 检查登录状态
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      // 检查本地存储是否有 token
-      if (drizzleAuthClient.isAuthenticated()) {
-        // 验证服务器端会话
-        const { data, error } = await drizzleAuthClient.getSession()
-        
-        if (data?.user && ['ADMIN', 'SUPER_ADMIN'].includes(data.user.role)) {
-          console.log('用户已登录，跳转到管理后台')
-          router.push('/admin/config')
-          router.refresh()
-          return
-        }
+    if (isLoggedIn && user) {
+      // 检查用户角色权限
+      if (['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
+        console.log('用户已登录，跳转到管理后台')
+        router.push('/admin/config')
+        router.refresh()
       }
     }
+  }, [isLoggedIn, user, router])
 
-    checkLoginStatus()
-  }, [router])
-
-  // 检测开发环境
+  // 检测开发环境和初始化埋点
   useEffect(() => {
     const isDevEnv = process.env.NODE_ENV === 'development' || 
                      window.location.hostname === 'localhost' ||
@@ -50,6 +48,24 @@ export default function AdminLogin() {
                      window.location.port === '3004'
     setIsDevelopment(isDevEnv)
     console.log('isDevEnv', isDevEnv)
+    
+    // 初始化埋点 SDK
+    const analyticsInstance = new Analytics({
+      appId: 'lyricnote-admin',
+      appVersion: '1.0.0',
+      serverUrl: '/api/analytics/events',
+      platform: 'web',
+      adapter: webAdapter,
+      enableAutoPageView: false, // 登录页面不需要自动页面浏览跟踪
+    })
+    setAnalytics(analyticsInstance)
+    
+    // 记录页面访问埋点
+    analyticsInstance.track('page_view', {
+      pageName: 'admin_login_page',
+      pageUrl: window.location.pathname,
+    })
+    
     // 开发环境下自动填充（可选）
     if (isDevEnv && !email && !password) {
       // 延迟自动填充，给用户一个选择的机会
@@ -69,7 +85,7 @@ export default function AdminLogin() {
   const fillTestAccount = () => {
     setEmail('admin@lyricnote.local')
     setPassword('admin123')
-    setError('')
+    setLocalError('')
     setAutoFilled(true)
   }
 
@@ -86,44 +102,78 @@ export default function AdminLogin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-    setError('')
+    setLocalError('')
+    clearError()
 
     try {
-      // 使用 Drizzle 认证进行登录
-      const { data, error } = await drizzleAuthClient.signIn(email, password)
+      // 使用统一的 login 方法
+      const result = await login(email, password)
 
-      console.log('Drizzle 认证登录响应:', { data, error })
-
-      if (error) {
-        console.error('登录失败:', error)
-        setError(error)
+      if (!result.success) {
+        console.error('登录失败:', result.error)
+        setLocalError(result.error || '登录失败')
+        
+        // 记录登录失败埋点
+        analytics?.track('user_login_failed', {
+          errorType: 'login_error',
+          email: email,
+          errorMessage: result.error,
+        })
         return
       }
 
-      if (data?.user) {
-        const user = data.user
-        // 检查用户角色权限
-        if (!['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-          setError('访问被拒绝：需要管理员权限')
-          return
-        }
-
-        console.log('登录成功，用户信息:', user.email, user.role)
-        
-        // Drizzle 认证已自动保存 token 和用户信息到 localStorage
-        router.push('/admin/config')
-        router.refresh()
-      } else {
-        setError('登录失败：未获取到用户信息')
-      }
+      // 登录成功后，user 会通过 useAuth 自动更新
+      // 检查将在 useEffect 中处理
+      
     } catch (err) {
       console.error('Login error:', err)
-      setError('登录失败：网络错误或服务器错误')
-    } finally {
-      setIsLoading(false)
+      setLocalError('登录失败：网络错误或服务器错误')
+      
+      // 记录登录异常埋点
+      analytics?.track('user_login_error', {
+        errorType: 'network_or_server_error',
+        errorMessage: err instanceof Error ? err.message : String(err),
+        email: email,
+      })
     }
   }
+  
+  // 监听用户登录后的角色检查和埋点
+  useEffect(() => {
+    if (user && isLoggedIn) {
+      // 检查用户角色权限
+      if (!['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
+        setLocalError('访问被拒绝：需要管理员权限')
+        
+        // 记录权限拒绝埋点
+        analytics?.track('login_permission_denied', {
+          email: user.email,
+          userRole: user.role,
+          requiredRole: 'ADMIN or SUPER_ADMIN',
+        })
+        
+        return
+      }
+
+      console.log('登录成功，用户信息:', user.email, user.role)
+      
+      // 记录登录成功埋点（客户端）
+      analytics?.track('user_login_success', {
+        userId: user.id,
+        email: user.email,
+        userRole: user.role,
+        loginMethod: 'email_password',
+        loginPage: 'admin_login',
+      })
+      
+      // 设置用户信息到埋点 SDK
+      analytics?.setUser({
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      })
+    }
+  }, [user, isLoggedIn, analytics])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 flex items-center justify-center px-4">

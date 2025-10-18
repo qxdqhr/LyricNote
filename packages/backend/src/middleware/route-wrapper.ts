@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth, type AuthLevel, type RouteHandler, type RouteContext } from './auth'
 import { withApiErrorHandling } from './error'
+import { withLogging, type LoggingOptions } from './logging'
 
 /**
  * 路由配置选项
@@ -10,6 +11,8 @@ export interface RouteOptions {
   auth?: AuthLevel
   /** 是否启用错误处理（默认 true） */
   errorHandling?: boolean
+  /** 日志配置（默认启用基础日志） */
+  logging?: boolean | LoggingOptions
 }
 
 /**
@@ -52,19 +55,26 @@ export function createRoute(
   const {
     auth = 'none',
     errorHandling = true,
+    logging = true,
   } = options
 
   // 包装业务逻辑
   let wrappedHandler = handler
 
-  // 应用认证中间件
+  // 1. 应用认证中间件
   if (auth && auth !== 'none') {
     wrappedHandler = withAuth(wrappedHandler, auth)
   }
 
-  // 应用错误处理中间件
+  // 2. 应用错误处理中间件
   if (errorHandling) {
     wrappedHandler = withApiErrorHandling(wrappedHandler)
+  }
+
+  // 3. 应用日志中间件（最外层，确保记录所有请求）
+  if (logging) {
+    const loggingOptions = typeof logging === 'boolean' ? {} : logging
+    wrappedHandler = withLogging(wrappedHandler, loggingOptions)
   }
 
   // 返回 Next.js 路由处理器
@@ -112,4 +122,5 @@ export function createPublicRoute(
 ): (request: NextRequest, context?: any) => Promise<NextResponse> {
   return createRoute(handler, { auth: 'none' })
 }
+
 

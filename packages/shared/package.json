@@ -10,6 +10,16 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./analytics/server": {
+      "types": "./dist/analytics/server/index.d.ts",
+      "import": "./dist/analytics/server/index.js",
+      "default": "./dist/analytics/server/index.js"
+    },
+    "./analytics/components": {
+      "types": "./dist/analytics/components/index.d.ts",
+      "import": "./dist/analytics/components/index.js",
+      "default": "./dist/analytics/components/index.js"
     }
   },
   "scripts": {
@@ -23,6 +33,7 @@
     "typescript": "^5.0.0"
   },
   "peerDependencies": {
+    "react": ">=18.0.0",
     "typescript": "^5.0.0"
   }
 }
