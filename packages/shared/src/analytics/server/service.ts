@@ -53,7 +53,9 @@ export function createAnalyticsService(
       try {
         if (events.length === 0) return;
 
-        await db.insert(analyticsEvents).values(events);
+        // 使用 onConflictDoNothing 来忽略重复的事件 ID
+        // 这样可以避免前端重试或离线队列导致的重复插入
+        await db.insert(analyticsEvents).values(events).onConflictDoNothing();
         
         logger.info('Analytics events inserted', { count: events.length });
       } catch (error) {

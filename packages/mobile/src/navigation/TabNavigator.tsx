@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { TabParamList } from '../types';
 import { UI_TEXT } from '@lyricnote/shared';
 import HomeScreen from '../screens/HomeScreen';
+import AITestScreen from '../screens/AITestScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -17,6 +18,8 @@ export default function TabNavigator(): React.JSX.Element {
 
           if (route.name === 'Home') {
             iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'AITest') {
+            iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           } else {
@@ -43,6 +46,13 @@ export default function TabNavigator(): React.JSX.Element {
         component={HomeScreen}
         options={{
           tabBarLabel: UI_TEXT.navigation.home,
+        }}
+      />
+      <Tab.Screen
+        name="AITest"
+        component={AITestScreen}
+        options={{
+          tabBarLabel: 'AI测试',
         }}
       />
       <Tab.Screen

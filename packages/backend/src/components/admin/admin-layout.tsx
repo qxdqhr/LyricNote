@@ -8,7 +8,7 @@ import { Bell, Search, Settings } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { apiClient } from '@/lib/auth/api-client'
-import { Analytics, APP_CONFIG, webAdapter, useAuth } from '@lyricnote/shared'
+import { APP_CONFIG, useAuth, type Analytics, getWebAdminAnalytics } from '@lyricnote/shared'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -24,27 +24,12 @@ type User = {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const [analytics, setAnalytics] = useState<Analytics | null>(null)
+  const [analytics] = useState<Analytics>(() => getWebAdminAnalytics())
   const router = useRouter()
   const pathname = usePathname()
   
   // 使用统一的 useAuth Hook
   const { user, isLoggedIn, checkingAuth: loading } = useAuth(apiClient)
-
-  // 初始化埋点 SDK
-  useEffect(() => {
-    const analyticsInstance = new Analytics({
-      appId: 'lyricnote-admin',
-      serverUrl: '/api/analytics/events',
-      platform: 'web',
-      appVersion: '1.0.0',
-      adapter: webAdapter,
-      enableAutoPageView: false, // 手动控制页面浏览埋点
-      debug: process.env.NODE_ENV === 'development',
-    })
-    
-    setAnalytics(analyticsInstance)
-  }, [])
 
   // 检查认证状态和权限
   useEffect(() => {
@@ -134,7 +119,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex overflow-hidden">
       {/* 侧边栏 */}
       <Suspense fallback={
         <div className="w-64 bg-white border-r border-gray-200 flex items-center justify-center">
@@ -145,9 +130,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       </Suspense>
       
       {/* 主内容区域 */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* 顶部导航栏 */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <header className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{getPageTitle()}</h1>
@@ -196,13 +181,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </div>
         </header>
         
-        {/* 页面内容 */}
-        <main className="flex-1 overflow-auto">
+        {/* 页面内容 - 可滚动 */}
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
         
         {/* 底部状态栏 */}
-        <footer className="bg-white border-t border-gray-200 px-6 py-3">
+        <footer className="bg-white border-t border-gray-200 px-6 py-3 flex-shrink-0">
           <div className="flex items-center justify-between text-xs text-gray-500">
             <div className="flex items-center space-x-4">
               <span>{APP_CONFIG.copyright}</span>

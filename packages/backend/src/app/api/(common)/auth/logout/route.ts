@@ -61,10 +61,16 @@ export async function POST(request: NextRequest) {
       console.error('Failed to track logout analytics:', analyticsError)
     }
 
-    return NextResponse.json({
+    // 创建响应
+    const response = NextResponse.json({
       success: true,
       message: '登出成功'
     })
+
+    // 🔐 清除 httpOnly Cookie
+    response.cookies.delete('auth_token')
+
+    return response
 
   } catch (error) {
     console.error('Logout error:', error)

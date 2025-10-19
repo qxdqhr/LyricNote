@@ -21,7 +21,10 @@ import {
   AlertTriangle,
   Eye,
   EyeOff,
-  BarChart3
+  BarChart3,
+  Plus,
+  X,
+  Trash2
 } from 'lucide-react'
 import { AnalyticsDashboard } from '@lyricnote/shared/analytics/components'
 
@@ -291,6 +294,16 @@ function ConfigManagementContent() {
   const [validationResults, setValidationResults] = useState<Record<string, any>>({})
   const [showSensitive, setShowSensitive] = useState<Record<string, boolean>>({})
   const [showAllSensitive, setShowAllSensitive] = useState(false)
+  // 添加配置
+  const [showAddConfig, setShowAddConfig] = useState(false)
+  const [newConfigKey, setNewConfigKey] = useState('')
+  const [newConfigValue, setNewConfigValue] = useState('')
+  const [newConfigDescription, setNewConfigDescription] = useState('')
+  const [newConfigIsSensitive, setNewConfigIsSensitive] = useState(false)
+  // 删除配置
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{ key: string } | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   // 获取认证token
   const getAuthToken = () => {
@@ -313,6 +326,15 @@ function ConfigManagementContent() {
         }
       })
 
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Token 过期，跳转到登录页
+          window.location.href = '/admin/login'
+          return
+        }
+        throw new Error(`HTTP ${response.status}`)
+      }
+
       const data = await response.json()
 
       if (data.success) {
@@ -325,6 +347,105 @@ function ConfigManagementContent() {
       setError('网络错误，请重试')
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 添加新配置
+  const addNewConfig = async () => {
+    if (!newConfigKey.trim()) {
+      setError('请输入配置键名')
+      return
+    }
+    if (!newConfigValue.trim()) {
+      setError('请输入配置值')
+      return
+    }
+
+    try {
+      setSaving(true)
+      const token = getAuthToken()
+
+      const response = await fetch(`/api/admin/config/${activeCategory}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          configs: {
+            [newConfigKey]: newConfigValue
+          }
+        })
+      })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Token 过期，跳转到登录页
+          window.location.href = '/admin/login'
+          return
+        }
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        setSuccess(`成功添加配置：${newConfigKey}`)
+        setError('')
+        setShowAddConfig(false)
+        setNewConfigKey('')
+        setNewConfigValue('')
+        setNewConfigDescription('')
+        setNewConfigIsSensitive(false)
+        await loadConfigs()
+      } else {
+        setError(data.error || '添加配置失败')
+      }
+    } catch (error) {
+      setError(`网络错误：${error instanceof Error ? error.message : '请重试'}`)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // 删除配置
+  const deleteConfig = async (key: string) => {
+    try {
+      setDeleting(true)
+      const token = getAuthToken()
+
+      const response = await fetch(`/api/admin/config?key=${encodeURIComponent(key)}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Token 过期，跳转到登录页
+          window.location.href = '/admin/login'
+          return
+        }
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        setSuccess(`成功删除配置：${key}`)
+        setError('')
+        await loadConfigs()
+      } else {
+        setError(data.error || '删除配置失败')
+      }
+    } catch (error) {
+      setError('网络错误，请重试')
+    } finally {
+      setDeleting(false)
+      setShowDeleteConfirm(false)
+      setDeleteTarget(null)
     }
   }
 
@@ -361,6 +482,15 @@ function ConfigManagementContent() {
         },
         body: JSON.stringify({ configs: filteredConfigs })
       })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Token 过期，跳转到登录页
+          window.location.href = '/admin/login'
+          return
+        }
+        throw new Error(`HTTP ${response.status}`)
+      }
 
       const data = await response.json()
 
@@ -408,6 +538,15 @@ function ConfigManagementContent() {
         },
         body: JSON.stringify({ category, configs: configsToValidate })
       })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Token 过期，跳转到登录页
+          window.location.href = '/admin/login'
+          return
+        }
+        throw new Error(`HTTP ${response.status}`)
+      }
 
       const data = await response.json()
 
@@ -550,6 +689,16 @@ function ConfigManagementContent() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
+                  {/* 添加配置按钮 */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAddConfig(true)}
+                    className="border-green-300 text-green-700 hover:bg-green-50"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    添加配置项
+                  </Button>
                   {/* 全局敏感信息开关 */}
                   {Object.values(configs[activeCategory]).some(config => config.isSensitive) && (
                     <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200">
@@ -608,7 +757,7 @@ function ConfigManagementContent() {
               {Object.entries(configs[activeCategory]).map(([key, config]) => (
                 <div key={key} className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1">
                       <label className="text-sm font-medium text-gray-900">
                         {config.description || key}
                         {config.isRequired && <span className="text-red-500 ml-1">*</span>}
@@ -616,6 +765,21 @@ function ConfigManagementContent() {
                       <p className="text-xs text-gray-500 mt-1">键名: {key}</p>
                     </div>
                     <div className="flex items-center space-x-2">
+                      {/* 删除按钮 */}
+                      {!config.readonly && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setDeleteTarget({ key })
+                            setShowDeleteConfirm(true)
+                          }}
+                          className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                          title="删除配置"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                       {config.readonly && (
                         <Badge variant="outline" className="text-xs text-blue-600 border-blue-300">
                           📖 只读
@@ -742,6 +906,189 @@ function ConfigManagementContent() {
               )}
             </CardContent>
           </Card>
+        )}
+
+        {/* 添加配置对话框 */}
+        {showAddConfig && (
+          <div 
+            className="fixed inset-0 bg-clear bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowAddConfig(false)
+              }
+            }}
+          >
+            <Card className="w-full max-w-md shadow-xl bg-white">
+              <CardHeader className="border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      <Plus className="h-5 w-5 text-purple-600" />
+                      添加配置项
+                    </CardTitle>
+                    <CardDescription className="mt-1">
+                      手动添加配置到 {CONFIG_CATEGORIES[activeCategory as ConfigCategoryKey]?.name}
+                    </CardDescription>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAddConfig(false)}
+                    className="h-8 w-8 p-0 hover:bg-gray-200 rounded-full"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 bg-white space-y-4">
+                {/* 配置键名 */}
+                <div>
+                  <label className="text-sm font-medium text-gray-900 block mb-2">
+                    配置键名 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={newConfigKey}
+                    onChange={(e) => setNewConfigKey(e.target.value)}
+                    placeholder="例如：ai_model_url"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    配置的唯一标识符，建议使用小写字母和下划线
+                  </p>
+                </div>
+
+                {/* 配置值 */}
+                <div>
+                  <label className="text-sm font-medium text-gray-900 block mb-2">
+                    配置值 <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={newConfigValue}
+                    onChange={(e) => setNewConfigValue(e.target.value)}
+                    placeholder="请输入配置值"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  />
+                </div>
+
+                {/* 配置描述 (可选) */}
+                <div>
+                  <label className="text-sm font-medium text-gray-900 block mb-2">
+                    配置描述 <span className="text-gray-400">(可选)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={newConfigDescription}
+                    onChange={(e) => setNewConfigDescription(e.target.value)}
+                    placeholder="简要描述此配置的用途"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  />
+                </div>
+
+                {/* 敏感信息标记 */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="isSensitive"
+                    checked={newConfigIsSensitive}
+                    onChange={(e) => setNewConfigIsSensitive(e.target.checked)}
+                    className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                  />
+                  <label htmlFor="isSensitive" className="text-sm text-gray-700 cursor-pointer">
+                    标记为敏感信息（密钥、密码等）
+                  </label>
+                </div>
+
+                {/* 按钮 */}
+                <div className="flex justify-end gap-3 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAddConfig(false)}
+                    disabled={saving}
+                  >
+                    取消
+                  </Button>
+                  <Button
+                    onClick={addNewConfig}
+                    disabled={saving || !newConfigKey.trim() || !newConfigValue.trim()}
+                    className="bg-purple-600 hover:bg-purple-700"
+                  >
+                    {saving ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        添加中...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        确认添加
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* 删除确认对话框 */}
+        {showDeleteConfirm && deleteTarget && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <Card className="w-full max-w-md bg-white shadow-xl">
+              <CardHeader className="border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-full bg-red-100">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">确认删除</CardTitle>
+                    <CardDescription>此操作无法撤销</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <p className="text-sm text-gray-700 mb-2">
+                  您确定要删除以下配置吗？
+                </p>
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="text-sm font-mono text-gray-900 break-all">
+                    {deleteTarget.key}
+                  </p>
+                </div>
+
+                <div className="flex justify-end gap-3 mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowDeleteConfirm(false)
+                      setDeleteTarget(null)
+                    }}
+                    disabled={deleting}
+                  >
+                    取消
+                  </Button>
+                  <Button
+                    onClick={() => deleteConfig(deleteTarget.key)}
+                    disabled={deleting}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    {deleting ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        删除中...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        确认删除
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </AdminLayout>

@@ -36,6 +36,7 @@ export class WebRequestAdapter implements RequestAdapter {
         ...headers,
       },
       body: body ? JSON.stringify(body) : undefined,
+      credentials: 'include', // 🔐 自动发送和接收 Cookie（支持 httpOnly Cookie 认证）
     })
 
     // 解析响应

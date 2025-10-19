@@ -17,6 +17,9 @@ export * from './adapters/mobile';
 export * from './adapters/miniapp';
 export * from './adapters/desktop';
 
+// 客户端单例和预设
+export * from './client';
+
 // 工具函数
 export * from './utils/helpers';
 export * from './utils/decorators';

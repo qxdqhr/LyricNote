@@ -1,6 +1,5 @@
 import { getConfig } from '@/lib/config/config-service'
 import { db } from '@/lib/drizzle/db'
-import { aiProcessLogs } from '../../drizzle/migrations/schema'
 import { gte, lte, eq, sql } from 'drizzle-orm'
 import crypto from 'crypto'
 import { aiLogger } from '@/lib/logger'
@@ -271,67 +270,12 @@ ${japaneseText}`
     return results
   }
 
-  private async logAIProcess(logData: {
-    type: string
-    inputData: any
-    outputData: any
-    apiProvider: string
-    tokens: number
-    duration: number
-    status: string
-    error?: string
-  }): Promise<void> {
-    try {
-      
-      await db.insert(aiProcessLogs).values({
-        id: crypto.randomBytes(16).toString('hex'),
-        type: logData.type,
-        inputData: logData.inputData,
-        outputData: logData.outputData,
-        apiProvider: logData.apiProvider,
-        tokens: logData.tokens,
-        cost: this.calculateCost(logData.tokens, logData.apiProvider),
-        duration: logData.duration,
-        status: logData.status,
-        error: logData.error,
-        createdAt: new Date().toISOString()
-      })
-    } catch (error) {
-      aiLogger.error('Failed to log AI process', error instanceof Error ? error : new Error(String(error)))
-    }
-  }
-
   private calculateCost(tokens: number, provider: string): number {
     // DeepSeek 的价格计算（示例价格）
     if (provider === 'DeepSeek') {
       return tokens * 0.00002 // 假设每 token 0.00002 元
     }
     return 0
-  }
-
-  // 获取 AI 使用统计
-  async getUsageStats(startDate: Date, endDate: Date): Promise<any> {
-    try {
-      // 使用 Drizzle 的 SQL 查询来实现 groupBy 功能
-      const stats = await db.execute(sql`
-        SELECT 
-          type,
-          "apiProvider",
-          SUM(tokens) as tokens_sum,
-          SUM(cost) as cost_sum,
-          COUNT(id) as count,
-          AVG(duration) as duration_avg
-        FROM ${aiProcessLogs}
-        WHERE "createdAt" >= ${startDate.toISOString()}
-          AND "createdAt" <= ${endDate.toISOString()}
-        GROUP BY type, "apiProvider"
-      `)
-
-      return stats.rows || []
-    } catch (error) {
-      aiLogger.error('Failed to get AI usage stats', error instanceof Error ? error : new Error(String(error)))
-      return []
-    }
   }
 }
 

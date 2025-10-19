@@ -8,9 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { useAuth } from '@lyricnote/shared'
+import { useAuth, APP_CONFIG, type Analytics, getWebAdminAnalytics } from '@lyricnote/shared'
 import { apiClient } from '@/lib/auth/api-client'
-import { APP_CONFIG, Analytics, webAdapter } from '@lyricnote/shared'
 import {
   Settings,
   Users,
@@ -112,30 +111,19 @@ export function Sidebar({ user }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['内容管理', '系统管理'])
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
-  const [analytics, setAnalytics] = useState<Analytics | null>(null)
+  const [analytics] = useState<Analytics>(() => getWebAdminAnalytics())
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  // 初始化埋点 SDK
+  // 设置用户信息
   useEffect(() => {
-    const analyticsInstance = new Analytics({
-      appId: 'lyricnote-admin',
-      serverUrl: '/api/analytics/events',
-      platform: 'web',
-      adapter: webAdapter,
-      enableAutoPageView: true,
-      appVersion: '1.0.0',
-    })
-    
-    // 设置用户信息
-    if (user) {
-      analyticsInstance.setUser({
+    if (user && analytics) {
+      analytics.setUser({
         userId: user.id,
         email: user.email || '',
         role: user.role,
       })
     }
-    
-    setAnalytics(analyticsInstance)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   const handleLogoutClick = () => {

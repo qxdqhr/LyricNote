@@ -15,6 +15,48 @@
       "when": 1760756066488,
       "tag": "0001_public_makkari",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760837974566,
+      "tag": "0002_happy_gamora",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1760838791261,
+      "tag": "0003_dusty_roxanne_simpson",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1760838835857,
+      "tag": "0004_yielding_nitro",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1760838970951,
+      "tag": "0005_nostalgic_doomsday",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1760876328990,
+      "tag": "0006_mute_vampiro",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1760885687484,
+      "tag": "0007_wet_moondragon",
+      "breakpoints": true
     }
   ]
 }

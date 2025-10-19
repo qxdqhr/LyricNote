@@ -31,6 +31,9 @@ export interface ConfigItem {
   isSensitive: boolean
   description?: string
   defaultValue?: any
+  group?: string  // 配置分组
+  isGroupTemplate?: boolean  // 是否为组模板（可多次实例化）
+  groupFields?: string[]  // 组内字段列表（用于多实例配置）
 }
 
 export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
@@ -44,7 +47,8 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
       isRequired: false,
       isSensitive: false,
       description: '数据库连接池大小',
-      defaultValue: 10
+      defaultValue: 10,
+      group: '连接池配置'
     },
     {
       key: 'database_query_timeout',
@@ -54,7 +58,8 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
       isRequired: false,
       isSensitive: false,
       description: '数据库查询超时时间（毫秒）',
-      defaultValue: 30000
+      defaultValue: 30000,
+      group: '连接池配置'
     },
     {
       key: 'enable_query_logging',
@@ -64,7 +69,8 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
       isRequired: false,
       isSensitive: false,
       description: '启用数据库查询日志',
-      defaultValue: false
+      defaultValue: false,
+      group: '连接池配置'
     },
     {
       key: 'auto_backup_enabled',
@@ -74,7 +80,8 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
       isRequired: false,
       isSensitive: false,
       description: '启用自动备份',
-      defaultValue: true
+      defaultValue: true,
+      group: '备份配置'
     },
     {
       key: 'backup_retention_days',
@@ -84,7 +91,8 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
       isRequired: false,
       isSensitive: false,
       description: '备份保留天数',
-      defaultValue: 30
+      defaultValue: 30,
+      group: '备份配置'
     },
     {
       key: 'redis_cache_ttl',
@@ -94,7 +102,8 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
       isRequired: false,
       isSensitive: false,
       description: 'Redis缓存默认过期时间（秒）',
-      defaultValue: 3600
+      defaultValue: 3600,
+      group: '缓存配置'
     }
   ],
 
@@ -107,7 +116,8 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
       type: ConfigType.STRING,
       isRequired: true,
       isSensitive: false,
-      description: 'OSS服务端点'
+      description: 'OSS服务端点',
+      group: 'OSS基础配置'
     },
     {
       key: 'oss_region',
@@ -117,7 +127,8 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
       isRequired: true,
       isSensitive: false,
       description: 'OSS区域',
-      defaultValue: 'cn-hangzhou'
+      defaultValue: 'cn-hangzhou',
+      group: 'OSS基础配置'
     },
     {
       key: 'oss_bucket_name',
@@ -126,7 +137,8 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
       type: ConfigType.STRING,
       isRequired: true,
       isSensitive: false,
-      description: 'OSS存储桶名称'
+      description: 'OSS存储桶名称',
+      group: 'OSS基础配置'
     },
     {
       key: 'oss_access_key_id',
@@ -135,7 +147,8 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
       type: ConfigType.STRING,
       isRequired: true,
       isSensitive: false,
-      description: 'OSS访问密钥ID'
+      description: 'OSS访问密钥ID',
+      group: 'OSS认证配置'
     },
     {
       key: 'oss_access_key_secret',
@@ -144,7 +157,8 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
       type: ConfigType.STRING,
       isRequired: true,
       isSensitive: true,
-      description: 'OSS访问密钥Secret'
+      description: 'OSS访问密钥Secret',
+      group: 'OSS认证配置'
     },
     {
       key: 'upload_max_size',
@@ -154,50 +168,52 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
       isRequired: false,
       isSensitive: false,
       description: '最大上传文件大小（字节）',
-      defaultValue: 10485760
+      defaultValue: 10485760,
+      group: '上传配置'
     }
   ],
 
   // AI服务配置
   [ConfigCategory.AI_SERVICE]: [
     {
-      key: 'deepseek_api_key',
+      key: 'ai_model_api_key',
       value: '',
       category: ConfigCategory.AI_SERVICE,
       type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: true,
-      description: 'DeepSeek API密钥'
+      isRequired: false,
+      isSensitive: false,
+      description: 'AI模型API密钥',
+      group: '主模型配置'
     },
     {
-      key: 'deepseek_base_url',
-      value: 'https://api.deepseek.com/v1',
+      key: 'ai_model_api_base_url',
+      value: '',
       category: ConfigCategory.AI_SERVICE,
       type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: false,
-      description: 'DeepSeek API基础URL',
-      defaultValue: 'https://api.deepseek.com/v1'
-    },
-    {
-      key: 'ai_request_timeout',
-      value: 30000,
-      category: ConfigCategory.AI_SERVICE,
-      type: ConfigType.NUMBER,
       isRequired: false,
       isSensitive: false,
-      description: 'AI请求超时时间（毫秒）',
-      defaultValue: 30000
+      description: 'AI模型API基础URL',
+      group: '主模型配置'
     },
     {
-      key: 'enable_ai_cache',
-      value: true,
+      key: 'ai_model_name',
+      value: '',
       category: ConfigCategory.AI_SERVICE,
-      type: ConfigType.BOOLEAN,
+      type: ConfigType.STRING,
       isRequired: false,
       isSensitive: false,
-      description: '启用AI响应缓存',
-      defaultValue: true
+      description: 'AI模型名称',
+      group: '主模型配置'
+    },
+    {
+      key: 'ai_model_description',
+      value: '',
+      category: ConfigCategory.AI_SERVICE,
+      type: ConfigType.STRING,
+      isRequired: false,
+      isSensitive: false,
+      description: 'AI模型描述',
+      group: '主模型配置'
     }
   ],
 

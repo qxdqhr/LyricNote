@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminRoute } from '@/middleware'
 import { getConfigService, ConfigCategory } from '../../../../../../lib/config/config-service'
 import { db } from '../../../../../../lib/drizzle/db'
-import { aiProcessLogs } from '../../../../../../../drizzle/migrations/schema'
 import crypto from 'crypto'
 
 // GET /api/admin/config/[category] - 获取分类下的配置
@@ -71,19 +70,6 @@ export const POST = createAdminRoute(async (request, context) => {
   if (configs.jwt_secret) {
     console.log('🔑 JWT 密钥已更新，Better-Auth 会自动处理')
   }
-
-  // 记录操作日志
-  await db.insert(aiProcessLogs).values({
-    id: crypto.randomBytes(16).toString('hex'),
-    type: 'config_category_update',
-    inputData: { category, configKeys: Object.keys(configs) },
-    outputData: { success: true, updatedCount: Object.keys(configs).length },
-    apiProvider: 'system',
-    tokens: 0,
-    cost: 0,
-    duration: 0,
-    status: 'success'
-  })
 
   return NextResponse.json({
     success: true,

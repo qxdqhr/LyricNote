@@ -192,20 +192,22 @@ export class DrizzleAuthService {
   }
 }
 
-// 中间件辅助函数
+// 中间件辅助函数：从请求中获取 token（优先 Cookie，兼容 Header）
 export function getTokenFromRequest(request: Request): string | null {
-  const authHeader = request.headers.get('Authorization')
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    return authHeader.substring(7)
-  }
-  
-  // 也可以从 cookie 中获取
+  // 🔐 优先从 httpOnly Cookie 读取（管理后台，更安全）
   const cookieHeader = request.headers.get('Cookie')
   if (cookieHeader) {
-    const match = cookieHeader.match(/auth-token=([^;]+)/)
+    // 匹配 auth_token（下划线，标准键名）
+    const match = cookieHeader.match(/auth_token=([^;]+)/)
     if (match) {
       return match[1]
     }
+  }
+  
+  // 🔄 兼容从 Authorization Header 读取（移动端、小程序、API 调用）
+  const authHeader = request.headers.get('Authorization')
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.substring(7)
   }
   
   return null

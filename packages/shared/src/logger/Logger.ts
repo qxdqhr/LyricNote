@@ -65,6 +65,15 @@ export class Logger {
       return
     }
 
+    // 检查动态调试配置（仅在浏览器环境）
+    if (typeof window !== 'undefined') {
+      const loggerDebug = localStorage.getItem('logger-debug');
+      // 如果明确设置为 false，则不输出（但 Error 级别始终输出）
+      if (loggerDebug === 'false' && level < LogLevel.ERROR) {
+        return;
+      }
+    }
+
     const entry: LogEntry = {
       level,
       message,

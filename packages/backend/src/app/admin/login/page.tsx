@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, Mail, Lock, Eye, EyeOff, TestTube, Zap, Info, Copy } from 'lucide-react'
-import { APP_TITLES, APP_CONFIG, Analytics, webAdapter, useAuth } from '@lyricnote/shared'
+import { APP_TITLES, APP_CONFIG, useAuth, type Analytics, getWebAdminAnalytics } from '@lyricnote/shared'
 import { apiClient } from '@/lib/auth/api-client'
 
 export default function AdminLogin() {
@@ -17,7 +17,7 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false)
   const [isDevelopment, setIsDevelopment] = useState(false)
   const [autoFilled, setAutoFilled] = useState(false)
-  const [analytics, setAnalytics] = useState<Analytics | null>(null)
+  const [analytics] = useState<Analytics>(() => getWebAdminAnalytics())
   const router = useRouter()
   
   // 使用统一的 useAuth Hook
@@ -39,7 +39,7 @@ export default function AdminLogin() {
     }
   }, [isLoggedIn, user, router])
 
-  // 检测开发环境和初始化埋点
+  // 检测开发环境和初始化
   useEffect(() => {
     const isDevEnv = process.env.NODE_ENV === 'development' || 
                      window.location.hostname === 'localhost' ||
@@ -47,21 +47,9 @@ export default function AdminLogin() {
                      window.location.port === '3000' ||
                      window.location.port === '3004'
     setIsDevelopment(isDevEnv)
-    console.log('isDevEnv', isDevEnv)
-    
-    // 初始化埋点 SDK
-    const analyticsInstance = new Analytics({
-      appId: 'lyricnote-admin',
-      appVersion: '1.0.0',
-      serverUrl: '/api/analytics/events',
-      platform: 'web',
-      adapter: webAdapter,
-      enableAutoPageView: false, // 登录页面不需要自动页面浏览跟踪
-    })
-    setAnalytics(analyticsInstance)
     
     // 记录页面访问埋点
-    analyticsInstance.track('page_view', {
+    analytics.track('page_view', {
       pageName: 'admin_login_page',
       pageUrl: window.location.pathname,
     })
@@ -79,7 +67,8 @@ export default function AdminLogin() {
       
       return () => clearTimeout(timer)
     }
-  }, [email, password])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // 手动填充测试账户信息
   const fillTestAccount = () => {

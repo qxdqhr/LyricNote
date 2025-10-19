@@ -21,19 +21,9 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   
-  // Security headers
-  async headers() {
-    return [
-      {
-        source: '/api/:path*',
-        headers: [
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, DELETE, OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
-        ],
-      },
-    ]
-  },
+  // CORS 配置已移至路由级别（见 src/lib/cors.ts）
+  // 这样可以根据不同的 API 精确控制 CORS，并支持 credentials
+  // 全局通配符 '*' 与 credentials: 'include' 不兼容
   
   // Environment variables
   env: {

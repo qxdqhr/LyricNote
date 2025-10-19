@@ -1,11 +1,11 @@
 import crypto from 'crypto'
 import { db } from '../drizzle/db'
-import { systemConfigs } from '../../../drizzle/migrations/schema'
+import { systemConfigs, configMetadata } from '../../../drizzle/migrations/schema'
 import { eq } from 'drizzle-orm'
-import { NEW_CONFIG_TEMPLATES } from './config-templates-new'
 import { configLogger } from '../logger'
+import { NEW_CONFIG_TEMPLATES } from './config-templates-new'
 
-// 导出新的配置模板作为默认配置模板  
+// 临时保留模板用于过渡
 export const CONFIG_TEMPLATES = NEW_CONFIG_TEMPLATES
 
 // 配置分类枚举
@@ -39,276 +39,44 @@ export interface ConfigItem {
   defaultValue?: any
 }
 
-// 配置模板定义（已废弃，数据库连接配置已移至环境变量）
-export const LEGACY_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
-  [ConfigCategory.DATABASE]: [
-    {
-      key: 'postgres_host',
-      value: 'localhost',
-      category: ConfigCategory.DATABASE,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: false,
-      description: 'PostgreSQL服务器地址',
-      defaultValue: 'localhost'
-    },
-    {
-      key: 'postgres_port', 
-      value: 5432,
-      category: ConfigCategory.DATABASE,
-      type: ConfigType.NUMBER,
-      isRequired: true,
-      isSensitive: false,
-      description: 'PostgreSQL端口号',
-      defaultValue: 5432
-    },
-    {
-      key: 'postgres_database',
-      value: 'lyricnote',
-      category: ConfigCategory.DATABASE,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: false,
-      description: 'PostgreSQL数据库名',
-      defaultValue: 'lyricnote'
-    },
-    {
-      key: 'postgres_username',
-      value: 'lyricnote',
-      category: ConfigCategory.DATABASE,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: false,
-      description: 'PostgreSQL用户名',
-      defaultValue: 'lyricnote'
-    },
-    {
-      key: 'postgres_password',
-      value: '',
-      category: ConfigCategory.DATABASE,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: true,
-      description: 'PostgreSQL密码'
-    },
-    {
-      key: 'redis_host',
-      value: 'localhost',
-      category: ConfigCategory.DATABASE,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: false,
-      description: 'Redis服务器地址',
-      defaultValue: 'localhost'
-    },
-    {
-      key: 'redis_port',
-      value: 6379,
-      category: ConfigCategory.DATABASE,
-      type: ConfigType.NUMBER,
-      isRequired: true,
-      isSensitive: false,
-      description: 'Redis端口号',
-      defaultValue: 6379
-    },
-    {
-      key: 'redis_password',
-      value: '',
-      category: ConfigCategory.DATABASE,
-      type: ConfigType.STRING,
-      isRequired: false,
-      isSensitive: true,
-      description: 'Redis密码'
-    }
-  ],
-  
-  [ConfigCategory.STORAGE]: [
-    {
-      key: 'aliyun_oss_access_key_id',
-      value: '',
-      category: ConfigCategory.STORAGE,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: true,
-      description: '阿里云OSS访问密钥ID'
-    },
-    {
-      key: 'aliyun_oss_access_key_secret',
-      value: '',
-      category: ConfigCategory.STORAGE,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: true,
-      description: '阿里云OSS访问密钥Secret'
-    },
-    {
-      key: 'aliyun_oss_bucket',
-      value: 'lyricnote-prod',
-      category: ConfigCategory.STORAGE,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: false,
-      description: '阿里云OSS存储桶名称',
-      defaultValue: 'lyricnote-prod'
-    },
-    {
-      key: 'aliyun_oss_region',
-      value: 'oss-cn-hangzhou',
-      category: ConfigCategory.STORAGE,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: false,
-      description: '阿里云OSS区域',
-      defaultValue: 'oss-cn-hangzhou'
-    }
-  ],
-  
-  [ConfigCategory.AI_SERVICE]: [
-    {
-      key: 'deepseek_api_key',
-      value: '',
-      category: ConfigCategory.AI_SERVICE,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: true,
-      description: 'DeepSeek API密钥'
-    },
-    {
-      key: 'deepseek_api_url',
-      value: 'https://api.deepseek.com',
-      category: ConfigCategory.AI_SERVICE,
-      type: ConfigType.STRING,
-      isRequired: false,
-      isSensitive: false,
-      description: 'DeepSeek API地址',
-      defaultValue: 'https://api.deepseek.com'
-    },
-    {
-      key: 'deepseek_model',
-      value: 'deepseek-chat',
-      category: ConfigCategory.AI_SERVICE,
-      type: ConfigType.STRING,
-      isRequired: false,
-      isSensitive: false,
-      description: 'DeepSeek模型名称',
-      defaultValue: 'deepseek-chat'
-    }
-  ],
-  
-  [ConfigCategory.SECURITY]: [
-    {
-      key: 'jwt_secret',
-      value: '',
-      category: ConfigCategory.SECURITY,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: true,
-      description: 'JWT密钥'
-    },
-    {
-      key: 'nextauth_secret',
-      value: '',
-      category: ConfigCategory.SECURITY,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: true,
-      description: 'NextAuth密钥'
-    },
-    {
-      key: 'session_timeout',
-      value: 86400,
-      category: ConfigCategory.SECURITY,
-      type: ConfigType.NUMBER,
-      isRequired: false,
-      isSensitive: false,
-      description: '会话超时时间(秒)',
-      defaultValue: 86400
-    },
-    {
-      key: 'rate_limit_requests',
-      value: 100,
-      category: ConfigCategory.SECURITY,
-      type: ConfigType.NUMBER,
-      isRequired: false,
-      isSensitive: false,
-      description: '每分钟最大请求数',
-      defaultValue: 100
-    }
-  ],
-  
-  [ConfigCategory.MOBILE]: [
-    {
-      key: 'expo_token',
-      value: '',
-      category: ConfigCategory.MOBILE,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: true,
-      description: 'Expo访问令牌'
-    },
-    {
-      key: 'expo_username',
-      value: '',
-      category: ConfigCategory.MOBILE,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: false,
-      description: 'Expo用户名'
-    },
-    {
-      key: 'expo_project_id',
-      value: '',
-      category: ConfigCategory.MOBILE,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: false,
-      description: 'Expo项目ID'
-    }
-  ],
-  
-  [ConfigCategory.SYSTEM]: [
-    {
-      key: 'domain',
-      value: 'qhr062.top',
-      category: ConfigCategory.SYSTEM,
-      type: ConfigType.STRING,
-      isRequired: true,
-      isSensitive: false,
-      description: '系统域名',
-      defaultValue: 'qhr062.top'
-    },
-    {
-      key: 'app_name',
-      value: 'LyricNote',
-      category: ConfigCategory.SYSTEM,
-      type: ConfigType.STRING,
-      isRequired: false,
-      isSensitive: false,
-      description: '应用名称',
-      defaultValue: 'LyricNote'
-    },
-    {
-      key: 'app_version',
-      value: '1.0.0',
-      category: ConfigCategory.SYSTEM,
-      type: ConfigType.STRING,
-      isRequired: false,
-      isSensitive: false,
-      description: '应用版本',
-      defaultValue: '1.0.0'
-    }
-  ]
-}
-
 // 配置管理服务类
 export class ConfigService {
   private configCache: Map<string, any> = new Map()
+  private metadataCache: Map<string, {
+    category: string
+    type: ConfigType
+    isSensitive: boolean
+    isRequired: boolean
+    defaultDescription?: string
+  }> = new Map()
   private encryptionKey: string
   
   constructor() {
     // 使用环境变量或默认密钥作为加密密钥
     this.encryptionKey = process.env.CONFIG_ENCRYPTION_KEY || 'lyricnote-config-key-2024'
     this.loadConfigsFromDatabase()
+    this.loadMetadataFromDatabase()
+  }
+  
+  // 从数据库加载元数据
+  private async loadMetadataFromDatabase() {
+    try {
+      const metadata = await db.select().from(configMetadata)
+      metadata.forEach((meta) => {
+        this.metadataCache.set(meta.key, {
+          category: meta.category,
+          type: meta.type as ConfigType,
+          isSensitive: meta.isSensitive,
+          isRequired: meta.isRequired,
+          defaultDescription: meta.defaultDescription || undefined
+        })
+      })
+      configLogger.info(`已加载 ${metadata.length} 条配置元数据`)
+    } catch (error) {
+      // 如果表不存在，使用模板作为后备
+      configLogger.warn('配置元数据表不存在，使用模板数据', error instanceof Error ? error.message : String(error))
+      // 不抛出错误，继续使用模板
+    }
   }
 
   // 从数据库加载配置到缓存
@@ -456,14 +224,70 @@ export class ConfigService {
   public async getAllConfigs(): Promise<Record<string, any>> {
     const allConfigs: Record<string, any> = {}
     
+    // 先获取数据库中所有实际存在的配置
+    const dbConfigs = await db.select().from(systemConfigs)
+    const dbConfigKeys = new Set(dbConfigs.map(c => c.key))
+    
     for (const [category, items] of Object.entries(CONFIG_TEMPLATES)) {
       allConfigs[category] = {}
       
       for (const item of items) {
-        const value = await this.getConfig(item.key, item.defaultValue)
-        allConfigs[category][item.key] = {
-          ...item,
-          value: item.isSensitive ? '********' : value // 敏感信息隐藏
+        // 只显示数据库中实际存在的配置
+        if (dbConfigKeys.has(item.key)) {
+          const value = await this.getConfig(item.key, item.defaultValue)
+          allConfigs[category][item.key] = {
+            ...item,
+            value: item.isSensitive ? '' : value, // 敏感信息隐藏
+            isStored: true // 标记为已存储
+          }
+        }
+      }
+    }
+    
+    return allConfigs
+  }
+
+  // 获取分类下可用的配置模板（未添加到数据库的配置项）
+  public async getAvailableTemplates(category: ConfigCategory): Promise<ConfigItem[]> {
+    // 获取数据库中已存在的配置键
+    const dbConfigs = await db.select().from(systemConfigs)
+    const dbConfigKeys = new Set(dbConfigs.map(c => c.key))
+    
+    // 返回该分类下未在数据库中的模板配置
+    const templates = CONFIG_TEMPLATES[category] || []
+    return templates.filter(item => !dbConfigKeys.has(item.key))
+  }
+
+  // 获取所有配置模板（包括已存储和未存储的）
+  public async getAllConfigsWithTemplates(): Promise<Record<string, any>> {
+    const allConfigs: Record<string, any> = {}
+    
+    // 获取数据库中所有实际存在的配置
+    const dbConfigs = await db.select().from(systemConfigs)
+    const dbConfigKeys = new Set(dbConfigs.map(c => c.key))
+    
+    for (const [category, items] of Object.entries(CONFIG_TEMPLATES)) {
+      allConfigs[category] = {
+        stored: {}, // 已存储的配置
+        available: [] // 可添加的配置模板
+      }
+      
+      for (const item of items) {
+        if (dbConfigKeys.has(item.key)) {
+          // 已存储的配置
+          const value = await this.getConfig(item.key, item.defaultValue)
+          allConfigs[category].stored[item.key] = {
+            ...item,
+            value: item.isSensitive ? '' : value,
+            isStored: true
+          }
+        } else {
+          // 未存储的模板
+          allConfigs[category].available.push({
+            ...item,
+            value: item.defaultValue,
+            isStored: false
+          })
         }
       }
     }
@@ -581,48 +405,87 @@ export class ConfigService {
 
   // 私有方法：获取配置类型
   private getConfigType(key: string): ConfigType {
-    for (const items of Object.values(CONFIG_TEMPLATES)) {
-      const item = items.find(i => i.key === key)
-      if (item) return item.type
-    }
-    return ConfigType.STRING
+    const metadata = this.metadataCache.get(key)
+    return metadata?.type || ConfigType.STRING
   }
 
   // 私有方法：获取配置分类
   private getConfigCategory(key: string): ConfigCategory {
-    for (const [category, items] of Object.entries(CONFIG_TEMPLATES)) {
-      if (items.find(i => i.key === key)) {
-        return category as ConfigCategory
-      }
-    }
-    return ConfigCategory.SYSTEM
+    const metadata = this.metadataCache.get(key)
+    return (metadata?.category as ConfigCategory) || ConfigCategory.SYSTEM
   }
 
   // 私有方法：检查是否为敏感配置
   private isSensitiveConfig(key: string): boolean {
-    for (const items of Object.values(CONFIG_TEMPLATES)) {
-      const item = items.find(i => i.key === key)
-      if (item) return item.isSensitive
-    }
-    return false
+    const metadata = this.metadataCache.get(key)
+    return metadata?.isSensitive || false
   }
 
   // 私有方法：检查是否为必需配置
   private isRequiredConfig(key: string): boolean {
-    for (const items of Object.values(CONFIG_TEMPLATES)) {
-      const item = items.find(i => i.key === key)
-      if (item) return item.isRequired
-    }
-    return false
+    const metadata = this.metadataCache.get(key)
+    return metadata?.isRequired || false
   }
 
   // 私有方法：获取配置描述
   private getConfigDescription(key: string): string {
-    for (const items of Object.values(CONFIG_TEMPLATES)) {
-      const item = items.find(i => i.key === key)
-      if (item) return item.description || ''
+    const metadata = this.metadataCache.get(key)
+    return metadata?.defaultDescription || ''
+  }
+  
+  // 新增方法：创建或更新配置元数据
+  public async setConfigMetadata(
+    key: string,
+    category: string,
+    type: ConfigType = ConfigType.STRING,
+    options: {
+      isSensitive?: boolean
+      isRequired?: boolean
+      defaultDescription?: string
+    } = {}
+  ): Promise<void> {
+    try {
+      const now = new Date().toISOString()
+      const existing = await db.select().from(configMetadata).where(eq(configMetadata.key, key)).limit(1)
+      
+      if (existing.length > 0) {
+        await db.update(configMetadata)
+          .set({
+            category,
+            type,
+            isSensitive: options.isSensitive ?? false,
+            isRequired: options.isRequired ?? false,
+            defaultDescription: options.defaultDescription,
+            updatedAt: now
+          })
+          .where(eq(configMetadata.key, key))
+      } else {
+        await db.insert(configMetadata).values({
+          key,
+          category,
+          type,
+          isSensitive: options.isSensitive ?? false,
+          isRequired: options.isRequired ?? false,
+          defaultDescription: options.defaultDescription,
+          createdAt: now,
+          updatedAt: now
+        })
+      }
+      
+      // 更新缓存
+      this.metadataCache.set(key, {
+        category,
+        type,
+        isSensitive: options.isSensitive ?? false,
+        isRequired: options.isRequired ?? false,
+        defaultDescription: options.defaultDescription
+      })
+      
+      configLogger.info(`配置元数据 ${key} 已更新`)
+    } catch (error) {
+      configLogger.error(`设置配置元数据 ${key} 失败`, error instanceof Error ? error : new Error(String(error)))
+      throw error
     }
-    return ''
   }
 }
 

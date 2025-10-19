@@ -8,10 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:dev:generate": "dotenv -e .env.local -- npx drizzle-kit generate",
-    "db:dev:push": "dotenv -e .env.local -- npx drizzle-kit push",
-    "db:prod:generate": "dotenv -e .env.production -- npx drizzle-kit generate",
-    "db:prod:push": "dotenv -e .env.production -- npx drizzle-kit push",
+    "db:dev:generate-push": "dotenv -e .env.local -- npx drizzle-kit generate && dotenv -e .env.local -- npx drizzle-kit push",
+    "db:prod:generatepush": "dotenv -e .env.production -- npx drizzle-kit generate && dotenv -e .env.production -- npx drizzle-kit push",
+    "db:create-admin": "dotenv -e .env.local -- npx tsx scripts/create-admin.ts",
     "mobile:dev": "pnpm --filter @lyricnote/mobile start",
     "miniapp:dev": "pnpm --filter @lyricnote/miniapp dev"
   },

@@ -3,7 +3,6 @@ import { createAdminRoute } from '@/middleware'
 import { getConfigService, ConfigCategory } from '../../../../../lib/config/config-service'
 import { getDatabaseConfigForDisplay } from '../../../../../lib/config/database-config'
 import { db } from '../../../../../lib/drizzle/db'
-import { aiProcessLogs } from '../../../../../../drizzle/migrations/schema'
 import crypto from 'crypto'
 
 // GET /api/admin/config - 获取所有配置

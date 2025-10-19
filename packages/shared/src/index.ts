@@ -23,7 +23,7 @@ export * from './analytics'
 export * from './adapters'
 
 // 导出业务逻辑
-export * from './business'
+export * from './api/business'
 
 // 版本信息
 export const SHARED_VERSION = '1.0.0'
