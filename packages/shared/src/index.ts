@@ -28,15 +28,15 @@ export {
   ElectronStorageAdapter,
   // 网络请求适配器
   WebRequestAdapter,
-  ApiMiniappRequestAdapter
+  MiniappRequestAdapter
 } from './adapters'
 
 // 导出适配器类型（显式导出以避免冲突）
 export type { 
   StorageAdapter,
   StorageChangeEvent,
-  ApiRequestAdapter,
-  ApiRequestConfig 
+  RequestAdapter,
+  RequestConfig 
 } from './adapters'
 
 // 版本信息

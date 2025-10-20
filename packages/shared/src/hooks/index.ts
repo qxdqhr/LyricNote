@@ -2,7 +2,7 @@
  * Hooks 统一导出
  */
 
-export * from './useAuth'
+export * from './auth'
 export * from './storage'
-export * from './useConfigs'
+export * from './config'
 

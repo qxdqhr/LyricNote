@@ -67,7 +67,7 @@ importers:
         version: 0.31.5
       drizzle-orm:
         specifier: ^0.44.5
-        version: 0.44.5(@prisma/client@6.16.2(prisma@6.16.2(typescript@5.9.2))(typescript@5.9.2))(@types/pg@8.15.5)(kysely@0.28.7)(pg@8.16.3)(prisma@6.16.2(typescript@5.9.2))
+        version: 0.44.5(@libsql/client-wasm@0.15.15)(@prisma/client@6.16.2(prisma@6.16.2(typescript@5.9.2))(typescript@5.9.2))(@types/pg@8.15.5)(kysely@0.28.7)(pg@8.16.3)(prisma@6.16.2(typescript@5.9.2))
       ioredis:
         specifier: ^5.7.0
         version: 5.8.0
@@ -412,6 +412,9 @@ importers:
       '@types/react':
         specifier: ~18.2.43
         version: 18.2.79
+      drizzle-orm:
+        specifier: ^0.44.5
+        version: 0.44.5(@libsql/client-wasm@0.15.15)(@prisma/client@6.16.2(prisma@6.16.2(typescript@5.9.2))(typescript@5.9.2))(@types/pg@8.15.5)(kysely@0.28.7)(pg@8.16.3)(prisma@6.16.2(typescript@5.9.2))
       typescript:
         specifier: ^5.0.0
         version: 5.9.2
@@ -2249,6 +2252,14 @@ packages:
 
   '@levischuck/tiny-cbor@0.2.11':
     resolution: {integrity: sha512-llBRm4dT4Z89aRsm6u2oEZ8tfwL/2l6BwpZ7JcyieouniDECM5AqNgr/y08zalEIvW3RSK4upYyybDcmjXqAow==}
+
+  '@libsql/client-wasm@0.15.15':
+    resolution: {integrity: sha512-ah71HHAsywWRSinJg7SKbJc+mTIgw7wHPYLE9DfW79wa+CSQXX1rEbrDNQx0HvHC1YFd2IpVpVASBFlqh54vVA==}
+    bundledDependencies:
+      - '@libsql/libsql-wasm-experimental'
+
+  '@libsql/core@0.15.15':
+    resolution: {integrity: sha512-C88Z6UKl+OyuKKPwz224riz02ih/zHYI3Ho/LAcVOgjsunIRZoBw7fjRfaH9oPMmSNeQfhGklSG2il1URoOIsA==}
 
   '@malept/cross-spawn-promise@1.1.1':
     resolution: {integrity: sha512-RTBGWL5FWQcg9orDOCcp4LvItNzUPcyEU9bwaeJX0rJ1IQxzucC48Y0/sQLp/g6t99IQgAlGIaesJS+gTn7tVQ==}
@@ -7474,6 +7485,9 @@ packages:
   joycon@3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
     engines: {node: '>=10'}
+
+  js-base64@3.7.8:
+    resolution: {integrity: sha512-hNngCeKxIUQiEUN3GPJOkz4wF/YvdUdbNL9hsBcMQTkKzboD7T/q3OYOuuPZLUE6dBxSGpwhk5mwuDud7JVAow==}
 
   js-tokens@3.0.2:
     resolution: {integrity: sha512-RjTcuD4xjtthQkaWH7dFlH85L+QaVtSoOyGdZ3g6HFhS9dFNDfLyqgm2NFe2X6cQpeFmt0452FJjFG5UameExg==}
@@ -13173,6 +13187,17 @@ snapshots:
 
   '@levischuck/tiny-cbor@0.2.11': {}
 
+  '@libsql/client-wasm@0.15.15':
+    dependencies:
+      '@libsql/core': 0.15.15
+      js-base64: 3.7.8
+    optional: true
+
+  '@libsql/core@0.15.15':
+    dependencies:
+      js-base64: 3.7.8
+    optional: true
+
   '@malept/cross-spawn-promise@1.1.1':
     dependencies:
       cross-spawn: 7.0.6
@@ -17103,8 +17128,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.5(@prisma/client@6.16.2(prisma@6.16.2(typescript@5.9.2))(typescript@5.9.2))(@types/pg@8.15.5)(kysely@0.28.7)(pg@8.16.3)(prisma@6.16.2(typescript@5.9.2)):
+  drizzle-orm@0.44.5(@libsql/client-wasm@0.15.15)(@prisma/client@6.16.2(prisma@6.16.2(typescript@5.9.2))(typescript@5.9.2))(@types/pg@8.15.5)(kysely@0.28.7)(pg@8.16.3)(prisma@6.16.2(typescript@5.9.2)):
     optionalDependencies:
+      '@libsql/client-wasm': 0.15.15
       '@prisma/client': 6.16.2(prisma@6.16.2(typescript@5.9.2))(typescript@5.9.2)
       '@types/pg': 8.15.5
       kysely: 0.28.7
@@ -19395,6 +19421,9 @@ snapshots:
   jose@6.1.0: {}
 
   joycon@3.1.1: {}
+
+  js-base64@3.7.8:
+    optional: true
 
   js-tokens@3.0.2: {}
 

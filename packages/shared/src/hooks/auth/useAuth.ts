@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback } from 'react'
-import type { User } from '../types'
-import type { BaseApiClient } from '../api/base-api-client'
+import type { User } from '../../types'
+import type { BaseApiClient } from '../../api/base-api-client'
 
 /**
  * 登录表单数据接口
