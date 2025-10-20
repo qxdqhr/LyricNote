@@ -1,0 +1,64 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+.next
+**/.next
+dist
+**/dist
+
+# Git
+.git
+.gitignore
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS
+.DS_Store
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode
+.idea
+*.sublime-workspace
+*.sublime-project
+
+# TypeScript
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# Testing
+coverage
+.nyc_output
+
+# Cache
+.cache
+.parcel-cache
+
+# Mobile & MiniApp source code (not needed for backend build, but keep package.json)
+packages/mobile/src
+packages/mobile/node_modules
+packages/mobile/dist
+packages/miniapp/src
+packages/miniapp/node_modules
+packages/miniapp/dist
+packages/desktop/src
+packages/desktop/node_modules
+packages/desktop/dist
+
+# Docs
+docs
+
+# Scripts (not needed in container)
+scripts
+
+# GitHub
+.github
+

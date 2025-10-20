@@ -37,6 +37,9 @@ COPY packages/shared ./packages/shared
 # Copy backend package source code
 COPY packages/backend ./packages/backend
 
+# Ensure public directory exists
+RUN mkdir -p /app/packages/backend/public
+
 # Build shared package first
 WORKDIR /app/packages/shared
 RUN pnpm build
