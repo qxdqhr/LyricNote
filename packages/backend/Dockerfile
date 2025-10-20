@@ -1,5 +1,8 @@
-# LyricNote Backend Dockerfile - Simplified for npm
+# LyricNote Backend Dockerfile - pnpm Monorepo
 FROM node:20-alpine AS base
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -7,9 +10,15 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 
-# Copy package files and install with npm
-COPY package.json ./
-RUN npm install
+# Copy workspace configuration
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+
+# Copy all package.json files for workspace
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/backend/package.json ./packages/backend/
+
+# Install dependencies for all workspace packages
+RUN pnpm install --frozen-lockfile
 
 # Build stage
 FROM base AS builder
@@ -17,14 +26,25 @@ WORKDIR /app
 
 # Copy installed dependencies
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages ./packages
 COPY --from=deps /app/package.json ./package.json
+COPY --from=deps /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=deps /app/pnpm-lock.yaml ./pnpm-lock.yaml
 
-# Copy source code (exclude node_modules and other build artifacts)
-COPY . ./
+# Copy shared package source code
+COPY packages/shared ./packages/shared
 
-# Build the application
+# Copy backend package source code
+COPY packages/backend ./packages/backend
+
+# Build shared package first
+WORKDIR /app/packages/shared
+RUN pnpm build
+
+# Build backend
+WORKDIR /app/packages/backend
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+RUN pnpm build
 
 # Production image
 FROM base AS runner
@@ -40,9 +60,10 @@ RUN adduser --system --uid 1001 nextjs
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
-# Copy built files
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Copy built files from backend package
+COPY --from=builder --chown=nextjs:nodejs /app/packages/backend/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/packages/backend/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/packages/backend/public ./public
 
 USER nextjs
 
