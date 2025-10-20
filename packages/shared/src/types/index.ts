@@ -42,20 +42,6 @@ export interface PaginationParams {
   sortOrder?: 'asc' | 'desc'
 }
 
-// AI 处理类型
-export interface AIProcessLog {
-  id: string
-  type: string
-  inputData: Record<string, any>
-  outputData?: Record<string, any>
-  apiProvider: string
-  tokens?: number
-  cost?: number
-  duration?: number
-  status: string
-  error?: string
-  createdAt: string
-}
 
 // 导航类型
 export type RootStackParamList = {

@@ -14,15 +14,6 @@ interface AdminLayoutProps {
   children: React.ReactNode
 }
 
-// 用户类型定义
-type User = {
-  id: string
-  email: string
-  username?: string
-  nickname?: string
-  role: string
-}
-
 export function AdminLayout({ children }: AdminLayoutProps) {
   const [analytics] = useState<Analytics>(() => getWebAdminAnalytics())
   const router = useRouter()

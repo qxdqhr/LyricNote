@@ -402,6 +402,9 @@ importers:
       react:
         specifier: 19.1.0
         version: 19.1.0
+      swr:
+        specifier: ^2.3.6
+        version: 2.3.6(react@19.1.0)
     devDependencies:
       '@types/node':
         specifier: ^20.0.0

@@ -3,4 +3,6 @@
  */
 
 export * from './useAuth'
+export * from './storage'
+export * from './useConfigs'
 

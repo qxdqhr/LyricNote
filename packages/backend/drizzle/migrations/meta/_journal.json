@@ -57,6 +57,13 @@
       "when": 1760885687484,
       "tag": "0007_wet_moondragon",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1760968299079,
+      "tag": "0008_parched_ultimatum",
+      "breakpoints": true
     }
   ]
 }
