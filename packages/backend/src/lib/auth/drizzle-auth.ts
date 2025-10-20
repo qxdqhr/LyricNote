@@ -6,8 +6,26 @@ import { eq, and, gt } from 'drizzle-orm'
 import { randomBytes } from 'crypto'
 
 // JWT 配置
-const JWT_SECRET = process.env.BETTER_AUTH_SECRET || process.env.JWT_SECRET || 'fallback-secret'
+const JWT_SECRET = process.env.BETTER_AUTH_SECRET || process.env.JWT_SECRET
+
+// 安全检查：JWT Secret 必须设置
+if (!JWT_SECRET) {
+  console.error('❌ CRITICAL: JWT_SECRET environment variable is not set!')
+  throw new Error(
+    'JWT_SECRET is required. Please set BETTER_AUTH_SECRET or JWT_SECRET in your .env file. ' +
+    'You can generate a secure secret with: node -e "console.log(require(\'crypto\').randomBytes(64).toString(\'hex\'))"'
+  )
+}
+
+// 检查密钥强度（生产环境）
+if (process.env.NODE_ENV === 'production' && JWT_SECRET.length < 32) {
+  console.error(`❌ CRITICAL: JWT_SECRET is too short (${JWT_SECRET.length} chars, minimum 32 required)`)
+  throw new Error('JWT_SECRET must be at least 32 characters long in production')
+}
+
 const JWT_EXPIRES_IN = '7d'
+
+console.log('✅ JWT configuration loaded successfully')
 
 // 用户认证服务
 export class DrizzleAuthService {

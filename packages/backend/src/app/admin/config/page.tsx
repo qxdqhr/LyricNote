@@ -3,6 +3,8 @@
 import React, { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AdminLayout } from '@/components/admin/admin-layout'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useConfigs } from '@/hooks/useConfigs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -96,27 +98,15 @@ type ConfigCategoryKey = keyof typeof CONFIG_CATEGORIES
 
 // 开发者调试配置组件
 function DeveloperDebugConfig() {
-  const [loggerDebug, setLoggerDebug] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('logger-debug') === 'true'
-    }
-    return false
-  })
-  
-  const [analyticsDebug, setAnalyticsDebug] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('analytics-debug') === 'true'
-    }
-    return false
-  })
+  const [loggerDebug, setLoggerDebug] = useLocalStorage('logger-debug', false)
+  const [analyticsDebug, setAnalyticsDebug] = useLocalStorage('analytics-debug', false)
   
   const [saved, setSaved] = useState(false)
 
   const handleLoggerDebugChange = (enabled: boolean) => {
     setLoggerDebug(enabled)
+    // 触发自定义事件，通知其他组件配置已更改
     if (typeof window !== 'undefined') {
-      localStorage.setItem('logger-debug', enabled.toString())
-      // 触发自定义事件，通知其他组件配置已更改
       window.dispatchEvent(new CustomEvent('logger-debug-changed', { detail: { enabled } }))
     }
     setSaved(true)
@@ -125,9 +115,8 @@ function DeveloperDebugConfig() {
 
   const handleAnalyticsDebugChange = (enabled: boolean) => {
     setAnalyticsDebug(enabled)
+    // 触发自定义事件，通知其他组件配置已更改
     if (typeof window !== 'undefined') {
-      localStorage.setItem('analytics-debug', enabled.toString())
-      // 触发自定义事件，通知其他组件配置已更改
       window.dispatchEvent(new CustomEvent('analytics-debug-changed', { detail: { enabled } }))
     }
     setSaved(true)
@@ -284,8 +273,8 @@ function ConfigManagementContent() {
   const searchParams = useSearchParams()
   const activeCategory = searchParams.get('category') || 'database'
   
-  const [configs, setConfigs] = useState<AllConfigs>({})
-  const [loading, setLoading] = useState(true)
+  // 使用 SWR 缓存配置数据
+  const { configs, isLoading: loading, updateConfigs, refresh } = useConfigs()
   const [saving, setSaving] = useState(false)
   const [validating, setValidating] = useState(false)
   const [editedConfigs, setEditedConfigs] = useState<Record<string, any>>({})
@@ -311,43 +300,6 @@ function ConfigManagementContent() {
       return localStorage.getItem('auth-token')
     }
     return null
-  }
-
-  // 加载配置
-  const loadConfigs = async () => {
-    try {
-      setLoading(true)
-      const token = getAuthToken()
-      
-      const response = await fetch('/api/admin/config', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          // Token 过期，跳转到登录页
-          window.location.href = '/admin/login'
-          return
-        }
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      const data = await response.json()
-
-      if (data.success) {
-        setConfigs(data.data)
-        setError('')
-      } else {
-        setError(data.error || '加载配置失败')
-      }
-    } catch (error) {
-      setError('网络错误，请重试')
-    } finally {
-      setLoading(false)
-    }
   }
 
   // 添加新配置
@@ -397,7 +349,7 @@ function ConfigManagementContent() {
         setNewConfigValue('')
         setNewConfigDescription('')
         setNewConfigIsSensitive(false)
-        await loadConfigs()
+        refresh() // 刷新缓存
       } else {
         setError(data.error || '添加配置失败')
       }
@@ -436,7 +388,7 @@ function ConfigManagementContent() {
       if (data.success) {
         setSuccess(`成功删除配置：${key}`)
         setError('')
-        await loadConfigs()
+        refresh() // 刷新缓存
       } else {
         setError(data.error || '删除配置失败')
       }
@@ -460,7 +412,7 @@ function ConfigManagementContent() {
     // 过滤掉只读配置项
     const filteredConfigs = Object.fromEntries(
       Object.entries(categoryConfigs).filter(([key]) => {
-        const config = configs[category]?.[key]
+        const config = configs?.[category]?.[key]
         return config && !config.readonly
       })
     )
@@ -472,40 +424,16 @@ function ConfigManagementContent() {
 
     try {
       setSaving(true)
-      const token = getAuthToken()
+      setError('')
       
-      const response = await fetch(`/api/admin/config/${category}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ configs: filteredConfigs })
-      })
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          // Token 过期，跳转到登录页
-          window.location.href = '/admin/login'
-          return
-        }
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      const data = await response.json()
-
-      if (data.success) {
-        setSuccess(data.message)
-        setError('')
-        // 清除编辑状态
-        setEditedConfigs(prev => ({ ...prev, [category]: {} }))
-        // 重新加载配置
-        await loadConfigs()
-      } else {
-        setError(data.error || '保存失败')
-      }
+      // 使用 Hook 提供的 updateConfigs（自动处理乐观更新和缓存）
+      await updateConfigs(category, filteredConfigs)
+      
+      setSuccess(`成功保存 ${Object.keys(filteredConfigs).length} 个配置项`)
+      // 清除编辑状态
+      setEditedConfigs(prev => ({ ...prev, [category]: {} }))
     } catch (error) {
-      setError('网络错误，请重试')
+      setError(error instanceof Error ? error.message : '保存失败')
     } finally {
       setSaving(false)
     }
@@ -514,7 +442,7 @@ function ConfigManagementContent() {
   // 验证配置
   const validateConfigs = async (category: string) => {
     const categoryConfigs = editedConfigs[category] || {}
-    const currentConfigs = configs[category] || {}
+    const currentConfigs = configs?.[category] || {}
     
     // 合并当前配置和编辑的配置
     const configsToValidate = { ...currentConfigs }
@@ -579,7 +507,7 @@ function ConfigManagementContent() {
     if (editedConfigs[category] && editedConfigs[category][key] !== undefined) {
       return editedConfigs[category][key]
     }
-    return configs[category]?.[key]?.value || ''
+    return configs?.[category]?.[key]?.value || ''
   }
 
   // 检查是否有未保存的更改
@@ -597,7 +525,7 @@ function ConfigManagementContent() {
     setShowAllSensitive(prev => {
       const newState = !prev
       // 如果设置为显示所有，则更新所有敏感字段的状态
-      if (configs[activeCategory]) {
+      if (configs?.[activeCategory]) {
         const sensitiveKeys = Object.entries(configs[activeCategory])
           .filter(([, config]) => config.isSensitive)
           .map(([key]) => key)
@@ -614,9 +542,7 @@ function ConfigManagementContent() {
     })
   }
 
-  useEffect(() => {
-    loadConfigs()
-  }, [])
+  // SWR 自动加载配置数据，无需手动触发
 
   // 清除消息
   useEffect(() => {
@@ -666,7 +592,7 @@ function ConfigManagementContent() {
         ) : activeCategory === 'developer' ? (
           // 开发者调试配置特殊处理
           <DeveloperDebugConfig />
-        ) : !configs[activeCategory] ? (
+        ) : !configs?.[activeCategory] ? (
           <Card>
             <CardContent className="p-6 text-center">
               <RefreshCw className="h-8 w-8 text-gray-400 mx-auto mb-4 animate-spin" />
@@ -700,7 +626,7 @@ function ConfigManagementContent() {
                     添加配置项
                   </Button>
                   {/* 全局敏感信息开关 */}
-                  {Object.values(configs[activeCategory]).some(config => config.isSensitive) && (
+                  {configs?.[activeCategory] && Object.values(configs[activeCategory]).some(config => config.isSensitive) && (
                     <div className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200">
                       <Shield className="h-3 w-3 text-amber-600" />
                       <span className="text-xs text-amber-700">敏感信息:</span>
@@ -754,7 +680,7 @@ function ConfigManagementContent() {
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              {Object.entries(configs[activeCategory]).map(([key, config]) => (
+              {configs?.[activeCategory] && Object.entries(configs[activeCategory]).map(([key, config]: [string, ConfigItem]) => (
                 <div key={key} className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">

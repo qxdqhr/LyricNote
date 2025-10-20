@@ -1,22 +1,34 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { APP_TITLES } from '@lyricnote/shared'
 
 export default function AdminRedirect() {
   const router = useRouter()
+  const [checking, setChecking] = useState(true)
 
   useEffect(() => {
-    // 检查是否已经登录
-    const token = localStorage.getItem('auth-token')
-    if (token) {
-      // 已登录，直接跳转到仪表板
-      router.replace('/admin/config')
-    } else {
-      // 未登录，跳转到登录页面
-      router.replace('/admin/login')
+    // 异步检查登录状态，不阻塞渲染
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('auth-token')
+        if (token) {
+          // 已登录，直接跳转到仪表板
+          router.replace('/admin/config')
+        } else {
+          // 未登录，跳转到登录页面
+          router.replace('/admin/login')
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+        router.replace('/admin/login')
+      } finally {
+        setChecking(false)
+      }
     }
+    
+    checkAuth()
   }, [router])
 
   // 显示加载状态

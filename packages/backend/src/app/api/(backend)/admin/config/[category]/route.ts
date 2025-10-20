@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminRoute } from '@/middleware'
 import { getConfigService, ConfigCategory } from '../../../../../../lib/config/config-service'
+import { maskConfigs, isMaskedValue } from '../../../../../../lib/config/mask'
 import { db } from '../../../../../../lib/drizzle/db'
 import crypto from 'crypto'
 
@@ -18,12 +19,15 @@ export const GET = createAdminRoute(async (request, context) => {
 
   const configService = getConfigService()
   const configs = await configService.getConfigsByCategory(category as ConfigCategory)
+  
+  // 🔒 对敏感配置进行掩码处理
+  const maskedConfigs = maskConfigs(configs)
 
   return NextResponse.json({
     success: true,
     data: {
       category,
-      configs
+      configs: maskedConfigs
     }
   })
 })
@@ -50,9 +54,31 @@ export const POST = createAdminRoute(async (request, context) => {
   }
 
   const configService = getConfigService()
-
-  // 验证所有配置项
+  
+  // 🔒 获取当前配置（用于检测掩码值）
+  const currentConfigs = await configService.getConfigsByCategory(category as ConfigCategory)
+  
+  // 过滤掉未修改的掩码值
+  const updates: Record<string, any> = {}
+  let skippedCount = 0
+  
   for (const [key, value] of Object.entries(configs)) {
+    const currentConfig = currentConfigs[key]
+    
+    // 如果是敏感配置且值是掩码值（未修改），则跳过
+    if (currentConfig?.isSensitive && typeof value === 'string' && typeof currentConfig.value === 'string') {
+      if (isMaskedValue(value, currentConfig.value)) {
+        console.log(`ℹ️  [Config] Skipping unchanged masked value for ${key}`)
+        skippedCount++
+        continue
+      }
+    }
+    
+    updates[key] = value
+  }
+
+  // 验证要更新的配置项
+  for (const [key, value] of Object.entries(updates)) {
     try {
       configService.validateConfig(key, value)
     } catch (error: any) {
@@ -63,16 +89,23 @@ export const POST = createAdminRoute(async (request, context) => {
     }
   }
 
-  // 批量设置配置
-  await configService.setConfigs(configs)
+  // 批量设置配置（只设置真正修改的配置）
+  if (Object.keys(updates).length > 0) {
+    await configService.setConfigs(updates)
+    console.log(`✅ [Config] Updated ${Object.keys(updates).length} configs in category ${category}`)
+  }
+  
+  if (skippedCount > 0) {
+    console.log(`ℹ️  [Config] Skipped ${skippedCount} unchanged masked values`)
+  }
   
   // JWT 密钥更新由 Better-Auth 自动处理
-  if (configs.jwt_secret) {
+  if (updates.jwt_secret) {
     console.log('🔑 JWT 密钥已更新，Better-Auth 会自动处理')
   }
 
   return NextResponse.json({
     success: true,
-    message: `成功更新分类 ${category} 下的 ${Object.keys(configs).length} 个配置项`
+    message: `成功更新 ${Object.keys(updates).length} 个配置项${skippedCount > 0 ? `（跳过 ${skippedCount} 个未修改的敏感配置）` : ''}`
   })
 })

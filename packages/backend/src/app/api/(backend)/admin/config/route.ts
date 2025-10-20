@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminRoute } from '@/middleware'
 import { getConfigService, ConfigCategory } from '../../../../../lib/config/config-service'
 import { getDatabaseConfigForDisplay } from '../../../../../lib/config/database-config'
+import { maskAllConfigs } from '../../../../../lib/config/mask'
 import { db } from '../../../../../lib/drizzle/db'
 import crypto from 'crypto'
 
@@ -61,9 +62,14 @@ export const GET = createAdminRoute(async (request, context) => {
     }
   }
 
+  // 🔒 对敏感配置进行掩码处理
+  const maskedConfigs = maskAllConfigs(allConfigs)
+  
+  console.log('🔒 Sensitive configs masked for frontend display')
+
   return NextResponse.json({
     success: true,
-    data: allConfigs
+    data: maskedConfigs
   })
 })
 
