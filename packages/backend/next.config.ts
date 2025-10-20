@@ -4,8 +4,8 @@ const nextConfig: NextConfig = {
   // Docker deployment configuration
   output: 'standalone',
   
-  // Workspace configuration
-  outputFileTracingRoot: process.env.NODE_ENV === 'production' ? undefined : '../../',
+  // Workspace configuration (monorepo root for dependency tracing)
+  outputFileTracingRoot: '../../',
   
   // Skip lint and TypeScript checks during build
   eslint: {

@@ -59,14 +59,14 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Copy built files from backend package
+# Copy the standalone output (includes entire monorepo structure)
 COPY --from=builder --chown=nextjs:nodejs /app/packages/backend/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/packages/backend/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/packages/backend/public ./public
+
+# Copy static files to the correct location within the monorepo structure
+COPY --from=builder --chown=nextjs:nodejs /app/packages/backend/.next/static ./packages/backend/.next/static
+
+# Copy public files
+COPY --from=builder --chown=nextjs:nodejs /app/packages/backend/public ./packages/backend/public
 
 USER nextjs
 
@@ -75,5 +75,6 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-# Start the application
+# Start the application from the backend package directory
+WORKDIR /app/packages/backend
 CMD ["node", "server.js"]
