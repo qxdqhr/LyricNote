@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { StorageAdapter } from './types'
+import type { StorageAdapter } from '../../adapters/storage'
 
 export function useStorage<T>(
   storage: StorageAdapter,

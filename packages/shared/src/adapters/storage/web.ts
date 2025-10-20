@@ -2,10 +2,20 @@
  * Web 平台存储适配器 (localStorage)
  */
 
-import type { StorageAdapter } from '../types'
+import type { StorageAdapter } from './types'
+
+/**
+ * 检查是否在浏览器环境中
+ */
+const isBrowser = typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
 
 export class WebStorageAdapter implements StorageAdapter {
   async getItem(key: string): Promise<string | null> {
+    // SSR 环境下返回 null
+    if (!isBrowser) {
+      return null
+    }
+    
     try {
       return localStorage.getItem(key)
     } catch (error) {
@@ -15,6 +25,11 @@ export class WebStorageAdapter implements StorageAdapter {
   }
 
   async setItem(key: string, value: string): Promise<void> {
+    // SSR 环境下静默忽略
+    if (!isBrowser) {
+      return
+    }
+    
     try {
       localStorage.setItem(key, value)
     } catch (error) {
@@ -24,6 +39,11 @@ export class WebStorageAdapter implements StorageAdapter {
   }
 
   async removeItem(key: string): Promise<void> {
+    // SSR 环境下静默忽略
+    if (!isBrowser) {
+      return
+    }
+    
     try {
       localStorage.removeItem(key)
     } catch (error) {
@@ -33,6 +53,11 @@ export class WebStorageAdapter implements StorageAdapter {
   }
 
   async clear(): Promise<void> {
+    // SSR 环境下静默忽略
+    if (!isBrowser) {
+      return
+    }
+    
     try {
       localStorage.clear()
     } catch (error) {
@@ -42,6 +67,11 @@ export class WebStorageAdapter implements StorageAdapter {
   }
 
   addChangeListener(callback: (key: string, value: string | null) => void): () => void {
+    // SSR 环境下返回空函数
+    if (!isBrowser) {
+      return () => {}
+    }
+    
     // 监听 storage 事件（跨标签页）
     const handleStorageEvent = (e: StorageEvent) => {
       if (e.key) {
@@ -69,13 +99,16 @@ export class WebStorageAdapter implements StorageAdapter {
    * 触发自定义事件，通知同标签页的其他组件
    */
   dispatchChange(key: string, value: string | null): void {
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(
-        new CustomEvent('local-storage-change', {
-          detail: { key, value }
-        })
-      )
+    // SSR 环境下静默忽略
+    if (!isBrowser) {
+      return
     }
+    
+    window.dispatchEvent(
+      new CustomEvent('local-storage-change', {
+        detail: { key, value }
+      })
+    )
   }
 }
 

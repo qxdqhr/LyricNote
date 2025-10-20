@@ -3,7 +3,7 @@
  * 使用 shared 包的统一 API 客户端 + Mobile 平台适配器
  */
 
-import { BaseApiClient, ApiMobileStorageAdapter, ApiWebRequestAdapter } from '@lyricnote/shared'
+import { BaseApiClient, ApiMobileStorageAdapter, WebRequestAdapter } from '@lyricnote/shared'
 
 // API 配置
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api'
@@ -13,7 +13,7 @@ const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/a
  */
 const apiClient = new BaseApiClient(
   new ApiMobileStorageAdapter(),  // 注入 AsyncStorage 实例
-  new ApiWebRequestAdapter(),
+  new WebRequestAdapter(),
   API_BASE_URL
 )
 

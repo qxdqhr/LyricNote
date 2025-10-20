@@ -4,7 +4,7 @@
  */
 
 import { useStorage } from './useStorage'
-import { MiniAppStorageAdapter } from './adapters/miniapp'
+import { MiniAppStorageAdapter } from '../../adapters/storage'
 
 // 创建单例适配器
 const taroStorage = new MiniAppStorageAdapter()

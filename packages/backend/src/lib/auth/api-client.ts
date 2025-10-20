@@ -2,12 +2,12 @@
  * 统一的 API 客户端（Backend Web）
  */
 
-import { BaseApiClient, ApiWebStorageAdapter, ApiWebRequestAdapter } from '@lyricnote/shared'
+import { BaseApiClient, WebStorageAdapter, WebRequestAdapter } from '@lyricnote/shared'
 
 // 创建 API 客户端实例
 const apiClient = new BaseApiClient(
-  new ApiWebStorageAdapter(),
-  new ApiWebRequestAdapter(),
+  new WebStorageAdapter(),
+  new WebRequestAdapter(),
   '/api'
 )
 

@@ -2,7 +2,7 @@
  * 小程序平台存储适配器 (wx.storage / Taro.storage)
  */
 
-import type { StorageAdapter } from '../types'
+import type { StorageAdapter } from './types'
 
 // 尝试导入 Taro
 let Taro: any = null
@@ -17,9 +17,8 @@ export class MiniAppStorageAdapter implements StorageAdapter {
   private listeners: Map<string, Set<(key: string, value: string | null) => void>> = new Map()
 
   constructor() {
-    if (!Taro) {
-      console.warn('[MiniAppStorage] Taro is not available. Make sure you are running in a Taro environment.')
-    }
+    // 不在构造函数中警告，因为适配器可能在非小程序环境被导入但不使用
+    // 实际使用时的错误处理已在各个方法中实现
   }
 
   async getItem(key: string): Promise<string | null> {

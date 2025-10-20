@@ -2,7 +2,7 @@
  * React Native 平台存储适配器 (AsyncStorage)
  */
 
-import type { StorageAdapter } from '../types'
+import type { StorageAdapter } from './types'
 
 // 动态导入 AsyncStorage（避免在非 RN 环境报错）
 let AsyncStorage: any = null
@@ -11,16 +11,11 @@ try {
   AsyncStorage = require('@react-native-async-storage/async-storage').default
 } catch (e) {
   // AsyncStorage 不可用（非 React Native 环境）
+  // 这是正常的，不需要警告
 }
 
 export class ReactNativeStorageAdapter implements StorageAdapter {
   private listeners: Map<string, Set<(key: string, value: string | null) => void>> = new Map()
-
-  constructor() {
-    if (!AsyncStorage) {
-      console.warn('[ReactNativeStorage] AsyncStorage is not available. Make sure @react-native-async-storage/async-storage is installed.')
-    }
-  }
 
   async getItem(key: string): Promise<string | null> {
     if (!AsyncStorage) return null

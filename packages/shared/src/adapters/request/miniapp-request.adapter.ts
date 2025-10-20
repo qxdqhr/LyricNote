@@ -1,4 +1,4 @@
-import type { RequestAdapter, RequestConfig } from '../api/request-adapter'
+import type { RequestAdapter, RequestConfig } from './request-adapter'
 
 /**
  * Taro Request 接口定义

@@ -4,7 +4,7 @@
  */
 
 import { useStorage } from './useStorage'
-import { ReactNativeStorageAdapter } from './adapters/react-native'
+import { ReactNativeStorageAdapter } from '../../adapters/storage'
 
 // 创建单例适配器
 const asyncStorage = new ReactNativeStorageAdapter()

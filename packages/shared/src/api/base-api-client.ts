@@ -1,6 +1,6 @@
-import { StorageAdapter } from './storage-adapter'
-import { RequestAdapter, RequestConfig } from './request-adapter'
-import { API_ENDPOINTS, STORAGE_KEYS } from './endpoints'
+import type { StorageAdapter } from '../adapters/storage'
+import type { RequestAdapter, RequestConfig } from '../adapters/request'
+import { API_ROUTES, STORAGE_KEYS } from './API_ROUTES'
 import type { ApiResponse, User } from '../types'
 
 /**
@@ -137,7 +137,7 @@ export class BaseApiClient {
     username: string
   ): Promise<ApiResponse<AuthResponse>> {
     const response = await this.sendRequest<AuthResponse>({
-      url: API_ENDPOINTS.AUTH.REGISTER,
+      url: API_ROUTES.AUTH.REGISTER,
       method: 'POST',
       body: { email, password, username },
     })
@@ -155,7 +155,7 @@ export class BaseApiClient {
    */
   async login(email: string, password: string): Promise<ApiResponse<AuthResponse>> {
     const response = await this.sendRequest<AuthResponse>({
-      url: API_ENDPOINTS.AUTH.LOGIN,
+      url: API_ROUTES.AUTH.LOGIN,
       method: 'POST',
       body: { email, password },
     })
@@ -187,7 +187,7 @@ export class BaseApiClient {
    */
   async logout(): Promise<ApiResponse<void>> {
     const response = await this.sendRequest<void>({
-      url: API_ENDPOINTS.AUTH.LOGOUT,
+      url: API_ROUTES.AUTH.LOGOUT,
       method: 'POST',
     })
 
@@ -202,7 +202,7 @@ export class BaseApiClient {
    */
   async getCurrentUser(): Promise<ApiResponse<User>> {
     const response = await this.sendRequest<any>({
-      url: API_ENDPOINTS.AUTH.ME,
+      url: API_ROUTES.AUTH.ME,
       method: 'GET',
     })
 
@@ -233,7 +233,7 @@ export class BaseApiClient {
     search?: string
   }): Promise<ApiResponse<{ users: User[]; total: number }>> {
     return this.sendRequest({
-      url: API_ENDPOINTS.USERS.LIST,
+      url: API_ROUTES.USERS.LIST,
       method: 'GET',
       params,
     })
@@ -244,7 +244,7 @@ export class BaseApiClient {
    */
   async getUserById(userId: string): Promise<ApiResponse<User>> {
     return this.sendRequest({
-      url: API_ENDPOINTS.USERS.DETAIL(userId),
+      url: API_ROUTES.USERS.DETAIL(userId),
       method: 'GET',
     })
   }
@@ -257,7 +257,7 @@ export class BaseApiClient {
     data: Partial<User>
   ): Promise<ApiResponse<User>> {
     return this.sendRequest({
-      url: API_ENDPOINTS.USERS.UPDATE(userId),
+      url: API_ROUTES.USERS.UPDATE(userId),
       method: 'PUT',
       body: data,
     })
@@ -268,7 +268,7 @@ export class BaseApiClient {
    */
   async deleteUser(userId: string): Promise<ApiResponse<void>> {
     return this.sendRequest({
-      url: API_ENDPOINTS.USERS.DELETE(userId),
+      url: API_ROUTES.USERS.DELETE(userId),
       method: 'DELETE',
     })
   }
