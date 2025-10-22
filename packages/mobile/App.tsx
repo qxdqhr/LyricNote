@@ -21,10 +21,7 @@ export default function App(): React.JSX.Element {
               headerShown: false,
             }}
           >
-            <Stack.Screen 
-              name="TabNavigator" 
-              component={TabNavigator} 
-            />
+            <Stack.Screen name="TabNavigator" component={TabNavigator} />
           </Stack.Navigator>
         </NavigationContainer>
       </GestureHandlerRootView>

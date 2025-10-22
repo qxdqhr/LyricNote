@@ -1,9 +1,9 @@
 /**
  * 配置缓存优化 Hook
- * 
+ *
  * 使用 SWR 实现智能缓存和自动重新验证
  * 支持多平台：Web、React Native、小程序
- * 
+ *
  * 优点：
  * 1. 自动缓存，减少网络请求
  * 2. 自动重新验证（可配置）
@@ -12,51 +12,51 @@
  * 5. 防抖和去重
  */
 
-import useSWR, { mutate } from 'swr'
-import { useCallback } from 'react'
+import useSWR, { mutate } from 'swr';
+import { useCallback } from 'react';
 
 export interface ConfigItem {
-  key: string
-  value: any
-  type: string
-  isRequired: boolean
-  isSensitive: boolean
-  description?: string
-  defaultValue?: any
-  readonly?: boolean
+  key: string;
+  value: any;
+  type: string;
+  isRequired: boolean;
+  isSensitive: boolean;
+  description?: string;
+  defaultValue?: any;
+  readonly?: boolean;
 }
 
 export interface AllConfigs {
   [category: string]: {
-    [key: string]: ConfigItem
-  }
+    [key: string]: ConfigItem;
+  };
 }
 
 export interface UseConfigsOptions {
   /**
    * API 基础 URL
    */
-  apiBaseUrl?: string
-  
+  apiBaseUrl?: string;
+
   /**
    * 获取认证 token 的函数
    */
-  getAuthToken: () => string | null | Promise<string | null>
-  
+  getAuthToken: () => string | null | Promise<string | null>;
+
   /**
    * 未认证时的回调（可选）
    */
-  onUnauthorized?: () => void
-  
+  onUnauthorized?: () => void;
+
   /**
    * 缓存去重时间（毫秒）
    */
-  dedupingInterval?: number
-  
+  dedupingInterval?: number;
+
   /**
    * 是否在窗口聚焦时重新验证
    */
-  revalidateOnFocus?: boolean
+  revalidateOnFocus?: boolean;
 }
 
 /**
@@ -68,68 +68,68 @@ export function createUseConfigs(options: UseConfigsOptions) {
     getAuthToken,
     onUnauthorized,
     dedupingInterval = 60000,
-    revalidateOnFocus = false
-  } = options
+    revalidateOnFocus = false,
+  } = options;
 
   // Fetcher 函数
   const fetcher = async (url: string) => {
-    const token = await getAuthToken()
-    
+    const token = await getAuthToken();
+
     const res = await fetch(`${apiBaseUrl}${url}`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
-      credentials: 'include'
-    })
-    
+      credentials: 'include',
+    });
+
     if (!res.ok) {
       if (res.status === 401) {
-        onUnauthorized?.()
-        throw new Error('Unauthorized')
+        onUnauthorized?.();
+        throw new Error('Unauthorized');
       }
-      throw new Error('Failed to fetch configs')
+      throw new Error('Failed to fetch configs');
     }
-    
-    const data = await res.json()
-    return data.data as AllConfigs
-  }
+
+    const data = await res.json();
+    return data.data as AllConfigs;
+  };
 
   // 返回 Hook 函数
   return function useConfigs() {
-    const { data, error, mutate: mutateConfigs } = useSWR<AllConfigs>(
-      '/api/admin/config',
-      fetcher,
-      {
-        // 配置选项
-        revalidateOnFocus,
-        revalidateOnReconnect: true,     // 网络重连时重新验证
-        dedupingInterval,                // 缓存去重时间
-        errorRetryCount: 3,              // 错误重试3次
-        errorRetryInterval: 5000,        // 重试间隔5秒
-        shouldRetryOnError: true,        // 启用错误重试
-        
-        // 成功时的回调
-        onSuccess: (data: AllConfigs) => {
-          console.log('✅ Configs loaded from cache or network')
-        },
-        
-        // 错误时的回调
-        onError: (error: Error) => {
-          console.error('❌ Failed to load configs:', error)
-        }
-      }
-    )
+    const {
+      data,
+      error,
+      mutate: mutateConfigs,
+    } = useSWR<AllConfigs>('/api/admin/config', fetcher, {
+      // 配置选项
+      revalidateOnFocus,
+      revalidateOnReconnect: true, // 网络重连时重新验证
+      dedupingInterval, // 缓存去重时间
+      errorRetryCount: 3, // 错误重试3次
+      errorRetryInterval: 5000, // 重试间隔5秒
+      shouldRetryOnError: true, // 启用错误重试
+
+      // 成功时的回调
+      onSuccess: (data: AllConfigs) => {
+        console.log('✅ Configs loaded from cache or network');
+      },
+
+      // 错误时的回调
+      onError: (error: Error) => {
+        console.error('❌ Failed to load configs:', error);
+      },
+    });
 
     // 更新配置（乐观更新）
     const updateConfigs = useCallback(
       async (category: string, updates: Record<string, any>) => {
-        const token = await getAuthToken()
-        
+        const token = await getAuthToken();
+
         // 乐观更新：立即更新本地缓存
         mutateConfigs(
           (current: AllConfigs | undefined) => {
-            if (!current) return current
+            if (!current) return current;
             return {
               ...current,
               [category]: {
@@ -137,47 +137,47 @@ export function createUseConfigs(options: UseConfigsOptions) {
                 ...Object.entries(updates).reduce((acc, [key, value]) => {
                   acc[key] = {
                     ...current[category]?.[key],
-                    value
-                  }
-                  return acc
-                }, {} as any)
-              }
-            }
+                    value,
+                  };
+                  return acc;
+                }, {} as any),
+              },
+            };
           },
-          false  // 不立即重新验证
-        )
-        
+          false // 不立即重新验证
+        );
+
         try {
           // 发送到服务器
           const res = await fetch(`${apiBaseUrl}/api/admin/config/${category}`, {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: JSON.stringify({ configs: updates })
-          })
-          
-          if (!res.ok) throw new Error('Update failed')
-          
+            body: JSON.stringify({ configs: updates }),
+          });
+
+          if (!res.ok) throw new Error('Update failed');
+
           // 更新成功，重新验证缓存
-          mutateConfigs()
-          
-          return { success: true }
+          mutateConfigs();
+
+          return { success: true };
         } catch (error) {
           // 更新失败，回滚
-          mutateConfigs()  // 从服务器重新获取
-          throw error
+          mutateConfigs(); // 从服务器重新获取
+          throw error;
         }
       },
       [mutateConfigs, getAuthToken, apiBaseUrl]
-    )
+    );
 
     // 手动刷新
     const refresh = useCallback(() => {
-      mutateConfigs()
-    }, [mutateConfigs])
+      mutateConfigs();
+    }, [mutateConfigs]);
 
     return {
       configs: data,
@@ -185,16 +185,16 @@ export function createUseConfigs(options: UseConfigsOptions) {
       isError: !!error,
       error,
       updateConfigs,
-      refresh
-    }
-  }
+      refresh,
+    };
+  };
 }
 
 /**
  * 预加载配置
  */
 export function prefetchConfigs(apiBaseUrl: string = '') {
-  mutate(`${apiBaseUrl}/api/admin/config`)
+  mutate(`${apiBaseUrl}/api/admin/config`);
 }
 
 /**
@@ -205,6 +205,5 @@ export function invalidateAllConfigs(apiBaseUrl: string = '') {
     (key: any) => typeof key === 'string' && key.startsWith(`${apiBaseUrl}/api/admin/config`),
     undefined,
     { revalidate: true }
-  )
+  );
 }
-

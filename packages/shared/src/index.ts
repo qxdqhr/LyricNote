@@ -1,23 +1,23 @@
 // 导出所有类型
-export * from './types'
+export * from './types';
 
 // 导出所有工具函数
-export * from './utils'
+export * from './utils';
 
 // 导出所有常量
-export * from './constants'
+export * from './constants';
 
 // 导出 API 层
-export * from './api'
+export * from './api';
 
 // 导出 Hooks
-export * from './hooks'
+export * from './hooks';
 
 // 导出日志系统
-export * from './logger'
+export * from './logger';
 
 // 导出埋点系统
-export * from './analytics'
+export * from './analytics';
 
 // 导出平台适配器（显式导出以避免冲突）
 export {
@@ -28,16 +28,11 @@ export {
   ElectronStorageAdapter,
   // 网络请求适配器
   WebRequestAdapter,
-  MiniappRequestAdapter
-} from './adapters'
+  MiniappRequestAdapter,
+} from './adapters';
 
 // 导出适配器类型（显式导出以避免冲突）
-export type { 
-  StorageAdapter,
-  StorageChangeEvent,
-  RequestAdapter,
-  RequestConfig 
-} from './adapters'
+export type { StorageAdapter, StorageChangeEvent, RequestAdapter, RequestConfig } from './adapters';
 
 // 版本信息
-export const SHARED_VERSION = '1.0.0'
+export const SHARED_VERSION = '1.0.0';

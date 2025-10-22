@@ -1,78 +1,78 @@
-import { useState } from 'react'
-import { useAuth, useAuthForm } from '@lyricnote/shared'
-import { apiService } from '../services/api'
+import { useState } from 'react';
+import { useAuth, useAuthForm } from '@lyricnote/shared';
+import { apiService } from '../services/api';
 
 export default function ProfilePage() {
   // 使用统一的 useAuth Hook
-  const { user, isLoggedIn, loading, checkingAuth, login, register, logout } = useAuth(apiService)
-  
+  const { user, isLoggedIn, loading, checkingAuth, login, register, logout } = useAuth(apiService);
+
   // 登录/注册模式切换
-  const [isLogin, setIsLogin] = useState(true)
-  
+  const [isLogin, setIsLogin] = useState(true);
+
   // 登录表单
   const loginForm = useAuthForm({
     email: '',
-    password: ''
-  })
-  
+    password: '',
+  });
+
   // 注册表单
   const registerForm = useAuthForm({
     email: '',
     password: '',
-    username: ''
-  })
+    username: '',
+  });
 
   // 处理登录
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    const { email, password } = loginForm.values
+    e.preventDefault();
+
+    const { email, password } = loginForm.values;
     if (!email || !password) {
-      alert('请输入邮箱和密码')
-      return
+      alert('请输入邮箱和密码');
+      return;
     }
 
-    const result = await login(email, password)
-    
+    const result = await login(email, password);
+
     if (result.success) {
-      loginForm.reset()
-      alert('登录成功！')
+      loginForm.reset();
+      alert('登录成功！');
     } else {
-      alert(result.error || '登录失败')
+      alert(result.error || '登录失败');
     }
-  }
+  };
 
   // 处理注册
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    const { email, password, username } = registerForm.values
+    e.preventDefault();
+
+    const { email, password, username } = registerForm.values;
     if (!email || !password || !username) {
-      alert('请填写所有字段')
-      return
+      alert('请填写所有字段');
+      return;
     }
 
     if (password.length < 6) {
-      alert('密码长度至少6位')
-      return
+      alert('密码长度至少6位');
+      return;
     }
 
-    const result = await register(email, password, username)
-    
+    const result = await register(email, password, username);
+
     if (result.success) {
-      registerForm.reset()
-      alert('注册成功！')
+      registerForm.reset();
+      alert('注册成功！');
     } else {
-      alert(result.error || '注册失败')
+      alert(result.error || '注册失败');
     }
-  }
+  };
 
   // 处理登出
   const handleLogout = () => {
     if (window.confirm('确定要退出登录吗？')) {
-      logout()
+      logout();
     }
-  }
+  };
 
   // 加载中状态
   if (checkingAuth) {
@@ -82,7 +82,7 @@ export default function ProfilePage() {
           <div className="loading">正在加载...</div>
         </div>
       </div>
-    )
+    );
   }
 
   // 已登录状态
@@ -91,35 +91,33 @@ export default function ProfilePage() {
       <div className="page-container">
         <div className="profile-card">
           <h2 className="profile-title">个人信息</h2>
-          
+
           <div className="user-info">
             <div className="avatar">
               {user.username?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
             </div>
-            
+
             <div className="user-details">
               <div className="user-name">{user.username || '未设置用户名'}</div>
               <div className="user-email">{user.email}</div>
               {user.role && (
                 <div className="user-role">
-                  {user.role === 'SUPER_ADMIN' && <span className="role-badge super-admin">超级管理员</span>}
+                  {user.role === 'SUPER_ADMIN' && (
+                    <span className="role-badge super-admin">超级管理员</span>
+                  )}
                   {user.role === 'ADMIN' && <span className="role-badge admin">管理员</span>}
                   {user.role === 'USER' && <span className="role-badge user">普通用户</span>}
                 </div>
               )}
             </div>
           </div>
-          
-          <button 
-            className="logout-button" 
-            onClick={handleLogout}
-            disabled={loading}
-          >
+
+          <button className="logout-button" onClick={handleLogout} disabled={loading}>
             {loading ? '退出中...' : '退出登录'}
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   // 未登录状态 - 登录/注册表单
@@ -127,16 +125,10 @@ export default function ProfilePage() {
     <div className="page-container">
       <div className="profile-card">
         <div className="tabs">
-          <button
-            className={`tab ${isLogin ? 'active' : ''}`}
-            onClick={() => setIsLogin(true)}
-          >
+          <button className={`tab ${isLogin ? 'active' : ''}`} onClick={() => setIsLogin(true)}>
             登录
           </button>
-          <button
-            className={`tab ${!isLogin ? 'active' : ''}`}
-            onClick={() => setIsLogin(false)}
-          >
+          <button className={`tab ${!isLogin ? 'active' : ''}`} onClick={() => setIsLogin(false)}>
             注册
           </button>
         </div>
@@ -144,7 +136,7 @@ export default function ProfilePage() {
         {isLogin ? (
           <form onSubmit={handleLogin} className="auth-form">
             <h2 className="form-title">登录账号</h2>
-            
+
             <div className="form-group">
               <label>邮箱</label>
               <input
@@ -176,7 +168,7 @@ export default function ProfilePage() {
         ) : (
           <form onSubmit={handleRegister} className="auth-form">
             <h2 className="form-title">注册账号</h2>
-            
+
             <div className="form-group">
               <label>用户名</label>
               <input
@@ -407,5 +399,5 @@ export default function ProfilePage() {
         }
       `}</style>
     </div>
-  )
+  );
 }

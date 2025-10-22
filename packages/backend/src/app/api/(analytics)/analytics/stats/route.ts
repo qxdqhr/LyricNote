@@ -15,4 +15,3 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   return analyticsHandlers.handleStatsGet(request);
 }
-

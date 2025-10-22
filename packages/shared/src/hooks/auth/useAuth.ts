@@ -1,32 +1,32 @@
-"use client"
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import type { User } from '../../types'
-import type { BaseApiClient } from '../../api/base-api-client'
+import { useState, useEffect, useCallback } from 'react';
+import type { User } from '../../types';
+import type { BaseApiClient } from '../../api/base-api-client';
 
 /**
  * 登录表单数据接口
  */
 export interface LoginFormData {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 /**
  * 注册表单数据接口
  */
 export interface RegisterFormData {
-  email: string
-  password: string
-  username: string
+  email: string;
+  password: string;
+  username: string;
 }
 
 /**
  * 认证操作结果接口
  */
 export interface AuthResult {
-  success: boolean
-  error?: string
+  success: boolean;
+  error?: string;
 }
 
 /**
@@ -34,160 +34,159 @@ export interface AuthResult {
  */
 export interface UseAuthReturn {
   // 状态
-  user: User | null
-  isLoggedIn: boolean
-  loading: boolean
-  checkingAuth: boolean
-  error: string | null
-  
+  user: User | null;
+  isLoggedIn: boolean;
+  loading: boolean;
+  checkingAuth: boolean;
+  error: string | null;
+
   // 操作方法
-  login: (email: string, password: string) => Promise<AuthResult>
-  register: (email: string, password: string, username: string) => Promise<AuthResult>
-  logout: () => Promise<void>
-  refresh: () => Promise<void>
-  clearError: () => void
+  login: (email: string, password: string) => Promise<AuthResult>;
+  register: (email: string, password: string, username: string) => Promise<AuthResult>;
+  logout: () => Promise<void>;
+  refresh: () => Promise<void>;
+  clearError: () => void;
 }
 
 export function useAuth(apiClient: BaseApiClient): UseAuthReturn {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [checkingAuth, setCheckingAuth] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   /**
    * 检查认证状态
    */
   const checkAuthStatus = useCallback(async () => {
     try {
-      setCheckingAuth(true)
-      setError(null)
-      
-      const isAuth = await apiClient.isAuthenticated()
-      
+      setCheckingAuth(true);
+      setError(null);
+
+      const isAuth = await apiClient.isAuthenticated();
+
       if (isAuth) {
         // 验证 token 并获取用户信息
-        const response = await apiClient.getCurrentUser()
-        
+        const response = await apiClient.getCurrentUser();
+
         if (response.success && response.data) {
-          setUser(response.data)
-          setIsLoggedIn(true)
+          setUser(response.data);
+          setIsLoggedIn(true);
         } else {
           // Token 无效，清除登录状态
-          await apiClient.clearUserData()
-          setUser(null)
-          setIsLoggedIn(false)
+          await apiClient.clearUserData();
+          setUser(null);
+          setIsLoggedIn(false);
         }
       } else {
-        setUser(null)
-        setIsLoggedIn(false)
+        setUser(null);
+        setIsLoggedIn(false);
       }
     } catch (err) {
-      console.error('检查登录状态失败:', err)
-      setError(err instanceof Error ? err.message : '检查登录状态失败')
-      setUser(null)
-      setIsLoggedIn(false)
+      console.error('检查登录状态失败:', err);
+      setError(err instanceof Error ? err.message : '检查登录状态失败');
+      setUser(null);
+      setIsLoggedIn(false);
     } finally {
-      setCheckingAuth(false)
+      setCheckingAuth(false);
     }
-  }, [apiClient])
+  }, [apiClient]);
 
   /**
    * 用户登录
    */
-  const login = useCallback(async (
-    email: string,
-    password: string
-  ): Promise<AuthResult> => {
-    setLoading(true)
-    setError(null)
-    
-    try {
-      const response = await apiClient.login(email, password)
-      
-      if (response.success && response.data) {
-        setUser(response.data.user)
-        setIsLoggedIn(true)
-        return { success: true }
-      } else {
-        const errorMsg = response.error || '登录失败'
-        setError(errorMsg)
-        return { success: false, error: errorMsg }
+  const login = useCallback(
+    async (email: string, password: string): Promise<AuthResult> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await apiClient.login(email, password);
+
+        if (response.success && response.data) {
+          setUser(response.data.user);
+          setIsLoggedIn(true);
+          return { success: true };
+        } else {
+          const errorMsg = response.error || '登录失败';
+          setError(errorMsg);
+          return { success: false, error: errorMsg };
+        }
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : '登录失败，请重试';
+        setError(errorMsg);
+        return { success: false, error: errorMsg };
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : '登录失败，请重试'
-      setError(errorMsg)
-      return { success: false, error: errorMsg }
-    } finally {
-      setLoading(false)
-    }
-  }, [apiClient])
+    },
+    [apiClient]
+  );
 
   /**
    * 用户注册
    */
-  const register = useCallback(async (
-    email: string,
-    password: string,
-    username: string
-  ): Promise<AuthResult> => {
-    setLoading(true)
-    setError(null)
-    
-    try {
-      const response = await apiClient.register(email, password, username)
-      
-      if (response.success && response.data) {
-        setUser(response.data.user)
-        setIsLoggedIn(true)
-        return { success: true }
-      } else {
-        const errorMsg = response.error || '注册失败'
-        setError(errorMsg)
-        return { success: false, error: errorMsg }
+  const register = useCallback(
+    async (email: string, password: string, username: string): Promise<AuthResult> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await apiClient.register(email, password, username);
+
+        if (response.success && response.data) {
+          setUser(response.data.user);
+          setIsLoggedIn(true);
+          return { success: true };
+        } else {
+          const errorMsg = response.error || '注册失败';
+          setError(errorMsg);
+          return { success: false, error: errorMsg };
+        }
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : '注册失败，请重试';
+        setError(errorMsg);
+        return { success: false, error: errorMsg };
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : '注册失败，请重试'
-      setError(errorMsg)
-      return { success: false, error: errorMsg }
-    } finally {
-      setLoading(false)
-    }
-  }, [apiClient])
+    },
+    [apiClient]
+  );
 
   /**
    * 用户登出
    */
   const logout = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    
+    setLoading(true);
+    setError(null);
+
     try {
-      await apiClient.logout()
-      setUser(null)
-      setIsLoggedIn(false)
+      await apiClient.logout();
+      setUser(null);
+      setIsLoggedIn(false);
     } catch (err) {
-      console.error('登出失败:', err)
-      setError(err instanceof Error ? err.message : '登出失败')
+      console.error('登出失败:', err);
+      setError(err instanceof Error ? err.message : '登出失败');
       // 即使登出失败，也清除本地状态
-      setUser(null)
-      setIsLoggedIn(false)
+      setUser(null);
+      setIsLoggedIn(false);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [apiClient])
+  }, [apiClient]);
 
   /**
    * 清除错误信息
    */
   const clearError = useCallback(() => {
-    setError(null)
-  }, [])
+    setError(null);
+  }, []);
 
   // 组件挂载时检查认证状态
   useEffect(() => {
-    checkAuthStatus()
-  }, [checkAuthStatus])
+    checkAuthStatus();
+  }, [checkAuthStatus]);
 
   return {
     // 状态
@@ -196,19 +195,19 @@ export function useAuth(apiClient: BaseApiClient): UseAuthReturn {
     loading,
     checkingAuth,
     error,
-    
+
     // 操作方法
     login,
     register,
     logout,
     refresh: checkAuthStatus,
-    clearError
-  }
+    clearError,
+  };
 }
 
 /**
  * 表单验证 Hook
- * 
+ *
  * @example
  * ```typescript
  * const { values, errors, handleChange, handleBlur, validate } = useAuthForm({
@@ -218,49 +217,55 @@ export function useAuth(apiClient: BaseApiClient): UseAuthReturn {
  * ```
  */
 export function useAuthForm<T extends Record<string, any>>(initialValues: T) {
-  const [values, setValues] = useState<T>(initialValues)
-  const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({})
-  const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({})
+  const [values, setValues] = useState<T>(initialValues);
+  const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
+  const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({});
 
-  const handleChange = useCallback((field: keyof T, value: any) => {
-    setValues((prev: T) => ({ ...prev, [field]: value }))
-    // 清除该字段的错误
-    if (errors[field]) {
-      setErrors((prev: Partial<Record<keyof T, string>>) => {
-        const newErrors = { ...prev }
-        delete newErrors[field]
-        return newErrors
-      })
-    }
-  }, [errors])
+  const handleChange = useCallback(
+    (field: keyof T, value: any) => {
+      setValues((prev: T) => ({ ...prev, [field]: value }));
+      // 清除该字段的错误
+      if (errors[field]) {
+        setErrors((prev: Partial<Record<keyof T, string>>) => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
+    },
+    [errors]
+  );
 
   const handleBlur = useCallback((field: keyof T) => {
-    setTouched((prev: Partial<Record<keyof T, boolean>>) => ({ ...prev, [field]: true }))
-  }, [])
+    setTouched((prev: Partial<Record<keyof T, boolean>>) => ({ ...prev, [field]: true }));
+  }, []);
 
-  const validate = useCallback((validationRules: Partial<Record<keyof T, (value: any) => string | undefined>>) => {
-    const newErrors: Partial<Record<keyof T, string>> = {}
-    
-    Object.keys(validationRules).forEach(key => {
-      const field = key as keyof T
-      const rule = validationRules[field]
-      if (rule) {
-        const error = rule(values[field])
-        if (error) {
-          newErrors[field] = error
+  const validate = useCallback(
+    (validationRules: Partial<Record<keyof T, (value: any) => string | undefined>>) => {
+      const newErrors: Partial<Record<keyof T, string>> = {};
+
+      Object.keys(validationRules).forEach((key) => {
+        const field = key as keyof T;
+        const rule = validationRules[field];
+        if (rule) {
+          const error = rule(values[field]);
+          if (error) {
+            newErrors[field] = error;
+          }
         }
-      }
-    })
-    
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }, [values])
+      });
+
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    },
+    [values]
+  );
 
   const reset = useCallback(() => {
-    setValues(initialValues)
-    setErrors({})
-    setTouched({})
-  }, [initialValues])
+    setValues(initialValues);
+    setErrors({});
+    setTouched({});
+  }, [initialValues]);
 
   return {
     values,
@@ -271,7 +276,6 @@ export function useAuthForm<T extends Record<string, any>>(initialValues: T) {
     validate,
     reset,
     setValues,
-    setErrors
-  }
+    setErrors,
+  };
 }
-

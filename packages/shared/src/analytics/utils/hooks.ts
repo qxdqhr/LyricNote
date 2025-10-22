@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 /**
  * React Hooks for Analytics
@@ -19,11 +19,7 @@ export function useAnalytics(analytics: Analytics | null) {
 /**
  * 追踪页面浏览
  */
-export function usePageView(
-  analytics: Analytics | null,
-  pageUrl?: string,
-  pageTitle?: string
-) {
+export function usePageView(analytics: Analytics | null, pageUrl?: string, pageTitle?: string) {
   useEffect(() => {
     if (!analytics) return;
 
@@ -122,14 +118,9 @@ export function usePerformanceTracking(analytics: Analytics | null) {
       const observer = new PerformanceObserver((list) => {
         list.getEntries().forEach((entry) => {
           if (entry.entryType === 'resource') {
-            analytics.trackPerformance(
-              'resource_load_time',
-              entry.duration,
-              'ms',
-              {
-                resource_name: entry.name,
-              }
-            );
+            analytics.trackPerformance('resource_load_time', entry.duration, 'ms', {
+              resource_name: entry.name,
+            });
           }
         });
       });
@@ -149,27 +140,17 @@ export function useErrorTracking(analytics: Analytics | null) {
     if (!analytics || typeof window === 'undefined') return;
 
     const handleError = (event: ErrorEvent) => {
-      analytics.trackError(
-        event.message,
-        event.error?.stack,
-        event.error?.name,
-        {
-          filename: event.filename,
-          lineno: event.lineno,
-          colno: event.colno,
-        }
-      );
+      analytics.trackError(event.message, event.error?.stack, event.error?.name, {
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+      });
     };
 
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      analytics.trackError(
-        'Unhandled Promise Rejection',
-        undefined,
-        'PromiseRejection',
-        {
-          reason: String(event.reason),
-        }
-      );
+      analytics.trackError('Unhandled Promise Rejection', undefined, 'PromiseRejection', {
+        reason: String(event.reason),
+      });
     };
 
     window.addEventListener('error', handleError);
@@ -259,4 +240,3 @@ export function useAutoTracking(
     return () => window.removeEventListener('error', handleError);
   }, [analytics, trackErrors]);
 }
-

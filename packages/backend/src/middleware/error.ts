@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
-import type { RouteHandler, RouteContext } from './auth'
-import { logger } from '../lib/logger'
+import { NextRequest, NextResponse } from 'next/server';
+import type { RouteHandler, RouteContext } from './auth';
+import { logger } from '../lib/logger';
 
 /**
  * 错误处理中间件
- * 
+ *
  * 统一处理路由中的错误，返回标准格式的错误响应
- * 
+ *
  * @param handler - 路由处理器
  * @returns 包装后的处理器
- * 
+ *
  * @example
  * ```typescript
  * export const GET = withErrorHandling(
@@ -20,14 +20,12 @@ import { logger } from '../lib/logger'
  * )
  * ```
  */
-export function withErrorHandling(
-  handler: RouteHandler
-): RouteHandler {
+export function withErrorHandling(handler: RouteHandler): RouteHandler {
   return async (request: NextRequest, context: RouteContext) => {
     try {
-      return await handler(request, context)
+      return await handler(request, context);
     } catch (error) {
-      logger.error('Route error', error instanceof Error ? error : new Error(String(error)))
+      logger.error('Route error', error instanceof Error ? error : new Error(String(error)));
 
       // 开发环境返回详细错误信息
       if (process.env.NODE_ENV === 'development') {
@@ -35,13 +33,16 @@ export function withErrorHandling(
           {
             success: false,
             error: error instanceof Error ? error.message : '服务器错误',
-            details: error instanceof Error ? {
-              message: error.message,
-              stack: error.stack,
-            } : undefined,
+            details:
+              error instanceof Error
+                ? {
+                    message: error.message,
+                    stack: error.stack,
+                  }
+                : undefined,
           },
           { status: 500 }
-        )
+        );
       }
 
       // 生产环境返回通用错误
@@ -51,14 +52,14 @@ export function withErrorHandling(
           error: '服务器错误，请稍后重试',
         },
         { status: 500 }
-      )
+      );
     }
-  }
+  };
 }
 
 /**
  * API 错误类
- * 
+ *
  * 用于在业务逻辑中抛出带有状态码的错误
  */
 export class ApiError extends Error {
@@ -67,8 +68,8 @@ export class ApiError extends Error {
     public statusCode: number = 500,
     public code?: string
   ) {
-    super(message)
-    this.name = 'ApiError'
+    super(message);
+    this.name = 'ApiError';
   }
 }
 
@@ -76,14 +77,12 @@ export class ApiError extends Error {
  * 增强的错误处理中间件
  * 支持 ApiError 类型的错误
  */
-export function withApiErrorHandling(
-  handler: RouteHandler
-): RouteHandler {
+export function withApiErrorHandling(handler: RouteHandler): RouteHandler {
   return async (request: NextRequest, context: RouteContext) => {
     try {
-      return await handler(request, context)
+      return await handler(request, context);
     } catch (error) {
-      logger.error('API route error', error instanceof Error ? error : new Error(String(error)))
+      logger.error('API route error', error instanceof Error ? error : new Error(String(error)));
 
       // 处理 ApiError
       if (error instanceof ApiError) {
@@ -94,7 +93,7 @@ export function withApiErrorHandling(
             code: error.code,
           },
           { status: error.statusCode }
-        )
+        );
       }
 
       // 开发环境返回详细错误
@@ -106,7 +105,7 @@ export function withApiErrorHandling(
             stack: error instanceof Error ? error.stack : undefined,
           },
           { status: 500 }
-        )
+        );
       }
 
       // 生产环境返回通用错误
@@ -116,8 +115,7 @@ export function withApiErrorHandling(
           error: '服务器错误，请稍后重试',
         },
         { status: 500 }
-      )
+      );
     }
-  }
+  };
 }
-

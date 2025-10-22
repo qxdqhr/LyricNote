@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./App.{js,jsx,ts,tsx}", "./src/**/*.{js,jsx,ts,tsx}"],
-  presets: [require("nativewind/preset")],
+  content: ['./App.{js,jsx,ts,tsx}', './src/**/*.{js,jsx,ts,tsx}'],
+  presets: [require('nativewind/preset')],
   theme: {
     extend: {
       colors: {
@@ -45,10 +45,9 @@ module.exports = {
       fontFamily: {
         'japanese-serif': ['Hiragino Mincho ProN', 'Yu Mincho', 'serif'],
         'japanese-sans': ['Hiragino Sans', 'Meiryo', 'Yu Gothic', 'sans-serif'],
-        'romaji': ['SF Pro Display', 'system'],
+        romaji: ['SF Pro Display', 'system'],
       },
     },
   },
   plugins: [],
-}
-
+};

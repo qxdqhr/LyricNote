@@ -48,4 +48,3 @@ export interface ChartDataPoint {
   value: number;
   [key: string]: any;
 }
-

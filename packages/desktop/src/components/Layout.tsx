@@ -1,5 +1,5 @@
-import { Outlet, NavLink } from 'react-router-dom'
-import { APP_CONFIG, UI_TEXT } from '@lyricnote/shared'
+import { Outlet, NavLink } from 'react-router-dom';
+import { APP_CONFIG, UI_TEXT } from '@lyricnote/shared';
 
 export default function Layout() {
   return (
@@ -10,14 +10,17 @@ export default function Layout() {
           <span className="logo-icon">{APP_CONFIG.icon}</span>
           <span className="logo-text">{APP_CONFIG.name}</span>
         </div>
-        
+
         <div className="nav-links">
           <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <span className="nav-icon">🏠</span>
             <span className="nav-text">{UI_TEXT.navigation.home}</span>
           </NavLink>
-          
-          <NavLink to="/profile" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+
+          <NavLink
+            to="/profile"
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+          >
             <span className="nav-icon">👤</span>
             <span className="nav-text">{UI_TEXT.navigation.profile}</span>
           </NavLink>
@@ -29,6 +32,5 @@ export default function Layout() {
         <Outlet />
       </main>
     </div>
-  )
+  );
 }
-

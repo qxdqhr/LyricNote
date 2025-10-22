@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
-import { APP_TITLES, APP_CONFIG } from "@lyricnote/shared";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { APP_TITLES, APP_CONFIG } from '@lyricnote/shared';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: APP_TITLES.admin,
@@ -14,9 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className="antialiased font-sans">
-        {children}
-      </body>
+      <body className="antialiased font-sans">{children}</body>
     </html>
   );
 }

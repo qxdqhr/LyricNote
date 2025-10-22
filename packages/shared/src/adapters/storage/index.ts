@@ -4,11 +4,10 @@
  */
 
 // 类型定义
-export type { StorageAdapter, StorageChangeEvent } from './types'
+export type { StorageAdapter, StorageChangeEvent } from './types';
 
 // 平台适配器（直接导出）
-export { WebStorageAdapter } from './web'
-export { ReactNativeStorageAdapter } from './react-native'
-export { MiniAppStorageAdapter } from './miniapp'
-export { ElectronStorageAdapter } from './electron'
-
+export { WebStorageAdapter } from './web';
+export { ReactNativeStorageAdapter } from './react-native';
+export { MiniAppStorageAdapter } from './miniapp';
+export { ElectronStorageAdapter } from './electron';

@@ -12,10 +12,6 @@ export const runtime = 'nodejs';
  * GET /api/analytics/session/[sessionId]
  * 获取指定会话的详细分析
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { sessionId: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { sessionId: string } }) {
   return analyticsHandlers.handleSessionAnalyticsGet(request, params);
 }
-

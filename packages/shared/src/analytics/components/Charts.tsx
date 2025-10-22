@@ -14,7 +14,7 @@ export interface PieChartProps {
 
 export const PieChart: React.FC<PieChartProps> = ({ data, title, className = '' }) => {
   const total = data.reduce((sum, item) => sum + item.value, 0);
-  
+
   const colors = [
     'bg-blue-500',
     'bg-green-500',
@@ -71,9 +71,7 @@ export const BarChart: React.FC<BarChartProps> = ({ data, title, className = '' 
           const percentage = (item.value / maxValue) * 100;
           return (
             <div key={index} className="flex items-center gap-4">
-              <div className="w-32 text-sm text-gray-700 font-medium truncate">
-                {item.name}
-              </div>
+              <div className="w-32 text-sm text-gray-700 font-medium truncate">{item.name}</div>
               <div className="flex-1 flex items-center gap-2">
                 <div className="flex-1 bg-gray-200 rounded-full h-8 relative overflow-hidden">
                   <div
@@ -116,11 +114,7 @@ export const LineChart: React.FC<LineChartProps> = ({ data, title, className = '
     <div className={`bg-white rounded-lg shadow-sm p-6 ${className}`}>
       {title && <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>}
       <div className="relative" style={{ height: `${height}px` }}>
-        <svg
-          viewBox={`0 0 100 ${height}`}
-          preserveAspectRatio="none"
-          className="w-full h-full"
-        >
+        <svg viewBox={`0 0 100 ${height}`} preserveAspectRatio="none" className="w-full h-full">
           {/* 网格线 */}
           {[0, 25, 50, 75, 100].map((y) => (
             <line
@@ -174,4 +168,3 @@ export const LineChart: React.FC<LineChartProps> = ({ data, title, className = '
     </div>
   );
 };
-

@@ -169,38 +169,37 @@ export class DesktopDeviceAdapter implements AnalyticsDeviceAdapter {
     // 尝试从 localStorage 获取已存在的 ID
     if (typeof window !== 'undefined') {
       let deviceId = localStorage.getItem('analytics:device_id');
-      
+
       if (!deviceId) {
         // Electron 中可以使用机器的唯一标识
         // 这里简化处理，实际可以通过 IPC 获取
         deviceId = `desktop_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
         localStorage.setItem('analytics:device_id', deviceId);
       }
-      
+
       return deviceId;
     }
-    
+
     return `desktop_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
   }
 
   private getOSName(): string {
     if (typeof navigator === 'undefined') return 'unknown';
-    
+
     const platform = navigator.platform.toLowerCase();
-    
+
     if (platform.indexOf('win') !== -1) return 'Windows';
     if (platform.indexOf('mac') !== -1) return 'MacOS';
     if (platform.indexOf('linux') !== -1) return 'Linux';
-    
+
     return 'unknown';
   }
 
   private getOSVersion(): string {
     if (typeof navigator === 'undefined') return 'unknown';
-    
+
     // Electron 中可以通过 process.getSystemVersion() 获取
     // 这里简化处理
     return navigator.userAgent;
   }
 }
-

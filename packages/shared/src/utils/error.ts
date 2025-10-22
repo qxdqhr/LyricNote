@@ -6,13 +6,17 @@ export const errorUtils = {
   /**
    * 创建标准化的错误对象
    */
-  createError(code: string, message: string, details?: any): Error & { code: string; details?: any } {
-    const error = new Error(message) as Error & { code: string; details?: any }
-    error.code = code
+  createError(
+    code: string,
+    message: string,
+    details?: any
+  ): Error & { code: string; details?: any } {
+    const error = new Error(message) as Error & { code: string; details?: any };
+    error.code = code;
     if (details) {
-      error.details = details
+      error.details = details;
     }
-    return error
+    return error;
   },
 
   /**
@@ -20,43 +24,38 @@ export const errorUtils = {
    */
   extractErrorMessage(error: unknown): string {
     if (error instanceof Error) {
-      return error.message
+      return error.message;
     }
     if (typeof error === 'string') {
-      return error
+      return error;
     }
     if (error && typeof error === 'object' && 'message' in error) {
-      return String(error.message)
+      return String(error.message);
     }
-    return '未知错误'
+    return '未知错误';
   },
 
   /**
    * 错误重试机制
    */
-  async retry<T>(
-    fn: () => Promise<T>,
-    maxAttempts: number = 3,
-    delay: number = 1000
-  ): Promise<T> {
-    let lastError: Error
-    
+  async retry<T>(fn: () => Promise<T>, maxAttempts: number = 3, delay: number = 1000): Promise<T> {
+    let lastError: Error;
+
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        return await fn()
+        return await fn();
       } catch (error) {
-        lastError = error instanceof Error ? error : new Error(String(error))
-        
+        lastError = error instanceof Error ? error : new Error(String(error));
+
         if (attempt === maxAttempts) {
-          throw lastError
+          throw lastError;
         }
-        
+
         // 指数退避延迟
-        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, attempt - 1)))
+        await new Promise((resolve) => setTimeout(resolve, delay * Math.pow(2, attempt - 1)));
       }
     }
-    
-    throw lastError!
-  }
-}
 
+    throw lastError!;
+  },
+};

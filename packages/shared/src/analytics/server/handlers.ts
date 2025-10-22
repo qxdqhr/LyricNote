@@ -1,22 +1,21 @@
 /**
  * 埋点 API 路由处理器
  * Analytics API Route Handlers
- * 
+ *
  * 使用方式（Next.js）：
  * import { createAnalyticsHandlers } from '@lyricnote/shared/analytics/server'
  * const handlers = createAnalyticsHandlers(analyticsService)
  * export const POST = handlers.handleEventsPost
  */
 
-import type { 
-  AnalyticsEvent,
-  AnalyticsQueryParams,
-} from './types';
+import type { AnalyticsEvent, AnalyticsQueryParams } from './types';
 
 // 服务接口类型
 interface AnalyticsService {
   insertAnalyticsEvents: (events: AnalyticsEvent[]) => Promise<void>;
-  queryAnalyticsEvents: (params: AnalyticsQueryParams) => Promise<{ events: AnalyticsEvent[]; total: number }>;
+  queryAnalyticsEvents: (
+    params: AnalyticsQueryParams
+  ) => Promise<{ events: AnalyticsEvent[]; total: number }>;
   getAnalyticsStats: (startDate?: string, endDate?: string, platform?: string) => Promise<any>;
   getUserBehavior: (userId: string, startDate?: string, endDate?: string) => Promise<any>;
   getSessionAnalytics: (sessionId: string) => Promise<any>;
@@ -47,7 +46,7 @@ export function createAnalyticsHandlers(
   ResponseClass?: any // Next.js NextResponse 或其他响应类
 ) {
   // 默认使用标准响应格式
-  const createResponse = ResponseClass 
+  const createResponse = ResponseClass
     ? (data: any, init?: ResponseInit) => ResponseClass.json(data, init)
     : (data: any, init?: ResponseInit) => ({ body: data, status: init?.status || 200 });
 
@@ -87,7 +86,7 @@ export function createAnalyticsHandlers(
         }
 
         // 转换字段名（前端使用 snake_case，数据库使用 camelCase）
-        const formattedEvents = events.map(event => ({
+        const formattedEvents = events.map((event) => ({
           id: event.event_id,
           eventType: event.event_type,
           eventName: event.event_name,
@@ -115,14 +114,12 @@ export function createAnalyticsHandlers(
         });
       } catch (error) {
         console.error('Failed to process analytics events', error);
-        
+
         return createResponse(
-          { 
-            success: false, 
+          {
+            success: false,
             message: 'Internal server error',
-            error: process.env.NODE_ENV === 'development' 
-              ? (error as Error).message 
-              : undefined
+            error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
           },
           { status: 500 }
         );
@@ -136,7 +133,8 @@ export function createAnalyticsHandlers(
     async handleQueryGet(request: Request) {
       try {
         // 解析查询参数
-        const searchParams = request.nextUrl?.searchParams || new URLSearchParams(request.url?.split('?')[1]);
+        const searchParams =
+          request.nextUrl?.searchParams || new URLSearchParams(request.url?.split('?')[1]);
 
         const params: AnalyticsQueryParams = {
           startDate: searchParams.get('startDate') || undefined,
@@ -165,14 +163,12 @@ export function createAnalyticsHandlers(
         });
       } catch (error) {
         console.error('Failed to query analytics events', error);
-        
+
         return createResponse(
-          { 
-            success: false, 
+          {
+            success: false,
             message: 'Internal server error',
-            error: process.env.NODE_ENV === 'development' 
-              ? (error as Error).message 
-              : undefined
+            error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
           },
           { status: 500 }
         );
@@ -185,7 +181,8 @@ export function createAnalyticsHandlers(
      */
     async handleStatsGet(request: Request) {
       try {
-        const searchParams = request.nextUrl?.searchParams || new URLSearchParams(request.url?.split('?')[1]);
+        const searchParams =
+          request.nextUrl?.searchParams || new URLSearchParams(request.url?.split('?')[1]);
 
         const startDate = searchParams.get('startDate') || undefined;
         const endDate = searchParams.get('endDate') || undefined;
@@ -200,14 +197,12 @@ export function createAnalyticsHandlers(
         });
       } catch (error) {
         console.error('Failed to get analytics stats', error);
-        
+
         return createResponse(
-          { 
-            success: false, 
+          {
+            success: false,
             message: 'Internal server error',
-            error: process.env.NODE_ENV === 'development' 
-              ? (error as Error).message 
-              : undefined
+            error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
           },
           { status: 500 }
         );
@@ -221,7 +216,8 @@ export function createAnalyticsHandlers(
     async handleUserBehaviorGet(request: Request, params: { userId: string }) {
       try {
         const { userId } = params;
-        const searchParams = request.nextUrl?.searchParams || new URLSearchParams(request.url?.split('?')[1]);
+        const searchParams =
+          request.nextUrl?.searchParams || new URLSearchParams(request.url?.split('?')[1]);
 
         const startDate = searchParams.get('startDate') || undefined;
         const endDate = searchParams.get('endDate') || undefined;
@@ -242,14 +238,12 @@ export function createAnalyticsHandlers(
         });
       } catch (error) {
         console.error('Failed to get user behavior', error);
-        
+
         return createResponse(
-          { 
-            success: false, 
+          {
+            success: false,
             message: 'Internal server error',
-            error: process.env.NODE_ENV === 'development' 
-              ? (error as Error).message 
-              : undefined
+            error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
           },
           { status: 500 }
         );
@@ -268,10 +262,7 @@ export function createAnalyticsHandlers(
         const session = await service.getSessionAnalytics(sessionId);
 
         if (!session) {
-          return createResponse(
-            { success: false, message: 'Session not found' },
-            { status: 404 }
-          );
+          return createResponse({ success: false, message: 'Session not found' }, { status: 404 });
         }
 
         return createResponse({
@@ -280,14 +271,12 @@ export function createAnalyticsHandlers(
         });
       } catch (error) {
         console.error('Failed to get session analytics', error);
-        
+
         return createResponse(
-          { 
-            success: false, 
+          {
+            success: false,
             message: 'Internal server error',
-            error: process.env.NODE_ENV === 'development' 
-              ? (error as Error).message 
-              : undefined
+            error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
           },
           { status: 500 }
         );
@@ -320,14 +309,12 @@ export function createAnalyticsHandlers(
         });
       } catch (error) {
         console.error('Failed to get funnel analysis', error);
-        
+
         return createResponse(
-          { 
-            success: false, 
+          {
+            success: false,
             message: 'Internal server error',
-            error: process.env.NODE_ENV === 'development' 
-              ? (error as Error).message 
-              : undefined
+            error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
           },
           { status: 500 }
         );
@@ -335,4 +322,3 @@ export function createAnalyticsHandlers(
     },
   };
 }
-

@@ -26,7 +26,7 @@ export class Analytics {
   private storageAdapter: AnalyticsStorageAdapter;
   private networkAdapter: AnalyticsNetworkAdapter;
   private deviceAdapter: AnalyticsDeviceAdapter;
-  
+
   private sessionId: string = '';
   private deviceId: string = '';
   private deviceInfo: DeviceInfo | null = null;
@@ -34,11 +34,11 @@ export class Analytics {
   private batchTimer: any = null;
 
   constructor(
-    config: Omit<AnalyticsConfig, 'endpoint'> & { 
-      adapter?: { 
-        storage: AnalyticsStorageAdapter; 
-        network: AnalyticsNetworkAdapter; 
-        device: AnalyticsDeviceAdapter; 
+    config: Omit<AnalyticsConfig, 'endpoint'> & {
+      adapter?: {
+        storage: AnalyticsStorageAdapter;
+        network: AnalyticsNetworkAdapter;
+        device: AnalyticsDeviceAdapter;
       };
       platform?: string;
       serverUrl?: string;
@@ -66,7 +66,7 @@ export class Analytics {
     // 合并默认配置
     const serverUrl = (config as any).serverUrl || config.endpoint || '/api/analytics/events';
     const platform = (config as any).platform || 'web';
-    
+
     this.config = {
       ...config,
       appId: config.appId,
@@ -87,7 +87,7 @@ export class Analytics {
       ignoreErrors: config.ignoreErrors ?? [],
       beforeSend: config.beforeSend,
     } as Required<AnalyticsConfig>;
-    
+
     this.eventQueue = new EventQueue(this.config.maxQueueSize);
     this.uploader = new Uploader({
       endpoint: this.config.endpoint,
@@ -99,7 +99,7 @@ export class Analytics {
       onSuccess: (events) => this.onUploadSuccess(events),
       onError: (error, events) => this.onUploadError(error, events),
     });
-    
+
     // 自动初始化
     this.init().catch((error) => {
       console.error('Failed to initialize Analytics:', error);
@@ -118,23 +118,23 @@ export class Analytics {
     try {
       // 初始化设备信息
       await this.initDeviceInfo();
-      
+
       // 初始化会话
       await this.initSession();
-      
+
       // 上传缓存的事件
       await this.uploader.uploadCachedEvents();
-      
+
       // 启动批量上传定时器
       this.startBatchTimer();
-      
+
       // 监听调试配置变化
       if (typeof window !== 'undefined') {
         window.addEventListener('analytics-debug-changed', ((e: CustomEvent) => {
           this.log(`Debug mode changed: ${e.detail.enabled ? 'enabled' : 'disabled'}`);
         }) as EventListener);
       }
-      
+
       this.initialized = true;
       this.log('Analytics initialized successfully');
     } catch (error) {
@@ -155,7 +155,10 @@ export class Analytics {
     if (!this.initialized) {
       console.warn('Analytics not initialized yet, queuing event...');
       // 可以选择在初始化后重试
-      setTimeout(() => this.track(eventNameOrType, propertiesOrName, maybeProperties, priority), 100);
+      setTimeout(
+        () => this.track(eventNameOrType, propertiesOrName, maybeProperties, priority),
+        100
+      );
       return;
     }
 
@@ -179,7 +182,7 @@ export class Analytics {
     }
 
     const event = this.createEvent(eventType, eventName, properties, priority);
-    
+
     // beforeSend 钩子
     const processedEvent = this.config.beforeSend?.(event) ?? event;
     if (!processedEvent) {
@@ -221,13 +224,16 @@ export class Analytics {
   /**
    * 追踪点击事件
    */
-  trackClick(elementInfo: {
-    elementId?: string;
-    elementClass?: string;
-    elementText?: string;
-    elementType?: string;
-    position?: { x: number; y: number };
-  }, properties?: Record<string, any>): void {
+  trackClick(
+    elementInfo: {
+      elementId?: string;
+      elementClass?: string;
+      elementText?: string;
+      elementType?: string;
+      position?: { x: number; y: number };
+    },
+    properties?: Record<string, any>
+  ): void {
     this.track(
       EventType.CLICK,
       'click',
@@ -358,7 +364,7 @@ export class Analytics {
    */
   private async flushHighPriority(): Promise<void> {
     const highPriorityEvents = this.eventQueue.getHighPriorityEvents();
-    
+
     if (highPriorityEvents.length > 0) {
       await this.uploader.upload(highPriorityEvents);
     }
@@ -394,13 +400,13 @@ export class Analytics {
     let pageUrl: string | undefined;
     let pageTitle: string | undefined;
     let referrer: string | undefined;
-    
+
     if (typeof window !== 'undefined') {
       pageUrl = window.location.href;
       pageTitle = document.title;
       referrer = document.referrer || undefined;
     }
-    
+
     return {
       event_id: this.generateEventId(),
       event_type: eventType,
@@ -430,12 +436,12 @@ export class Analytics {
     try {
       // 尝试从缓存获取
       let cachedDeviceInfo = await this.storageAdapter.getDeviceInfo();
-      
+
       if (!cachedDeviceInfo) {
         // 生成新的设备信息
         this.deviceInfo = await this.deviceAdapter.getDeviceInfo();
         this.deviceId = await this.deviceAdapter.generateDeviceId();
-        
+
         // 保存到缓存
         await this.storageAdapter.saveDeviceInfo(this.deviceInfo);
       } else {
@@ -456,7 +462,7 @@ export class Analytics {
     try {
       // 尝试从缓存获取
       const cachedSessionId = await this.storageAdapter.getSessionId();
-      
+
       if (cachedSessionId) {
         this.sessionId = cachedSessionId;
       } else {
@@ -478,7 +484,7 @@ export class Analytics {
       if (!this.eventQueue.isEmpty()) {
         this.flush();
       }
-      
+
       // 重试失败的上传
       this.uploader.retryFailedUploads();
     }, this.config.batchInterval);
@@ -524,10 +530,9 @@ export class Analytics {
    */
   private log(message: string, data?: any): void {
     // 检查动态调试配置（优先级高于初始化时的 debug 配置）
-    const dynamicDebug = typeof window !== 'undefined' 
-      ? localStorage.getItem('analytics-debug') === 'true'
-      : false;
-    
+    const dynamicDebug =
+      typeof window !== 'undefined' ? localStorage.getItem('analytics-debug') === 'true' : false;
+
     if (this.config.debug || dynamicDebug) {
       console.log(`[Analytics] ${message}`, data ?? '');
     }
@@ -555,4 +560,3 @@ export class Analytics {
     return this.initialized;
   }
 }
-

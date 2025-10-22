@@ -22,11 +22,13 @@ export class MobileStorageAdapter implements AnalyticsStorageAdapter {
   private SESSION_ID_KEY = '@analytics:session_id';
 
   // 需要注入具体的存储实现
-  constructor(private storage: {
-    getItem: (key: string) => Promise<string | null>;
-    setItem: (key: string, value: string) => Promise<void>;
-    removeItem: (key: string) => Promise<void>;
-  }) {}
+  constructor(
+    private storage: {
+      getItem: (key: string) => Promise<string | null>;
+      setItem: (key: string, value: string) => Promise<void>;
+      removeItem: (key: string) => Promise<void>;
+    }
+  ) {}
 
   async saveEvents(events: AnalyticsEvent[]): Promise<void> {
     try {
@@ -95,9 +97,11 @@ export class MobileStorageAdapter implements AnalyticsStorageAdapter {
  */
 export class MobileNetworkAdapter implements AnalyticsNetworkAdapter {
   // 需要注入网络检查函数
-  constructor(private netInfo?: {
-    fetch: () => Promise<{ isConnected: boolean | null }>;
-  }) {}
+  constructor(
+    private netInfo?: {
+      fetch: () => Promise<{ isConnected: boolean | null }>;
+    }
+  ) {}
 
   async upload(url: string, events: AnalyticsEvent[]): Promise<UploadResponse> {
     try {
@@ -154,18 +158,20 @@ export class MobileNetworkAdapter implements AnalyticsNetworkAdapter {
  */
 export class MobileDeviceAdapter implements AnalyticsDeviceAdapter {
   // 需要注入设备信息获取函数
-  constructor(private deviceInfoModule?: {
-    getSystemName: () => Promise<string>;
-    getSystemVersion: () => Promise<string>;
-    getModel: () => Promise<string>;
-    getBrand: () => Promise<string>;
-    getUniqueId: () => Promise<string>;
-  }) {}
+  constructor(
+    private deviceInfoModule?: {
+      getSystemName: () => Promise<string>;
+      getSystemVersion: () => Promise<string>;
+      getModel: () => Promise<string>;
+      getBrand: () => Promise<string>;
+      getUniqueId: () => Promise<string>;
+    }
+  ) {}
 
   async getDeviceInfo(): Promise<DeviceInfo> {
     try {
       const info = this.deviceInfoModule;
-      
+
       return {
         device_id: info ? await info.getUniqueId() : await this.generateDeviceId(),
         device_model: info ? await info.getModel() : 'unknown',
@@ -202,4 +208,3 @@ export class MobileDeviceAdapter implements AnalyticsDeviceAdapter {
     };
   }
 }
-

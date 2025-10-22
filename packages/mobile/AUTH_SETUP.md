@@ -3,6 +3,7 @@
 ## 🎯 功能概述
 
 已完成的移动端认证功能：
+
 - ✅ 用户注册
 - ✅ 用户登录
 - ✅ 自动保持登录状态
@@ -34,6 +35,7 @@ EXPO_PUBLIC_API_URL=http://your-server-ip:3000/api
 ```
 
 本地开发示例：
+
 ```bash
 # iOS 模拟器
 EXPO_PUBLIC_API_URL=http://localhost:3000/api
@@ -76,6 +78,7 @@ pnpm android  # Android 模拟器
 所有接口都在后台系统中：
 
 1. **注册** - `POST /api/users`
+
    ```json
    {
      "email": "user@example.com",
@@ -85,6 +88,7 @@ pnpm android  # Android 模拟器
    ```
 
 2. **登录** - `POST /api/auth/login`
+
    ```json
    {
      "email": "user@example.com",
@@ -124,11 +128,13 @@ const isAuth = await apiService.isAuthenticated();
 ### "我的"页面 (ProfileScreen)
 
 **未登录状态：**
+
 - 切换登录/注册模式
 - 输入邮箱、密码（注册还需输入用户名）
 - 提交登录/注册
 
 **已登录状态：**
+
 - 显示用户头像（首字母）
 - 显示用户名和邮箱
 - 显示用户角色（普通用户/管理员/超级管理员）
@@ -139,16 +145,19 @@ const isAuth = await apiService.isAuthenticated();
 认证逻辑使用相同的 `DrizzleAuthService`：
 
 ### 管理后台登录
+
 - 路径：`/admin/login`
 - 要求：角色必须是 `ADMIN` 或 `SUPER_ADMIN`
 - 使用：`/api/auth/login` 接口
 
 ### 移动端登录
+
 - 页面：ProfileScreen
 - 角色：任何角色都可以登录
 - 使用：`/api/auth/login` 接口
 
 ### Token 存储
+
 - **管理后台**：存储在浏览器 localStorage
 - **移动端**：存储在 AsyncStorage
 
@@ -200,6 +209,7 @@ npm start
 **问题**：无法连接到后端服务器
 
 **解决方案**：
+
 - 检查后端服务是否启动：`curl http://localhost:3000/api/health`
 - iOS 模拟器使用：`http://localhost:3000/api`
 - Android 模拟器使用：`http://10.0.2.2:3000/api`
@@ -210,6 +220,7 @@ npm start
 **问题**：找不到 AsyncStorage 模块
 
 **解决方案**：
+
 ```bash
 npx expo install @react-native-async-storage/async-storage
 ```
@@ -219,6 +230,7 @@ npx expo install @react-native-async-storage/async-storage
 **问题**：登录后立即提示未登录
 
 **解决方案**：
+
 - 清除应用数据重新登录
 - 检查后端 JWT_SECRET 配置
 - 查看后端日志确认 token 生成
@@ -232,6 +244,7 @@ npx expo install @react-native-async-storage/async-storage
 ## 📚 相关文件
 
 ### 后端
+
 - `packages/backend/src/app/api/(common)/auth/login/route.ts` - 登录接口
 - `packages/backend/src/app/api/(common)/auth/logout/route.ts` - 登出接口
 - `packages/backend/src/app/api/(common)/auth/me/route.ts` - 获取用户信息
@@ -239,6 +252,7 @@ npx expo install @react-native-async-storage/async-storage
 - `packages/backend/src/lib/auth/drizzle-auth.ts` - 认证服务
 
 ### 移动端
+
 - `packages/mobile/src/services/api.ts` - API 服务
 - `packages/mobile/src/screens/ProfileScreen.tsx` - 我的页面
 - `packages/mobile/src/navigation/TabNavigator.tsx` - Tab 导航
@@ -246,9 +260,9 @@ npx expo install @react-native-async-storage/async-storage
 ## 🎉 完成
 
 现在你的移动端已经具备完整的认证功能，可以：
+
 - ✅ 注册新用户
 - ✅ 登录现有用户
 - ✅ 自动保持登录
 - ✅ 安全退出登录
 - ✅ 与后台共享认证逻辑
-

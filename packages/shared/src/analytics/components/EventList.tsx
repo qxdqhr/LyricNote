@@ -136,9 +136,7 @@ export const EventList: React.FC<EventListProps> = ({
                     {event.pageUrl || '-'}
                   </div>
                   {event.pageTitle && (
-                    <div className="text-xs text-gray-500 max-w-xs truncate">
-                      {event.pageTitle}
-                    </div>
+                    <div className="text-xs text-gray-500 max-w-xs truncate">{event.pageTitle}</div>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -170,4 +168,3 @@ export const EventList: React.FC<EventListProps> = ({
     </div>
   );
 };
-

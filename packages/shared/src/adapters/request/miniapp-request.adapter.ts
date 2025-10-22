@@ -1,4 +1,4 @@
-import type { RequestAdapter, RequestConfig } from './request-adapter'
+import type { RequestAdapter, RequestConfig } from './request-adapter';
 
 /**
  * Taro Request 接口定义
@@ -6,42 +6,42 @@ import type { RequestAdapter, RequestConfig } from './request-adapter'
  */
 interface TaroRequestStatic {
   request<T = any>(options: {
-    url: string
-    method?: string
-    header?: Record<string, string>
-    data?: any
+    url: string;
+    method?: string;
+    header?: Record<string, string>;
+    data?: any;
   }): Promise<{
-    statusCode: number
-    data: T
-  }>
+    statusCode: number;
+    data: T;
+  }>;
 }
 
 /**
  * Miniapp 平台请求适配器
  * 基于 Taro.request API
- * 
+ *
  * 使用方式：
  * ```typescript
  * import Taro from '@tarojs/taro'
  * const adapter = new MiniappRequestAdapter(Taro)
  * ```
- * 
+ *
  * 适用平台：
  * - WeChat Miniapp
  * - Other Taro-based miniapps
  */
 export class MiniappRequestAdapter implements RequestAdapter {
-  private taro: TaroRequestStatic
+  private taro: TaroRequestStatic;
 
   constructor(taro: TaroRequestStatic) {
     if (!taro) {
-      throw new Error('MiniappRequestAdapter requires Taro instance')
+      throw new Error('MiniappRequestAdapter requires Taro instance');
     }
-    this.taro = taro
+    this.taro = taro;
   }
 
   async request<T = any>(config: RequestConfig): Promise<T> {
-    const { url, method = 'GET', headers = {}, body, params } = config
+    const { url, method = 'GET', headers = {}, body, params } = config;
 
     try {
       const response = await this.taro.request({
@@ -52,26 +52,25 @@ export class MiniappRequestAdapter implements RequestAdapter {
           ...headers,
         },
         data: method === 'GET' ? params : body,
-      })
+      });
 
-      const data = response.data as any
+      const data = response.data as any;
 
       // 统一返回格式
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return data
+        return data;
       } else {
         return {
           success: false,
           error: data.error || `请求失败: ${response.statusCode}`,
-        } as T
+        } as T;
       }
     } catch (error) {
-      console.error('[MiniappRequestAdapter] request error:', error)
+      console.error('[MiniappRequestAdapter] request error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '网络请求失败',
-      } as T
+      } as T;
     }
   }
 }
-

@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 简单的提交信息验证
+commit_msg=$(cat "$1")
+
+# 检查提交信息是否为空
+if [ -z "$commit_msg" ]; then
+  echo "❌ 提交信息不能为空"
+  exit 1
+fi
+
+# 检查提交信息长度
+if [ ${#commit_msg} -lt 10 ]; then
+  echo "❌ 提交信息太短，至少需要 10 个字符"
+  echo "当前长度: ${#commit_msg}"
+  exit 1
+fi
+
+echo "✅ 提交信息验证通过"
+

@@ -1,9 +1,9 @@
-import type { RequestAdapter, RequestConfig } from './request-adapter'
+import type { RequestAdapter, RequestConfig } from './request-adapter';
 
 /**
  * Web 平台请求适配器
  * 基于标准 fetch API
- * 
+ *
  * 适用平台：
  * - Web (Next.js)
  * - Desktop (Electron)
@@ -11,20 +11,20 @@ import type { RequestAdapter, RequestConfig } from './request-adapter'
  */
 export class WebRequestAdapter implements RequestAdapter {
   async request<T = any>(config: RequestConfig): Promise<T> {
-    const { url, method = 'GET', headers = {}, body, params } = config
+    const { url, method = 'GET', headers = {}, body, params } = config;
 
     // 构建 URL（如果有查询参数）
-    let fullUrl = url
+    let fullUrl = url;
     if (params) {
-      const searchParams = new URLSearchParams()
+      const searchParams = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          searchParams.append(key, String(value))
+          searchParams.append(key, String(value));
         }
-      })
-      const queryString = searchParams.toString()
+      });
+      const queryString = searchParams.toString();
       if (queryString) {
-        fullUrl += (url.includes('?') ? '&' : '?') + queryString
+        fullUrl += (url.includes('?') ? '&' : '?') + queryString;
       }
     }
 
@@ -37,20 +37,19 @@ export class WebRequestAdapter implements RequestAdapter {
       },
       body: body ? JSON.stringify(body) : undefined,
       credentials: 'include', // 🔐 自动发送和接收 Cookie（支持 httpOnly Cookie 认证）
-    })
+    });
 
     // 解析响应
-    const data = await response.json()
+    const data = await response.json();
 
     // 如果响应不成功，返回错误格式
     if (!response.ok) {
       return {
         success: false,
         error: data.error || `请求失败: ${response.status}`,
-      } as T
+      } as T;
     }
 
-    return data
+    return data;
   }
 }
-

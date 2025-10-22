@@ -23,7 +23,7 @@ export class EventQueue {
     }
 
     this.queue.push(event);
-    
+
     // 按优先级排序（高优先级在前）
     this.queue.sort((a, b) => b.priority - a.priority);
   }
@@ -32,7 +32,7 @@ export class EventQueue {
    * 批量添加事件
    */
   enqueueBatch(events: AnalyticsEvent[]): void {
-    events.forEach(event => this.enqueue(event));
+    events.forEach((event) => this.enqueue(event));
   }
 
   /**
@@ -56,14 +56,12 @@ export class EventQueue {
    */
   getHighPriorityEvents(): AnalyticsEvent[] {
     const highPriorityEvents = this.queue.filter(
-      event => event.priority >= 2 // HIGH 和 CRITICAL
+      (event) => event.priority >= 2 // HIGH 和 CRITICAL
     );
-    
+
     // 从队列中移除这些事件
-    this.queue = this.queue.filter(
-      event => event.priority < 2
-    );
-    
+    this.queue = this.queue.filter((event) => event.priority < 2);
+
     return highPriorityEvents;
   }
 
@@ -122,4 +120,3 @@ export class EventQueue {
     return [...this.queue];
   }
 }
-

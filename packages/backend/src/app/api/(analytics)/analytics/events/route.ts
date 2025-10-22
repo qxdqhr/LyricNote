@@ -1,7 +1,7 @@
 /**
  * 埋点事件上报接口
  * Analytics Events Endpoint
- * 
+ *
  * 使用从 shared 包导入的处理器
  */
 
@@ -32,4 +32,3 @@ export async function OPTIONS() {
     },
   });
 }
-

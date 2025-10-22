@@ -89,7 +89,7 @@ export function validateEvents(events: AnalyticsEvent[]): {
   const valid: AnalyticsEvent[] = [];
   const invalid: AnalyticsEvent[] = [];
 
-  events.forEach(event => {
+  events.forEach((event) => {
     if (validateEvent(event)) {
       valid.push(event);
     } else {
@@ -126,7 +126,7 @@ export function sanitizeEvent(
   if (sanitized.properties) {
     const cleanProperties = { ...sanitized.properties };
 
-    sensitiveKeys.forEach(key => {
+    sensitiveKeys.forEach((key) => {
       if (key in cleanProperties) {
         cleanProperties[key] = '***';
       }
@@ -162,10 +162,8 @@ export function generateUniqueId(prefix: string = ''): string {
  */
 export function isMobile(): boolean {
   if (typeof navigator === 'undefined') return false;
-  
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
+
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
 /**
@@ -178,7 +176,10 @@ export function isDevelopment(): boolean {
 /**
  * 格式化时间戳
  */
-export function formatTimestamp(timestamp: number, format: 'date' | 'datetime' | 'time' = 'datetime'): string {
+export function formatTimestamp(
+  timestamp: number,
+  format: 'date' | 'datetime' | 'time' = 'datetime'
+): string {
   const date = new Date(timestamp);
 
   switch (format) {
@@ -259,4 +260,3 @@ export function getReferrer(): string {
   }
   return '';
 }
-

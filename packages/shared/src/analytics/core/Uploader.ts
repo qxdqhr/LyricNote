@@ -3,11 +3,11 @@
  * Event Uploader
  */
 
-import type { 
-  AnalyticsEvent, 
-  AnalyticsNetworkAdapter, 
+import type {
+  AnalyticsEvent,
+  AnalyticsNetworkAdapter,
   AnalyticsStorageAdapter,
-  UploadResponse 
+  UploadResponse,
 } from '../types';
 
 export interface UploaderConfig {
@@ -47,10 +47,7 @@ export class Uploader {
     try {
       this.uploading = true;
 
-      const response = await this.config.networkAdapter.upload(
-        this.config.endpoint,
-        events
-      );
+      const response = await this.config.networkAdapter.upload(this.config.endpoint, events);
 
       if (response.success) {
         this.config.onSuccess?.(events);
@@ -61,7 +58,7 @@ export class Uploader {
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       this.config.onError?.(err, events);
-      
+
       // 添加到重试队列
       await this.addToRetryQueue(events);
       return false;
@@ -75,11 +72,9 @@ export class Uploader {
    */
   async uploadBatch(events: AnalyticsEvent[]): Promise<boolean> {
     const batches = this.splitIntoBatches(events, this.config.batchSize);
-    const results = await Promise.all(
-      batches.map(batch => this.upload(batch))
-    );
-    
-    return results.every(result => result);
+    const results = await Promise.all(batches.map((batch) => this.upload(batch)));
+
+    return results.every((result) => result);
   }
 
   /**
@@ -105,7 +100,7 @@ export class Uploader {
       await this.delay(this.config.retryInterval * (item.retryCount + 1));
 
       const success = await this.upload(item.events);
-      
+
       if (success) {
         this.retryQueue.delete(key);
       } else {
@@ -121,10 +116,10 @@ export class Uploader {
   async uploadCachedEvents(): Promise<void> {
     try {
       const cachedEvents = await this.config.storageAdapter.getEvents();
-      
+
       if (cachedEvents.length > 0) {
         const success = await this.uploadBatch(cachedEvents);
-        
+
         if (success) {
           await this.config.storageAdapter.clearEvents();
         }
@@ -163,11 +158,11 @@ export class Uploader {
    */
   private splitIntoBatches(events: AnalyticsEvent[], batchSize: number): AnalyticsEvent[][] {
     const batches: AnalyticsEvent[][] = [];
-    
+
     for (let i = 0; i < events.length; i += batchSize) {
       batches.push(events.slice(i, i + batchSize));
     }
-    
+
     return batches;
   }
 
@@ -175,7 +170,7 @@ export class Uploader {
    * 延迟函数
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -199,4 +194,3 @@ export class Uploader {
     this.retryQueue.clear();
   }
 }
-

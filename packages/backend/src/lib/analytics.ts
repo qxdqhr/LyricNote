@@ -3,7 +3,10 @@
  * Analytics System Initialization
  */
 
-import { createAnalyticsService, createAnalyticsHandlers } from '@lyricnote/shared/analytics/server';
+import {
+  createAnalyticsService,
+  createAnalyticsHandlers,
+} from '@lyricnote/shared/analytics/server';
 import { db } from './drizzle/db';
 import { analyticsEvents } from '../../drizzle/migrations/schema';
 import { logger } from './logger';
@@ -14,4 +17,3 @@ export const analyticsService = createAnalyticsService(db, analyticsEvents, logg
 
 // 创建 API 处理器
 export const analyticsHandlers = createAnalyticsHandlers(analyticsService, NextResponse);
-

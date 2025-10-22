@@ -1,5 +1,5 @@
-import Link from 'next/link'
-import { APP_CONFIG } from '@lyricnote/shared'
+import Link from 'next/link';
+import { APP_CONFIG } from '@lyricnote/shared';
 
 export default function HomePage() {
   return (
@@ -10,9 +10,7 @@ export default function HomePage() {
           <h1 className="text-5xl font-bold text-gray-900 mb-4">
             {APP_CONFIG.icon} {APP_CONFIG.name} Backend
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            日语音乐识别应用后端系统 + Web 管理平台
-          </p>
+          <p className="text-xl text-gray-600 mb-8">日语音乐识别应用后端系统 + Web 管理平台</p>
           <div className="flex flex-wrap justify-center gap-4">
             <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
               Next.js 15
@@ -37,49 +35,37 @@ export default function HomePage() {
           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
             <div className="text-3xl mb-4">🎤</div>
             <h3 className="text-xl font-semibold mb-2">音乐识别 API</h3>
-            <p className="text-gray-600">
-              基于 AI 的日语歌曲识别，支持多种音频格式，高准确率识别
-            </p>
+            <p className="text-gray-600">基于 AI 的日语歌曲识别，支持多种音频格式，高准确率识别</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
             <div className="text-3xl mb-4">📝</div>
             <h3 className="text-xl font-semibold mb-2">歌词处理</h3>
-            <p className="text-gray-600">
-              汉字、平假名、罗马音多语言转换，AI 增强的翻译服务
-            </p>
+            <p className="text-gray-600">汉字、平假名、罗马音多语言转换，AI 增强的翻译服务</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
             <div className="text-3xl mb-4">👥</div>
             <h3 className="text-xl font-semibold mb-2">用户管理</h3>
-            <p className="text-gray-600">
-              完整的用户注册、登录、权限控制和会话管理系统
-            </p>
+            <p className="text-gray-600">完整的用户注册、登录、权限控制和会话管理系统</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
             <div className="text-3xl mb-4">📚</div>
             <h3 className="text-xl font-semibold mb-2">收藏管理</h3>
-            <p className="text-gray-600">
-              智能分类的歌曲收藏系统，支持学习进度跟踪
-            </p>
+            <p className="text-gray-600">智能分类的歌曲收藏系统，支持学习进度跟踪</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
             <div className="text-3xl mb-4">🤖</div>
             <h3 className="text-xl font-semibold mb-2">AI 集成</h3>
-            <p className="text-gray-600">
-              DeepSeek 大模型日语优化处理，智能歌词转换和翻译
-            </p>
+            <p className="text-gray-600">DeepSeek 大模型日语优化处理，智能歌词转换和翻译</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
             <div className="text-3xl mb-4">📊</div>
             <h3 className="text-xl font-semibold mb-2">管理后台</h3>
-            <p className="text-gray-600">
-              完整的 Web 管理界面，数据分析和系统监控
-            </p>
+            <p className="text-gray-600">完整的 Web 管理界面，数据分析和系统监控</p>
           </div>
         </div>
 
@@ -150,5 +136,5 @@ export default function HomePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

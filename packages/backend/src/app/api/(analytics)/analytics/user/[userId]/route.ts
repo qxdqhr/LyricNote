@@ -12,10 +12,6 @@ export const runtime = 'nodejs';
  * GET /api/analytics/user/[userId]
  * 获取指定用户的行为分析
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { userId: string } }) {
   return analyticsHandlers.handleUserBehaviorGet(request, params);
 }
-

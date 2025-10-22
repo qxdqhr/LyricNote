@@ -17,21 +17,21 @@ import { apiService } from '../services/api';
 export default function ProfileScreen(): React.JSX.Element {
   // 使用统一的 useAuth Hook
   const { user, isLoggedIn, loading, checkingAuth, login, register, logout } = useAuth(apiService);
-  
+
   // 登录/注册模式切换
   const [isLogin, setIsLogin] = useState(true);
-  
+
   // 登录表单
   const loginForm = useAuthForm({
     email: '',
-    password: ''
+    password: '',
   });
-  
+
   // 注册表单
   const registerForm = useAuthForm({
     email: '',
     password: '',
-    username: ''
+    username: '',
   });
 
   // 处理登录
@@ -47,7 +47,7 @@ export default function ProfileScreen(): React.JSX.Element {
     }
 
     const result = await login(email, password);
-    
+
     if (result.success) {
       loginForm.reset();
       if (Platform.OS === 'web') {
@@ -86,7 +86,7 @@ export default function ProfileScreen(): React.JSX.Element {
     }
 
     const result = await register(email, password, username);
-    
+
     if (result.success) {
       registerForm.reset();
       if (Platform.OS === 'web') {
@@ -112,18 +112,14 @@ export default function ProfileScreen(): React.JSX.Element {
       }
     } else {
       // Native 端使用 Alert.alert
-      Alert.alert(
-        '确认',
-        '确定要退出登录吗？',
-        [
-          { text: '取消', style: 'cancel' },
-          { 
-            text: '退出', 
-            style: 'destructive',
-            onPress: logout
-          },
-        ]
-      );
+      Alert.alert('确认', '确定要退出登录吗？', [
+        { text: '取消', style: 'cancel' },
+        {
+          text: '退出',
+          style: 'destructive',
+          onPress: logout,
+        },
+      ]);
     }
   };
 
@@ -144,54 +140,54 @@ export default function ProfileScreen(): React.JSX.Element {
     return (
       <SafeAreaView style={styles.safeContainer} edges={['top', 'left', 'right']}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.card}>
-          <Text style={styles.title}>个人信息</Text>
-          
-          <View style={styles.userInfo}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>
-                {user.username?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
-              </Text>
+          <View style={styles.card}>
+            <Text style={styles.title}>个人信息</Text>
+
+            <View style={styles.userInfo}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>
+                  {user.username?.charAt(0).toUpperCase() || user.email.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+
+              <View style={styles.userDetails}>
+                <Text style={styles.userName}>{user.username || '未设置用户名'}</Text>
+                <Text style={styles.userEmail}>{user.email}</Text>
+                {user.role && (
+                  <View style={styles.roleContainer}>
+                    {user.role === 'SUPER_ADMIN' && (
+                      <View style={[styles.roleBadge, styles.superAdminBadge]}>
+                        <Text style={styles.roleBadgeText}>超级管理员</Text>
+                      </View>
+                    )}
+                    {user.role === 'ADMIN' && (
+                      <View style={[styles.roleBadge, styles.adminBadge]}>
+                        <Text style={styles.roleBadgeText}>管理员</Text>
+                      </View>
+                    )}
+                    {user.role === 'USER' && (
+                      <View style={[styles.roleBadge, styles.userBadge]}>
+                        <Text style={styles.roleBadgeText}>普通用户</Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+              </View>
             </View>
-            
-            <View style={styles.userDetails}>
-              <Text style={styles.userName}>{user.username || '未设置用户名'}</Text>
-              <Text style={styles.userEmail}>{user.email}</Text>
-              {user.role && (
-                <View style={styles.roleContainer}>
-                  {user.role === 'SUPER_ADMIN' && (
-                    <View style={[styles.roleBadge, styles.superAdminBadge]}>
-                      <Text style={styles.roleBadgeText}>超级管理员</Text>
-                    </View>
-                  )}
-                  {user.role === 'ADMIN' && (
-                    <View style={[styles.roleBadge, styles.adminBadge]}>
-                      <Text style={styles.roleBadgeText}>管理员</Text>
-                    </View>
-                  )}
-                  {user.role === 'USER' && (
-                    <View style={[styles.roleBadge, styles.userBadge]}>
-                      <Text style={styles.roleBadgeText}>普通用户</Text>
-                    </View>
-                  )}
-                </View>
+
+            <TouchableOpacity
+              style={[styles.logoutButton, loading && styles.buttonDisabled]}
+              onPress={handleLogout}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.logoutButtonText}>退出登录</Text>
               )}
-            </View>
+            </TouchableOpacity>
           </View>
-          
-          <TouchableOpacity 
-            style={[styles.logoutButton, loading && styles.buttonDisabled]} 
-            onPress={handleLogout}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.logoutButtonText}>退出登录</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -200,129 +196,129 @@ export default function ProfileScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.safeContainer} edges={['top', 'left', 'right']}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-      <View style={styles.card}>
-        <View style={styles.tabs}>
-          <TouchableOpacity
-            style={[styles.tab, isLogin && styles.tabActive]}
-            onPress={() => setIsLogin(true)}
-          >
-            <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>登录</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, !isLogin && styles.tabActive]}
-            onPress={() => setIsLogin(false)}
-          >
-            <Text style={[styles.tabText, !isLogin && styles.tabTextActive]}>注册</Text>
-          </TouchableOpacity>
+        <View style={styles.card}>
+          <View style={styles.tabs}>
+            <TouchableOpacity
+              style={[styles.tab, isLogin && styles.tabActive]}
+              onPress={() => setIsLogin(true)}
+            >
+              <Text style={[styles.tabText, isLogin && styles.tabTextActive]}>登录</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, !isLogin && styles.tabActive]}
+              onPress={() => setIsLogin(false)}
+            >
+              <Text style={[styles.tabText, !isLogin && styles.tabTextActive]}>注册</Text>
+            </TouchableOpacity>
+          </View>
+
+          {isLogin ? (
+            <View style={styles.form}>
+              <Text style={styles.formTitle}>登录账号</Text>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>邮箱</Text>
+                <TextInput
+                  style={styles.input}
+                  value={loginForm.values.email}
+                  onChangeText={(text) => loginForm.handleChange('email', text)}
+                  onBlur={() => loginForm.handleBlur('email')}
+                  placeholder="请输入邮箱"
+                  placeholderTextColor="#9ca3af"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  editable={!loading}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>密码</Text>
+                <TextInput
+                  style={styles.input}
+                  value={loginForm.values.password}
+                  onChangeText={(text) => loginForm.handleChange('password', text)}
+                  onBlur={() => loginForm.handleBlur('password')}
+                  placeholder="请输入密码"
+                  placeholderTextColor="#9ca3af"
+                  secureTextEntry
+                  editable={!loading}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.submitButton, loading && styles.buttonDisabled]}
+                onPress={handleLogin}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.submitButtonText}>登录</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.form}>
+              <Text style={styles.formTitle}>注册账号</Text>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>用户名</Text>
+                <TextInput
+                  style={styles.input}
+                  value={registerForm.values.username}
+                  onChangeText={(text) => registerForm.handleChange('username', text)}
+                  onBlur={() => registerForm.handleBlur('username')}
+                  placeholder="请输入用户名"
+                  placeholderTextColor="#9ca3af"
+                  autoCapitalize="none"
+                  editable={!loading}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>邮箱</Text>
+                <TextInput
+                  style={styles.input}
+                  value={registerForm.values.email}
+                  onChangeText={(text) => registerForm.handleChange('email', text)}
+                  onBlur={() => registerForm.handleBlur('email')}
+                  placeholder="请输入邮箱"
+                  placeholderTextColor="#9ca3af"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  editable={!loading}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>密码</Text>
+                <TextInput
+                  style={styles.input}
+                  value={registerForm.values.password}
+                  onChangeText={(text) => registerForm.handleChange('password', text)}
+                  onBlur={() => registerForm.handleBlur('password')}
+                  placeholder="请输入密码（至少6位）"
+                  placeholderTextColor="#9ca3af"
+                  secureTextEntry
+                  editable={!loading}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.submitButton, loading && styles.buttonDisabled]}
+                onPress={handleRegister}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.submitButtonText}>注册</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
-
-        {isLogin ? (
-          <View style={styles.form}>
-            <Text style={styles.formTitle}>登录账号</Text>
-            
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>邮箱</Text>
-              <TextInput
-                style={styles.input}
-                value={loginForm.values.email}
-                onChangeText={(text) => loginForm.handleChange('email', text)}
-                onBlur={() => loginForm.handleBlur('email')}
-                placeholder="请输入邮箱"
-                placeholderTextColor="#9ca3af"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                editable={!loading}
-              />
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>密码</Text>
-              <TextInput
-                style={styles.input}
-                value={loginForm.values.password}
-                onChangeText={(text) => loginForm.handleChange('password', text)}
-                onBlur={() => loginForm.handleBlur('password')}
-                placeholder="请输入密码"
-                placeholderTextColor="#9ca3af"
-                secureTextEntry
-                editable={!loading}
-              />
-            </View>
-
-            <TouchableOpacity 
-              style={[styles.submitButton, loading && styles.buttonDisabled]} 
-              onPress={handleLogin}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.submitButtonText}>登录</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.form}>
-            <Text style={styles.formTitle}>注册账号</Text>
-            
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>用户名</Text>
-              <TextInput
-                style={styles.input}
-                value={registerForm.values.username}
-                onChangeText={(text) => registerForm.handleChange('username', text)}
-                onBlur={() => registerForm.handleBlur('username')}
-                placeholder="请输入用户名"
-                placeholderTextColor="#9ca3af"
-                autoCapitalize="none"
-                editable={!loading}
-              />
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>邮箱</Text>
-              <TextInput
-                style={styles.input}
-                value={registerForm.values.email}
-                onChangeText={(text) => registerForm.handleChange('email', text)}
-                onBlur={() => registerForm.handleBlur('email')}
-                placeholder="请输入邮箱"
-                placeholderTextColor="#9ca3af"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                editable={!loading}
-              />
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>密码</Text>
-              <TextInput
-                style={styles.input}
-                value={registerForm.values.password}
-                onChangeText={(text) => registerForm.handleChange('password', text)}
-                onBlur={() => registerForm.handleBlur('password')}
-                placeholder="请输入密码（至少6位）"
-                placeholderTextColor="#9ca3af"
-                secureTextEntry
-                editable={!loading}
-              />
-            </View>
-
-            <TouchableOpacity 
-              style={[styles.submitButton, loading && styles.buttonDisabled]} 
-              onPress={handleRegister}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.submitButtonText}>注册</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-    </ScrollView>
+      </ScrollView>
     </SafeAreaView>
   );
 }

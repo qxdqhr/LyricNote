@@ -3,4 +3,4 @@
  * 直接导出 shared 的 useLocalStorage
  */
 
-export { useLocalStorage } from '@lyricnote/shared'
+export { useLocalStorage } from '@lyricnote/shared';

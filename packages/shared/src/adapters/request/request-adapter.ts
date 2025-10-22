@@ -3,15 +3,15 @@
  */
 export interface RequestConfig {
   /** 请求 URL */
-  url: string
+  url: string;
   /** HTTP 方法 */
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   /** 请求头 */
-  headers?: Record<string, string>
+  headers?: Record<string, string>;
   /** 请求体 */
-  body?: any
+  body?: any;
   /** 查询参数 */
-  params?: Record<string, any>
+  params?: Record<string, any>;
 }
 
 /**
@@ -26,6 +26,5 @@ export interface RequestAdapter {
    * @param config 请求配置
    * @returns 响应数据
    */
-  request<T = any>(config: RequestConfig): Promise<T>
+  request<T = any>(config: RequestConfig): Promise<T>;
 }
-

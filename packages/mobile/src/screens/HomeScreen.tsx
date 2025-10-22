@@ -1,24 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  StatusBar,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, ActivityIndicator, StatusBar, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { 
-  APP_TITLES,
-  APP_CONFIG,
-} from '@lyricnote/shared';
+import { APP_TITLES, APP_CONFIG } from '@lyricnote/shared';
 import { apiService } from '../services/api';
 
 interface User {
-  id: string
-  email: string
-  username: string
-  nickname?: string
-  role: string
+  id: string;
+  email: string;
+  username: string;
+  nickname?: string;
+  role: string;
 }
 
 export default function HomeScreen(): React.JSX.Element {
@@ -33,7 +24,7 @@ export default function HomeScreen(): React.JSX.Element {
     try {
       setLoading(true);
       const isAuth = await apiService.isAuthenticated();
-      
+
       if (isAuth) {
         const response = await apiService.getCurrentUser();
         if (response.success && response.data) {
@@ -50,7 +41,7 @@ export default function HomeScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <StatusBar barStyle="dark-content" backgroundColor="#f9fafb" />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{APP_TITLES.main}</Text>
@@ -61,7 +52,7 @@ export default function HomeScreen(): React.JSX.Element {
         <Text style={styles.emoji}>🎵</Text>
         <Text style={styles.title}>{APP_TITLES.welcome}</Text>
         <Text style={styles.subtitle}>{APP_CONFIG.description}</Text>
-        
+
         {loading ? (
           <ActivityIndicator size="large" color="#8b5cf6" style={styles.loading} />
         ) : user ? (

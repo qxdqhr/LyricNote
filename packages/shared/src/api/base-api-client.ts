@@ -1,14 +1,14 @@
-import type { StorageAdapter } from '../adapters/storage'
-import type { RequestAdapter, RequestConfig } from '../adapters/request'
-import { API_ROUTES, STORAGE_KEYS } from './API_ROUTES'
-import type { ApiResponse, User } from '../types'
+import type { StorageAdapter } from '../adapters/storage';
+import type { RequestAdapter, RequestConfig } from '../adapters/request';
+import { API_ROUTES, STORAGE_KEYS } from './API_ROUTES';
+import type { ApiResponse, User } from '../types';
 
 /**
  * 认证响应类型
  */
 export interface AuthResponse {
-  user: User
-  token: string
+  user: User;
+  token: string;
 }
 
 /**
@@ -16,8 +16,8 @@ export interface AuthResponse {
  * 提供统一的 API 调用逻辑，通过适配器模式支持多平台
  */
 export class BaseApiClient {
-  private token: string | null = null
-  private user: User | null = null
+  private token: string | null = null;
+  private user: User | null = null;
 
   constructor(
     private storage: StorageAdapter,
@@ -30,13 +30,13 @@ export class BaseApiClient {
    */
   async init(): Promise<void> {
     try {
-      this.token = await this.storage.getItem(STORAGE_KEYS.AUTH_TOKEN)
-      const userData = await this.storage.getItem(STORAGE_KEYS.USER_DATA)
+      this.token = await this.storage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+      const userData = await this.storage.getItem(STORAGE_KEYS.USER_DATA);
       if (userData) {
-        this.user = JSON.parse(userData)
+        this.user = JSON.parse(userData);
       }
     } catch (error) {
-      console.error('Failed to load auth data:', error)
+      console.error('Failed to load auth data:', error);
     }
   }
 
@@ -44,11 +44,11 @@ export class BaseApiClient {
    * 设置认证 token
    */
   async setToken(token: string | null): Promise<void> {
-    this.token = token
+    this.token = token;
     if (token) {
-      await this.storage.setItem(STORAGE_KEYS.AUTH_TOKEN, token)
+      await this.storage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
     } else {
-      await this.storage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+      await this.storage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
     }
   }
 
@@ -56,11 +56,11 @@ export class BaseApiClient {
    * 设置用户信息
    */
   async setUser(user: User | null): Promise<void> {
-    this.user = user
+    this.user = user;
     if (user) {
-      await this.storage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user))
+      await this.storage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
     } else {
-      await this.storage.removeItem(STORAGE_KEYS.USER_DATA)
+      await this.storage.removeItem(STORAGE_KEYS.USER_DATA);
     }
   }
 
@@ -68,31 +68,31 @@ export class BaseApiClient {
    * 获取当前 token
    */
   getToken(): string | null {
-    return this.token
+    return this.token;
   }
 
   /**
    * 获取当前用户
    */
   getUser(): User | null {
-    return this.user
+    return this.user;
   }
 
   /**
    * 检查是否已登录
    */
   isAuthenticated(): boolean {
-    return !!this.token
+    return !!this.token;
   }
 
   /**
    * 清除用户数据
    */
   async clearUserData(): Promise<void> {
-    await this.storage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
-    await this.storage.removeItem(STORAGE_KEYS.USER_DATA)
-    this.token = null
-    this.user = null
+    await this.storage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    await this.storage.removeItem(STORAGE_KEYS.USER_DATA);
+    this.token = null;
+    this.user = null;
   }
 
   /**
@@ -103,26 +103,26 @@ export class BaseApiClient {
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         ...(config.headers || {}),
-      }
+      };
 
       // 添加认证 token
       if (this.token) {
-        headers['Authorization'] = `Bearer ${this.token}`
+        headers['Authorization'] = `Bearer ${this.token}`;
       }
 
       const response = await this.request.request<ApiResponse<T>>({
         ...config,
         url: `${this.baseUrl}${config.url}`,
         headers,
-      })
+      });
 
-      return response
+      return response;
     } catch (error) {
-      console.error('API request error:', error)
+      console.error('API request error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '网络错误，请重试',
-      }
+      };
     }
   }
 
@@ -140,14 +140,14 @@ export class BaseApiClient {
       url: API_ROUTES.AUTH.REGISTER,
       method: 'POST',
       body: { email, password, username },
-    })
+    });
 
     if (response.success && response.data) {
-      await this.setToken(response.data.token)
-      await this.setUser(response.data.user)
+      await this.setToken(response.data.token);
+      await this.setUser(response.data.user);
     }
 
-    return response
+    return response;
   }
 
   /**
@@ -158,28 +158,30 @@ export class BaseApiClient {
       url: API_ROUTES.AUTH.LOGIN,
       method: 'POST',
       body: { email, password },
-    })
+    });
 
     if (response.success && response.data) {
-      await this.setToken(response.data.token)
-      await this.setUser(response.data.user)
-      
+      await this.setToken(response.data.token);
+      await this.setUser(response.data.user);
+
       // 客户端埋点 - 登录成功
       // 注意：客户端需要自己初始化 Analytics 并调用 track
       // 这里只是提供数据，具体埋点由使用方决定
       if (typeof window !== 'undefined') {
         // 可以通过事件通知使用方
-        window.dispatchEvent(new CustomEvent('user_login_success', {
-          detail: {
-            userId: response.data.user.id,
-            email: response.data.user.email,
-            role: response.data.user.role,
-          }
-        }))
+        window.dispatchEvent(
+          new CustomEvent('user_login_success', {
+            detail: {
+              userId: response.data.user.id,
+              email: response.data.user.email,
+              role: response.data.user.role,
+            },
+          })
+        );
       }
     }
 
-    return response
+    return response;
   }
 
   /**
@@ -189,12 +191,12 @@ export class BaseApiClient {
     const response = await this.sendRequest<void>({
       url: API_ROUTES.AUTH.LOGOUT,
       method: 'POST',
-    })
+    });
 
     // 无论成功与否，都清除本地数据
-    await this.clearUserData()
+    await this.clearUserData();
 
-    return response
+    return response;
   }
 
   /**
@@ -204,22 +206,22 @@ export class BaseApiClient {
     const response = await this.sendRequest<any>({
       url: API_ROUTES.AUTH.ME,
       method: 'GET',
-    })
+    });
 
     // 统一处理响应格式：自动展开 response.data.user 为 response.data
     if (response.success && response.data) {
       // 如果 data 是嵌套的 {user: {...}, session: {...}} 格式，提取 user
-      const userData = response.data.user || response.data
-      
-      await this.setUser(userData)
-      
+      const userData = response.data.user || response.data;
+
+      await this.setUser(userData);
+
       return {
         ...response,
-        data: userData
-      }
+        data: userData,
+      };
     }
 
-    return response
+    return response;
   }
 
   // ==================== 用户相关 API ====================
@@ -228,15 +230,15 @@ export class BaseApiClient {
    * 获取用户列表
    */
   async getUsers(params?: {
-    page?: number
-    limit?: number
-    search?: string
+    page?: number;
+    limit?: number;
+    search?: string;
   }): Promise<ApiResponse<{ users: User[]; total: number }>> {
     return this.sendRequest({
       url: API_ROUTES.USERS.LIST,
       method: 'GET',
       params,
-    })
+    });
   }
 
   /**
@@ -246,21 +248,18 @@ export class BaseApiClient {
     return this.sendRequest({
       url: API_ROUTES.USERS.DETAIL(userId),
       method: 'GET',
-    })
+    });
   }
 
   /**
    * 更新用户信息
    */
-  async updateUser(
-    userId: string,
-    data: Partial<User>
-  ): Promise<ApiResponse<User>> {
+  async updateUser(userId: string, data: Partial<User>): Promise<ApiResponse<User>> {
     return this.sendRequest({
       url: API_ROUTES.USERS.UPDATE(userId),
       method: 'PUT',
       body: data,
-    })
+    });
   }
 
   /**
@@ -270,7 +269,7 @@ export class BaseApiClient {
     return this.sendRequest({
       url: API_ROUTES.USERS.DELETE(userId),
       method: 'DELETE',
-    })
+    });
   }
 
   // ==================== 通用方法 ====================
@@ -279,28 +278,27 @@ export class BaseApiClient {
    * 发送 GET 请求
    */
   async get<T = any>(url: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
-    return this.sendRequest({ url, method: 'GET', params })
+    return this.sendRequest({ url, method: 'GET', params });
   }
 
   /**
    * 发送 POST 请求
    */
   async post<T = any>(url: string, body?: any): Promise<ApiResponse<T>> {
-    return this.sendRequest({ url, method: 'POST', body })
+    return this.sendRequest({ url, method: 'POST', body });
   }
 
   /**
    * 发送 PUT 请求
    */
   async put<T = any>(url: string, body?: any): Promise<ApiResponse<T>> {
-    return this.sendRequest({ url, method: 'PUT', body })
+    return this.sendRequest({ url, method: 'PUT', body });
   }
 
   /**
    * 发送 DELETE 请求
    */
   async delete<T = any>(url: string): Promise<ApiResponse<T>> {
-    return this.sendRequest({ url, method: 'DELETE' })
+    return this.sendRequest({ url, method: 'DELETE' });
   }
 }
-

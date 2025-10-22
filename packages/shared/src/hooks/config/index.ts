@@ -1,1 +1,1 @@
-export * from './useConfigs'
+export * from './useConfigs';

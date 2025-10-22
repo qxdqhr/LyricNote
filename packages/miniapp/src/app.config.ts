@@ -1,15 +1,12 @@
-import { APP_CONFIG, UI_TEXT } from '@lyricnote/shared'
+import { APP_CONFIG, UI_TEXT } from '@lyricnote/shared';
 
 export default defineAppConfig({
-  pages: [
-    'pages/index/index',
-    'pages/profile/index'
-  ],
+  pages: ['pages/index/index', 'pages/profile/index'],
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#8b5cf6',
     navigationBarTitleText: APP_CONFIG.name,
-    navigationBarTextStyle: 'white'
+    navigationBarTextStyle: 'white',
   },
   tabBar: {
     color: '#9ca3af',
@@ -19,14 +16,12 @@ export default defineAppConfig({
     list: [
       {
         pagePath: 'pages/index/index',
-        text: UI_TEXT.navigation.home
+        text: UI_TEXT.navigation.home,
       },
       {
         pagePath: 'pages/profile/index',
-        text: UI_TEXT.navigation.profile
-      }
-    ]
-  }
-})
-
-
+        text: UI_TEXT.navigation.profile,
+      },
+    ],
+  },
+});

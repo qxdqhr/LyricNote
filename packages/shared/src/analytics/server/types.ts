@@ -71,4 +71,3 @@ export interface DatabaseInstance {
   insert: (...args: any[]) => any;
   delete: (...args: any[]) => any;
 }
-

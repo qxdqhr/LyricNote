@@ -1,21 +1,21 @@
 /**
  * Analytics 预设配置
  * Analytics Preset Configurations
- * 
+ *
  * 为不同平台和应用提供预配置的 Analytics 实例
  */
 
-import { createAnalytics } from './singleton'
-import { webAdapter } from '../adapters/web'
-import type { Analytics } from '../core/Analytics'
+import { createAnalytics } from './singleton';
+import { webAdapter } from '../adapters/web';
+import type { Analytics } from '../core/Analytics';
 
 /**
  * Web 管理后台 Analytics 配置
  */
 export interface WebAdminConfig {
-  endpoint?: string
-  debug?: boolean
-  enableAutoPageView?: boolean
+  endpoint?: string;
+  debug?: boolean;
+  enableAutoPageView?: boolean;
 }
 
 /**
@@ -29,17 +29,18 @@ export function getWebAdminAnalytics(config: WebAdminConfig = {}): Analytics {
     platform: 'web',
     adapter: webAdapter,
     enableAutoPageView: config.enableAutoPageView ?? false,
-    debug: config.debug ?? (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development'),
-  } as any)
+    debug:
+      config.debug ?? (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development'),
+  } as any);
 }
 
 /**
  * Web 前台 Analytics 配置
  */
 export interface WebFrontendConfig {
-  endpoint?: string
-  debug?: boolean
-  enableAutoPageView?: boolean
+  endpoint?: string;
+  debug?: boolean;
+  enableAutoPageView?: boolean;
 }
 
 /**
@@ -53,10 +54,10 @@ export function getWebFrontendAnalytics(config: WebFrontendConfig = {}): Analyti
     platform: 'web',
     adapter: webAdapter,
     enableAutoPageView: config.enableAutoPageView ?? true,
-    debug: config.debug ?? (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development'),
-  } as any)
+    debug:
+      config.debug ?? (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development'),
+  } as any);
 }
 
 // Note: Mobile 和 Miniapp 的预设配置需要在各自的项目中根据实际情况创建
 // 因为它们需要注入平台特定的适配器实例（如 AsyncStorage, Taro API 等）
-

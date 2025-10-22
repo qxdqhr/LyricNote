@@ -1,7 +1,7 @@
 /**
  * Analytics 客户端
  * Analytics Client
- * 
+ *
  * 导出单例管理器和预设配置
  */
 
@@ -13,16 +13,9 @@ export {
   resetAllAnalytics,
   isAnalyticsInitialized,
   getAllInstanceKeys,
-} from './singleton'
+} from './singleton';
 
 // 预设配置
-export {
-  getWebAdminAnalytics,
-  getWebFrontendAnalytics,
-} from './presets'
+export { getWebAdminAnalytics, getWebFrontendAnalytics } from './presets';
 
-export type {
-  WebAdminConfig,
-  WebFrontendConfig,
-} from './presets'
-
+export type { WebAdminConfig, WebFrontendConfig } from './presets';

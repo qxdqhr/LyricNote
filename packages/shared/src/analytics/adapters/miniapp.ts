@@ -21,11 +21,13 @@ export class MiniappStorageAdapter implements AnalyticsStorageAdapter {
   private SESSION_ID_KEY = 'analytics_session_id';
 
   // 需要注入 Taro 的存储 API
-  constructor(private storage?: {
-    getStorageSync: (key: string) => any;
-    setStorageSync: (key: string, data: any) => void;
-    removeStorageSync: (key: string) => void;
-  }) {}
+  constructor(
+    private storage?: {
+      getStorageSync: (key: string) => any;
+      setStorageSync: (key: string, data: any) => void;
+      removeStorageSync: (key: string) => void;
+    }
+  ) {}
 
   async saveEvents(events: AnalyticsEvent[]): Promise<void> {
     try {
@@ -110,11 +112,14 @@ export class MiniappStorageAdapter implements AnalyticsStorageAdapter {
  */
 export class MiniappNetworkAdapter implements AnalyticsNetworkAdapter {
   // 需要注入 Taro 的网络 API
-  constructor(private request?: {
-    request: (options: any) => Promise<any>;
-  }, private netInfo?: {
-    getNetworkType: () => Promise<{ networkType: string }>;
-  }) {}
+  constructor(
+    private request?: {
+      request: (options: any) => Promise<any>;
+    },
+    private netInfo?: {
+      getNetworkType: () => Promise<{ networkType: string }>;
+    }
+  ) {}
 
   async upload(url: string, events: AnalyticsEvent[]): Promise<UploadResponse> {
     try {
@@ -174,15 +179,17 @@ export class MiniappNetworkAdapter implements AnalyticsNetworkAdapter {
  */
 export class MiniappDeviceAdapter implements AnalyticsDeviceAdapter {
   // 需要注入 Taro 的系统信息 API
-  constructor(private systemInfo?: {
-    getSystemInfoSync: () => any;
-  }) {}
+  constructor(
+    private systemInfo?: {
+      getSystemInfoSync: () => any;
+    }
+  ) {}
 
   async getDeviceInfo(): Promise<DeviceInfo> {
     try {
       if (this.systemInfo) {
         const info = this.systemInfo.getSystemInfoSync();
-        
+
         return {
           device_id: await this.generateDeviceId(),
           device_model: info.model || 'unknown',
@@ -196,7 +203,7 @@ export class MiniappDeviceAdapter implements AnalyticsDeviceAdapter {
           network_type: info.networkType,
         };
       }
-      
+
       return this.getDefaultDeviceInfo();
     } catch (error) {
       console.error('Failed to get device info:', error);
@@ -224,4 +231,3 @@ export class MiniappDeviceAdapter implements AnalyticsDeviceAdapter {
     };
   }
 }
-

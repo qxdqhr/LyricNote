@@ -5,14 +5,7 @@
 
 // ==================== 基础类型 ====================
 
-export type ConfigType = 
-  | 'string'
-  | 'number'
-  | 'boolean'
-  | 'json'
-  | 'enum'
-  | 'url'
-  | 'email'
+export type ConfigType = 'string' | 'number' | 'boolean' | 'json' | 'enum' | 'url' | 'email';
 
 export type UiComponentType =
   | 'input'
@@ -20,17 +13,11 @@ export type UiComponentType =
   | 'select'
   | 'switch'
   | 'slider'
-  | 'color-picker'
+  | 'color-picker';
 
-export type ConfigStatus = 
-  | 'active'
-  | 'deprecated'
-  | 'disabled'
+export type ConfigStatus = 'active' | 'deprecated' | 'disabled';
 
-export type ChangeType =
-  | 'create'
-  | 'update'
-  | 'delete'
+export type ChangeType = 'create' | 'update' | 'delete';
 
 // ==================== 配置定义 ====================
 
@@ -39,21 +26,21 @@ export type ChangeType =
  */
 export interface ValidationRules {
   /** 最小值（数字） */
-  min?: number
+  min?: number;
   /** 最大值（数字） */
-  max?: number
+  max?: number;
   /** 最小长度（字符串） */
-  minLength?: number
+  minLength?: number;
   /** 最大长度（字符串） */
-  maxLength?: number
+  maxLength?: number;
   /** 正则表达式 */
-  pattern?: string
+  pattern?: string;
   /** 是否为邮箱 */
-  email?: boolean
+  email?: boolean;
   /** 是否为 URL */
-  url?: boolean
+  url?: boolean;
   /** 自定义验证函数名 */
-  custom?: string
+  custom?: string;
 }
 
 /**
@@ -61,23 +48,23 @@ export interface ValidationRules {
  */
 export interface UiProps {
   /** 占位符 */
-  placeholder?: string
+  placeholder?: string;
   /** 帮助文本 */
-  helpText?: string
+  helpText?: string;
   /** 前缀 */
-  prefix?: string
+  prefix?: string;
   /** 后缀 */
-  suffix?: string
+  suffix?: string;
   /** 步长（数字输入） */
-  step?: number
+  step?: number;
   /** 行数（文本域） */
-  rows?: number
+  rows?: number;
   /** 是否禁用 */
-  disabled?: boolean
+  disabled?: boolean;
   /** 最大值（滑块） */
-  max?: number
+  max?: number;
   /** 最小值（滑块） */
-  min?: number
+  min?: number;
 }
 
 /**
@@ -85,13 +72,13 @@ export interface UiProps {
  */
 export interface EnumOption {
   /** 显示标签 */
-  label: string
+  label: string;
   /** 实际值 */
-  value: any
+  value: any;
   /** 描述 */
-  description?: string
+  description?: string;
   /** 图标 */
-  icon?: string
+  icon?: string;
 }
 
 /**
@@ -99,67 +86,67 @@ export interface EnumOption {
  */
 export interface ConfigDefinition {
   // 基本信息
-  id?: number
-  key: string
-  category: string
-  name: string
-  description?: string
-  
+  id?: number;
+  key: string;
+  category: string;
+  name: string;
+  description?: string;
+
   // 类型和验证
-  type: ConfigType
-  validationRules?: ValidationRules
-  
+  type: ConfigType;
+  validationRules?: ValidationRules;
+
   // UI 配置
-  uiComponent?: UiComponentType
-  uiProps?: UiProps
-  
+  uiComponent?: UiComponentType;
+  uiProps?: UiProps;
+
   // 安全和权限
-  isSensitive?: boolean
-  isRequired?: boolean
-  isReadonly?: boolean
-  requiredPermission?: string
-  
+  isSensitive?: boolean;
+  isRequired?: boolean;
+  isReadonly?: boolean;
+  requiredPermission?: string;
+
   // 默认值和选项
-  defaultValue?: any
-  enumOptions?: EnumOption[]
-  
+  defaultValue?: any;
+  enumOptions?: EnumOption[];
+
   // 依赖和条件
-  dependsOn?: string[]
-  showIf?: Record<string, any>
-  
+  dependsOn?: string[];
+  showIf?: Record<string, any>;
+
   // 分组和排序
-  groupName?: string
-  sortOrder?: number
-  
+  groupName?: string;
+  sortOrder?: number;
+
   // 版本和状态
-  version?: number
-  status?: ConfigStatus
-  
+  version?: number;
+  status?: ConfigStatus;
+
   // 标签
-  tags?: string[]
-  
+  tags?: string[];
+
   // 元数据
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  createdBy?: number
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  createdBy?: number;
 }
 
 /**
  * 配置定义（用于创建）
  */
-export type ConfigDefinitionCreate = Omit<ConfigDefinition, 'id' | 'createdAt' | 'updatedAt'>
+export type ConfigDefinitionCreate = Omit<ConfigDefinition, 'id' | 'createdAt' | 'updatedAt'>;
 
 /**
  * 配置定义（用于更新）
  */
-export type ConfigDefinitionUpdate = Partial<ConfigDefinitionCreate>
+export type ConfigDefinitionUpdate = Partial<ConfigDefinitionCreate>;
 
 /**
  * 配置定义（带值）
  */
 export interface ConfigDefinitionWithValue extends ConfigDefinition {
-  value: any
-  displayValue?: any // 用于敏感信息掩码
+  value: any;
+  displayValue?: any; // 用于敏感信息掩码
 }
 
 // ==================== 配置值 ====================
@@ -168,8 +155,8 @@ export interface ConfigDefinitionWithValue extends ConfigDefinition {
  * 配置值
  */
 export interface ConfigValue {
-  key: string
-  value: any
+  key: string;
+  value: any;
 }
 
 // ==================== 配置历史 ====================
@@ -178,22 +165,22 @@ export interface ConfigValue {
  * 配置变更历史
  */
 export interface ConfigHistoryRecord {
-  id?: number
-  configKey: string
-  oldValue?: string
-  newValue?: string
-  changeType: ChangeType
-  changedBy?: number
-  changedAt?: Date | string
-  reason?: string
-  ipAddress?: string
-  userAgent?: string
+  id?: number;
+  configKey: string;
+  oldValue?: string;
+  newValue?: string;
+  changeType: ChangeType;
+  changedBy?: number;
+  changedAt?: Date | string;
+  reason?: string;
+  ipAddress?: string;
+  userAgent?: string;
 }
 
 /**
  * 配置历史（用于创建）
  */
-export type ConfigHistoryCreate = Omit<ConfigHistoryRecord, 'id' | 'changedAt'>
+export type ConfigHistoryCreate = Omit<ConfigHistoryRecord, 'id' | 'changedAt'>;
 
 // ==================== 验证结果 ====================
 
@@ -201,8 +188,8 @@ export type ConfigHistoryCreate = Omit<ConfigHistoryRecord, 'id' | 'changedAt'>
  * 验证结果
  */
 export interface ValidationResult {
-  valid: boolean
-  errors: string[]
+  valid: boolean;
+  errors: string[];
 }
 
 // ==================== API 响应 ====================
@@ -211,24 +198,24 @@ export interface ValidationResult {
  * API 成功响应
  */
 export interface ApiSuccessResponse<T = any> {
-  success: true
-  data: T
-  message?: string
+  success: true;
+  data: T;
+  message?: string;
 }
 
 /**
  * API 错误响应
  */
 export interface ApiErrorResponse {
-  success: false
-  error: string
-  details?: any
+  success: false;
+  error: string;
+  details?: any;
 }
 
 /**
  * API 响应（联合类型）
  */
-export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse
+export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 // ==================== 配置分组 ====================
 
@@ -236,16 +223,16 @@ export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse
  * 配置分组（UI 展示用）
  */
 export interface ConfigGroup {
-  groupName: string
-  definitions: ConfigDefinitionWithValue[]
+  groupName: string;
+  definitions: ConfigDefinitionWithValue[];
 }
 
 /**
  * 分类配置（UI 展示用）
  */
 export interface CategoryConfigs {
-  category: string
-  groups: ConfigGroup[]
+  category: string;
+  groups: ConfigGroup[];
 }
 
 // ==================== 批量操作 ====================
@@ -254,7 +241,7 @@ export interface CategoryConfigs {
  * 批量注册配置定义
  */
 export interface BatchRegisterRequest {
-  definitions: ConfigDefinitionCreate[]
+  definitions: ConfigDefinitionCreate[];
 }
 
 /**
@@ -262,9 +249,9 @@ export interface BatchRegisterRequest {
  */
 export interface BatchUpdateValuesRequest {
   values: Array<{
-    key: string
-    value: any
-  }>
+    key: string;
+    value: any;
+  }>;
 }
 
 // ==================== 配置元数据 ====================
@@ -273,10 +260,9 @@ export interface BatchUpdateValuesRequest {
  * 配置元数据缓存
  */
 export interface ConfigMetadataCache {
-  category: string
-  type: ConfigType
-  isSensitive: boolean
-  isRequired: boolean
-  defaultDescription?: string
+  category: string;
+  type: ConfigType;
+  isSensitive: boolean;
+  isRequired: boolean;
+  defaultDescription?: string;
 }
-

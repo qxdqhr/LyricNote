@@ -12,11 +12,7 @@ import { EventType, EventPriority } from '../types';
  * @param priority 事件优先级
  */
 export function Track(eventName?: string, priority: EventPriority = EventPriority.NORMAL) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (this: any, ...args: any[]) {
@@ -67,11 +63,7 @@ export function Track(eventName?: string, priority: EventPriority = EventPriorit
  * 追踪点击事件
  */
 export function TrackClick(eventName?: string) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = function (this: any, ...args: any[]) {
@@ -98,11 +90,7 @@ export function TrackClick(eventName?: string) {
  * 追踪性能
  */
 export function TrackPerformance(metricName?: string) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (this: any, ...args: any[]) {
@@ -114,28 +102,18 @@ export function TrackPerformance(metricName?: string) {
         const result = await originalMethod.apply(this, args);
         const duration = performance.now() - startTime;
 
-        analytics?.trackPerformance(
-          finalMetricName,
-          duration,
-          'ms',
-          {
-            success: true,
-          }
-        );
+        analytics?.trackPerformance(finalMetricName, duration, 'ms', {
+          success: true,
+        });
 
         return result;
       } catch (error) {
         const duration = performance.now() - startTime;
 
-        analytics?.trackPerformance(
-          finalMetricName,
-          duration,
-          'ms',
-          {
-            success: false,
-            error: error instanceof Error ? error.message : String(error),
-          }
-        );
+        analytics?.trackPerformance(finalMetricName, duration, 'ms', {
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+        });
 
         throw error;
       }
@@ -149,11 +127,7 @@ export function TrackPerformance(metricName?: string) {
  * 自动捕获错误
  */
 export function CatchError(eventName?: string) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (this: any, ...args: any[]) {
@@ -211,4 +185,3 @@ export function setGlobalAnalytics(analytics: Analytics): void {
 export function getGlobalAnalytics(): Analytics | null {
   return (globalThis as any).__analytics__ || null;
 }
-

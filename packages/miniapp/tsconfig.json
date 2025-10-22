@@ -21,13 +21,8 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "typeRoots": [
-      "node_modules/@types",
-      "global.d.ts"
-    ]
+    "typeRoots": ["node_modules/@types", "global.d.ts"]
   },
   "include": ["./src", "./types", "./config"],
   "exclude": ["node_modules", "dist"]
 }
-
-

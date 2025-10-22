@@ -15,4 +15,3 @@ export const runtime = 'nodejs';
 export async function POST(request: NextRequest) {
   return analyticsHandlers.handleFunnelPost(request);
 }
-

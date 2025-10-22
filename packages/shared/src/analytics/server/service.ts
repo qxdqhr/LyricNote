@@ -1,7 +1,7 @@
 /**
  * 埋点分析服务
  * Analytics Service
- * 
+ *
  * 使用方式：
  * import { createAnalyticsService } from '@lyricnote/shared/analytics/server'
  * const service = createAnalyticsService(db, analyticsEvents, logger)
@@ -11,13 +11,13 @@ import { eq, and, gte, lte, sql, desc, asc, count, inArray } from 'drizzle-orm';
 
 // 导出类型
 export * from './types';
-import type { 
-  AnalyticsEvent, 
-  AnalyticsQueryParams, 
-  AnalyticsStats, 
-  UserBehavior, 
+import type {
+  AnalyticsEvent,
+  AnalyticsQueryParams,
+  AnalyticsStats,
+  UserBehavior,
   SessionAnalytics,
-  DatabaseInstance 
+  DatabaseInstance,
 } from './types';
 
 // Logger 接口
@@ -56,7 +56,7 @@ export function createAnalyticsService(
         // 使用 onConflictDoNothing 来忽略重复的事件 ID
         // 这样可以避免前端重试或离线队列导致的重复插入
         await db.insert(analyticsEvents).values(events).onConflictDoNothing();
-        
+
         logger.info('Analytics events inserted', { count: events.length });
       } catch (error) {
         logger.error('Failed to insert analytics events', error as Error);
@@ -235,12 +235,7 @@ export function createAnalyticsService(
             count: count(),
           })
           .from(analyticsEvents)
-          .where(
-            and(
-              whereClause,
-              sql`${analyticsEvents.pageUrl} IS NOT NULL`
-            )
-          )
+          .where(and(whereClause, sql`${analyticsEvents.pageUrl} IS NOT NULL`))
           .groupBy(analyticsEvents.pageUrl)
           .orderBy(desc(count()))
           .limit(10);
@@ -250,20 +245,20 @@ export function createAnalyticsService(
           uniqueUsers: Number(uniqueUsers),
           uniqueSessions: Number(uniqueSessions),
           uniqueDevices: Number(uniqueDevices),
-        eventsByType: eventsByType.map((e: any) => ({
-          eventType: e.eventType,
-          count: Number(e.count),
-        })),
-        eventsByPlatform: eventsByPlatform.map((e: any) => ({
-          platform: e.platform,
-          count: Number(e.count),
-        })),
-        topPages: topPages
-          .filter((p: any) => p.pageUrl)
-          .map((p: any) => ({
-            pageUrl: p.pageUrl!,
-            count: Number(p.count),
+          eventsByType: eventsByType.map((e: any) => ({
+            eventType: e.eventType,
+            count: Number(e.count),
           })),
+          eventsByPlatform: eventsByPlatform.map((e: any) => ({
+            platform: e.platform,
+            count: Number(e.count),
+          })),
+          topPages: topPages
+            .filter((p: any) => p.pageUrl)
+            .map((p: any) => ({
+              pageUrl: p.pageUrl!,
+              count: Number(p.count),
+            })),
         };
       } catch (error) {
         logger.error('Failed to get analytics stats', error as Error);
@@ -437,7 +432,7 @@ export function createAnalyticsService(
           .where(lte(analyticsEvents.timestamp, cutoffDate.toISOString()));
 
         logger.info('Old analytics events cleaned', { daysToKeep });
-        
+
         return 0; // Drizzle doesn't return affected rows count in delete
       } catch (error) {
         logger.error('Failed to clean old analytics events', error as Error);

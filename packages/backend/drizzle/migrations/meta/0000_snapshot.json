@@ -218,12 +218,8 @@
           "tableFrom": "Session",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -349,12 +345,8 @@
           "tableFrom": "Account",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -570,12 +562,8 @@
           "tableFrom": "lyrics",
           "tableTo": "songs",
           "schemaTo": "public",
-          "columnsFrom": [
-            "songId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["songId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -672,12 +660,8 @@
           "tableFrom": "user_lyrics",
           "tableTo": "lyrics",
           "schemaTo": "public",
-          "columnsFrom": [
-            "lyricId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["lyricId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -686,12 +670,8 @@
           "tableFrom": "user_lyrics",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -769,12 +749,8 @@
           "tableFrom": "collection_songs",
           "tableTo": "collections",
           "schemaTo": "public",
-          "columnsFrom": [
-            "collectionId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["collectionId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -783,12 +759,8 @@
           "tableFrom": "collection_songs",
           "tableTo": "songs",
           "schemaTo": "public",
-          "columnsFrom": [
-            "songId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["songId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -860,12 +832,8 @@
           "tableFrom": "favorites",
           "tableTo": "songs",
           "schemaTo": "public",
-          "columnsFrom": [
-            "songId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["songId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -874,12 +842,8 @@
           "tableFrom": "favorites",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1025,12 +989,8 @@
           "tableFrom": "recognitions",
           "tableTo": "songs",
           "schemaTo": "public",
-          "columnsFrom": [
-            "songId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["songId"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "cascade"
         },
@@ -1039,12 +999,8 @@
           "tableFrom": "recognitions",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "cascade"
         }
@@ -1204,12 +1160,8 @@
           "tableFrom": "collections",
           "tableTo": "User",
           "schemaTo": "public",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1292,31 +1244,17 @@
   "enums": {
     "public.LyricStatus": {
       "name": "LyricStatus",
-      "values": [
-        "PENDING",
-        "APPROVED",
-        "REJECTED",
-        "PROCESSING"
-      ],
+      "values": ["PENDING", "APPROVED", "REJECTED", "PROCESSING"],
       "schema": "public"
     },
     "public.RecognitionStatus": {
       "name": "RecognitionStatus",
-      "values": [
-        "PROCESSING",
-        "SUCCESS",
-        "FAILED",
-        "TIMEOUT"
-      ],
+      "values": ["PROCESSING", "SUCCESS", "FAILED", "TIMEOUT"],
       "schema": "public"
     },
     "public.UserRole": {
       "name": "UserRole",
-      "values": [
-        "USER",
-        "ADMIN",
-        "SUPER_ADMIN"
-      ],
+      "values": ["USER", "ADMIN", "SUPER_ADMIN"],
       "schema": "public"
     }
   },

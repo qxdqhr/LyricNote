@@ -19,7 +19,7 @@ export const API_ROUTES = {
     UPDATE: (id: string) => `/users/${id}`,
     DELETE: (id: string) => `/users/${id}`,
   },
-} as const
+} as const;
 
 /**
  * 存储键常量
@@ -28,5 +28,4 @@ export const STORAGE_KEYS = {
   AUTH_TOKEN: 'auth_token',
   USER_DATA: 'user_data',
   REFRESH_TOKEN: 'refresh_token',
-} as const
-
+} as const;

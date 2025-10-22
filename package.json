@@ -16,41 +16,61 @@
     "build:shared": "cd packages/shared && pnpm build",
     "build:backend": "cd packages/backend && pnpm build",
     "build:mobile": "cd packages/mobile && pnpm build",
-    "test": "npm run test:backend && npm run test:mobile",
-    "test:backend": "cd packages/backend && npm run test",
-    "test:mobile": "cd packages/mobile && npm run test",
-    "lint": "npm run lint:backend && npm run lint:mobile",
-    "lint:backend": "cd packages/backend && npm run lint",
-    "lint:mobile": "cd packages/mobile && npm run lint",
-    "clean": "npm run clean:backend && npm run clean:mobile && rm -rf node_modules",
+    "test": "pnpm test:backend && pnpm test:mobile",
+    "test:backend": "cd packages/backend && pnpm test",
+    "test:mobile": "cd packages/mobile && pnpm test",
+    "lint": "pnpm lint:backend && pnpm lint:mobile",
+    "lint:backend": "cd packages/backend && pnpm lint",
+    "lint:mobile": "cd packages/mobile && pnpm lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "clean": "pnpm clean:backend && pnpm clean:mobile && rm -rf node_modules",
     "clean:backend": "cd packages/backend && rm -rf node_modules .next",
     "clean:mobile": "cd packages/mobile && rm -rf node_modules",
     "devdb:generate": "cd packages/backend && dotenv -e .env.local -- npx drizzle-kit generate",
     "devdb:push": "cd packages/backend && dotenv -e .env.local -- npx drizzle-kit push",
     "devdb:migrate": "cd packages/backend && dotenv -e .env.local -- npx drizzle-kit migrate",
-    "devdb:seed": "cd packages/backend && dotenv -e .env.local -- npm run db:seed",
+    "devdb:seed": "cd packages/backend && dotenv -e .env.local -- pnpm db:seed",
     "devdb:studio": "cd packages/backend && dotenv -e .env.local -- npx drizzle-kit studio --port 5555",
     "devdb:introspect": "cd packages/backend && dotenv -e .env.local -- npx drizzle-kit introspect",
     "prodb:generate": "cd packages/backend && dotenv -e .env.production -- npx drizzle-kit generate",
     "prodb:push": "cd packages/backend && dotenv -e .env.production -- npx drizzle-kit push",
     "prodb:migrate": "cd packages/backend && dotenv -e .env.production -- npx drizzle-kit migrate",
-    "prodb:seed": "cd packages/backend && dotenv -e .env.production -- npm run db:seed",
+    "prodb:seed": "cd packages/backend && dotenv -e .env.production -- pnpm db:seed",
     "prodb:studio": "cd packages/backend && dotenv -e .env.production -- npx drizzle-kit studio --port 5556",
     "prodb:introspect": "cd packages/backend && dotenv -e .env.production -- npx drizzle-kit introspect",
-    "setup": "npm install && npm run devdb:generate",
-    "reset": "npm run clean && npm run setup",
+    "setup": "pnpm install && pnpm devdb:generate",
+    "reset": "pnpm clean && pnpm setup",
     "quick-setup": "./scripts/setup.sh",
     "quick-dev": "./scripts/dev.sh",
-    "ci:test": "npm run test",
-    "ci:build": "npm run build",
-    "ci:lint": "npm run lint",
+    "ci:test": "pnpm test",
+    "ci:build": "pnpm build",
+    "ci:lint": "pnpm lint",
     "docker:build": "docker build -f packages/backend/Dockerfile -t app .",
-    "docker:run": "docker run -p 3000:3000 app"
+    "docker:run": "docker run -p 3000:3000 app",
+    "prepare": "husky install",
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
     "concurrently": "^8.2.0",
     "dotenv-cli": "^7.3.0",
-    "typescript": "^5.0.0"
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
   },
   "keywords": [
     "japanese",
@@ -70,14 +90,16 @@
   },
   "engines": {
     "node": ">=18.0.0",
-    "npm": ">=8.0.0"
+    "pnpm": ">=8.0.0"
   },
+  "packageManager": "pnpm@8.15.0",
   "pnpm": {
     "overrides": {
-      "react": "19.1.0",
-      "react-dom": "19.1.0",
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0",
       "@types/react": "~18.2.43",
-      "@types/react-dom": "~18.2.17"
+      "@types/react-dom": "~18.2.17",
+      "typescript": "^5.3.3"
     }
   }
 }

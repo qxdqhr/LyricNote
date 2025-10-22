@@ -171,60 +171,60 @@ export class WebDeviceAdapter implements AnalyticsDeviceAdapter {
     // 尝试从 localStorage 获取已存在的 ID
     if (typeof window !== 'undefined') {
       let deviceId = localStorage.getItem('analytics:device_id');
-      
+
       if (!deviceId) {
         deviceId = `web_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
         localStorage.setItem('analytics:device_id', deviceId);
       }
-      
+
       return deviceId;
     }
-    
+
     return `web_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
   }
 
   private getOSName(): string {
     if (typeof navigator === 'undefined') return 'unknown';
-    
+
     const userAgent = navigator.userAgent;
-    
+
     if (userAgent.indexOf('Win') !== -1) return 'Windows';
     if (userAgent.indexOf('Mac') !== -1) return 'MacOS';
     if (userAgent.indexOf('Linux') !== -1) return 'Linux';
     if (userAgent.indexOf('Android') !== -1) return 'Android';
     if (userAgent.indexOf('iOS') !== -1) return 'iOS';
-    
+
     return 'unknown';
   }
 
   private getOSVersion(): string {
     if (typeof navigator === 'undefined') return 'unknown';
-    
+
     const userAgent = navigator.userAgent;
     const match = userAgent.match(/\(([^)]+)\)/);
-    
+
     return match ? match[1] : 'unknown';
   }
 
   private getBrowserName(): string {
     if (typeof navigator === 'undefined') return 'unknown';
-    
+
     const userAgent = navigator.userAgent;
-    
+
     if (userAgent.indexOf('Chrome') !== -1) return 'Chrome';
     if (userAgent.indexOf('Safari') !== -1) return 'Safari';
     if (userAgent.indexOf('Firefox') !== -1) return 'Firefox';
     if (userAgent.indexOf('Edge') !== -1) return 'Edge';
-    
+
     return 'unknown';
   }
 
   private getBrowserVersion(): string {
     if (typeof navigator === 'undefined') return 'unknown';
-    
+
     const userAgent = navigator.userAgent;
     const match = userAgent.match(/(Chrome|Safari|Firefox|Edge)\/(\d+)/);
-    
+
     return match ? match[2] : 'unknown';
   }
 }
