@@ -45,7 +45,7 @@ export default function AdminLogin() {
     if (isLoggedIn && user) {
       // 检查用户角色权限
       if (['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-        console.log('用户已登录，跳转到管理后台');
+        console.warn('用户已登录，跳转到管理后台');
         router.push('/admin/config');
         router.refresh();
       }
@@ -99,7 +99,7 @@ export default function AdminLogin() {
       await navigator.clipboard.writeText(credentials);
       // 可以添加一个临时的成功提示
     } catch (err) {
-      console.log('复制失败，请手动复制');
+      console.warn('复制失败，请手动复制');
     }
   };
 
@@ -157,7 +157,7 @@ export default function AdminLogin() {
         return;
       }
 
-      console.log('登录成功，用户信息:', user.email, user.role);
+      console.warn('登录成功，用户信息:', user.email, user.role);
 
       // 记录登录成功埋点（客户端）
       analytics?.track('user_login_success', {

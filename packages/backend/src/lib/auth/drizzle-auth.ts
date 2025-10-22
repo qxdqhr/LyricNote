@@ -13,7 +13,7 @@ if (!JWT_SECRET) {
   console.error('❌ CRITICAL: JWT_SECRET environment variable is not set!');
   throw new Error(
     'JWT_SECRET is required. Please set BETTER_AUTH_SECRET or JWT_SECRET in your .env file. ' +
-      "You can generate a secure secret with: node -e \"console.log(require('crypto').randomBytes(64).toString('hex'))\""
+      "You can generate a secure secret with: node -e \"console.warn(require('crypto').randomBytes(64).toString('hex'))\""
   );
 }
 
@@ -27,7 +27,7 @@ if (process.env.NODE_ENV === 'production' && JWT_SECRET.length < 32) {
 
 const JWT_EXPIRES_IN = '7d';
 
-console.log('✅ JWT configuration loaded successfully');
+console.warn('✅ JWT configuration loaded successfully');
 
 // 用户认证服务
 export class DrizzleAuthService {

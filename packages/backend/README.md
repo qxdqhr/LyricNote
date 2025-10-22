@@ -4,7 +4,8 @@
 
 ## 📋 项目概述
 
-LyricNote Backend 是一个基于 Next.js 构建的现代化后端系统，为 LyricNote 移动应用提供 API 服务，并包含完整的 Web 管理后台。
+LyricNote
+Backend 是一个基于 Next.js 构建的现代化后端系统，为 LyricNote 移动应用提供 API 服务，并包含完整的 Web 管理后台。
 
 ### 🎯 核心功能
 
@@ -100,46 +101,46 @@ npm run dev
 
 ### 认证相关
 
-| 方法 | 路径 | 描述 |
-|------|------|------|
-| POST | `/api/auth/login` | 用户登录 |
+| 方法 | 路径               | 描述     |
+| ---- | ------------------ | -------- |
+| POST | `/api/auth/login`  | 用户登录 |
 | POST | `/api/auth/logout` | 用户退出 |
-| POST | `/api/users` | 用户注册 |
+| POST | `/api/users`       | 用户注册 |
 
 ### 音乐识别
 
-| 方法 | 路径 | 描述 |
-|------|------|------|
+| 方法 | 路径               | 描述     |
+| ---- | ------------------ | -------- |
 | POST | `/api/recognition` | 音频识别 |
-| GET | `/api/recognition` | 识别历史 |
+| GET  | `/api/recognition` | 识别历史 |
 
 ### 歌词处理
 
-| 方法 | 路径 | 描述 |
-|------|------|------|
-| GET | `/api/lyrics` | 获取歌词 |
-| POST | `/api/lyrics` | 创建/更新歌词 |
-| POST | `/api/lyrics/convert` | 歌词格式转换 |
-| PUT | `/api/lyrics/convert` | 批量转换 |
+| 方法 | 路径                  | 描述          |
+| ---- | --------------------- | ------------- |
+| GET  | `/api/lyrics`         | 获取歌词      |
+| POST | `/api/lyrics`         | 创建/更新歌词 |
+| POST | `/api/lyrics/convert` | 歌词格式转换  |
+| PUT  | `/api/lyrics/convert` | 批量转换      |
 
 ### 使用示例
 
 #### 音频识别
 
 ```javascript
-const formData = new FormData()
-formData.append('audio', audioFile)
-formData.append('userId', 'user_id')
+const formData = new FormData();
+formData.append('audio', audioFile);
+formData.append('userId', 'user_id');
 
 const response = await fetch('/api/recognition', {
   method: 'POST',
   headers: {
-    'Authorization': `Bearer ${token}`
+    Authorization: `Bearer ${token}`,
   },
-  body: formData
-})
+  body: formData,
+});
 
-const result = await response.json()
+const result = await response.json();
 ```
 
 #### 歌词转换
@@ -149,16 +150,16 @@ const response = await fetch('/api/lyrics/convert', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
+    Authorization: `Bearer ${token}`,
   },
   body: JSON.stringify({
     text: '夜に駆ける',
     to: 'all',
-    useAI: true
-  })
-})
+    useAI: true,
+  }),
+});
 
-const converted = await response.json()
+const converted = await response.json();
 // 返回: { kanji, hiragana, romaji, translation }
 ```
 

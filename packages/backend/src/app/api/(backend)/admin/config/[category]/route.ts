@@ -77,7 +77,7 @@ export const POST = createAdminRoute(async (request, context) => {
       ) {
         // 简单检查：如果值等于 displayValue（掩码值），则跳过
         if (value === currentConfig.displayValue) {
-          console.log(`ℹ️  [Config] Skipping unchanged masked value for ${key}`);
+          console.warn(`ℹ️  [Config] Skipping unchanged masked value for ${key}`);
           skippedCount++;
           continue;
         }
@@ -93,11 +93,11 @@ export const POST = createAdminRoute(async (request, context) => {
         ipAddress,
         userAgent,
       });
-      console.log(`✅ [Config] Updated ${updates.length} configs in category ${category}`);
+      console.warn(`✅ [Config] Updated ${updates.length} configs in category ${category}`);
     }
 
     if (skippedCount > 0) {
-      console.log(`ℹ️  [Config] Skipped ${skippedCount} unchanged masked values`);
+      console.warn(`ℹ️  [Config] Skipped ${skippedCount} unchanged masked values`);
     }
 
     return NextResponse.json({

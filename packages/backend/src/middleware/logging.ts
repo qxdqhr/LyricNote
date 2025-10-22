@@ -5,7 +5,7 @@
  * 自动记录 API 请求日志，包括请求信息、响应状态、耗时等
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import type { RouteHandler, RouteContext } from './auth';
 import { apiLogger } from '../lib/logger';
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/drizzle/db';
-import { user, session } from '../../../../../../drizzle/migrations/schema';
+import { user } from '../../../../../../drizzle/migrations/schema';
 import { eq, or, ilike, count, desc } from 'drizzle-orm';
 import { DrizzleAuthService } from '@/lib/auth/drizzle-auth';
 

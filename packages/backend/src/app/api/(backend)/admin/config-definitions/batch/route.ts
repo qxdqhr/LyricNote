@@ -3,10 +3,10 @@
  * 用于批量导入配置定义
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createAdminRoute } from '@/middleware';
 import { configEngine } from '@/lib/config/config-engine';
-import type { ConfigDefinitionCreate, BatchRegisterRequest } from '@/lib/config/config-types';
+import type { BatchRegisterRequest } from '@/lib/config/config-types';
 
 /**
  * POST /api/admin/config-definitions/batch
