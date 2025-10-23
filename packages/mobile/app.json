@@ -7,15 +7,14 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "owner": "your-expo-username",
-    "projectId": "your-expo-project-id",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.qhrqht.lyricnote"
     },
     "android": {
       "adaptiveIcon": {
@@ -29,16 +28,11 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
+      "apiUrl": "https://your-domain.com/api",
       "eas": {
-        "projectId": "your-expo-project-id"
-      },
-      "apiUrl": "https://your-domain.com/api"
+        "projectId": "e587ca0a-8977-4d5b-b8b8-9f7ffb6be2b6"
+      }
     },
-    "updates": {
-      "url": "https://u.expo.dev/your-expo-project-id"
-    },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    }
+    "owner": "qhrqht"
   }
 }

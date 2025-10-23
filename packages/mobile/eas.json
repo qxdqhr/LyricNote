@@ -7,7 +7,8 @@
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "simulator": true
       },
       "android": {
         "buildType": "apk"
@@ -28,7 +29,7 @@
         "resourceClass": "m-medium"
       },
       "android": {
-        "buildType": "aab"
+        "buildType": "app-bundle"
       }
     }
   },
