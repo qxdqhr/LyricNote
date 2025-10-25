@@ -41,6 +41,14 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  optimizeDeps: {
+    include: ['@lyricnote/shared'],
+  },
+  build: {
+    commonjsOptions: {
+      include: [/node_modules/, /shared/],
+    },
+  },
   server: {
     port: 5173,
   },

@@ -1,7 +1,6 @@
 {
   "name": "@lyricnote/shared",
   "version": "1.0.0",
-  "type": "module",
   "description": "Shared types, constants, and utilities for LyricNote",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
