@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    image: crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/lyricnote/lyricnote:latest
+    container_name: lyricnote-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - lyricnote-network
+
+networks:
+  lyricnote-network:
+    driver: bridge
+
