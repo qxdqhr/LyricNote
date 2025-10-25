@@ -6,8 +6,8 @@
 import Taro from '@tarojs/taro';
 import {
   BaseApiClient,
-  ApiMiniappStorageAdapter,
-  ApiMiniappRequestAdapter,
+  MiniAppStorageAdapter,
+  MiniappRequestAdapter,
 } from '@lyricnote/shared';
 
 // API 配置
@@ -17,8 +17,8 @@ const API_BASE_URL = process.env.TARO_APP_API_URL || 'http://localhost:3000/api'
  * 创建 Miniapp 端 API 客户端实例
  */
 const apiClient = new BaseApiClient(
-  new ApiMiniappStorageAdapter(Taro), // 注入 Taro 实例
-  new ApiMiniappRequestAdapter(Taro), // 注入 Taro 实例
+  new MiniAppStorageAdapter(Taro), // 注入 Taro 实例
+  new MiniappRequestAdapter(Taro), // 注入 Taro 实例
   API_BASE_URL
 );
 
