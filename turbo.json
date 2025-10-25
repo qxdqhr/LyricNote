@@ -13,6 +13,10 @@
         "NEXTAUTH_URL"
       ]
     },
+    "@lyricnote/mobile#build": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
     "dev": {
       "cache": false,
       "persistent": true
