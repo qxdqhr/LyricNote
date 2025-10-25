@@ -8,15 +8,9 @@ export type {
   FileManagerProps,
   FileManagerState,
   FilePreviewModalProps,
-  UploadModalProps
+  UploadModalProps,
 } from './file-manager';
 
-export type {
-  FileShareModalProps,
-  ShareInfo
-} from './file-share-modal';
+export type { FileShareModalProps, ShareInfo } from './file-share-modal';
 
-export type {
-  FolderNode,
-  FolderManagerProps
-} from './folder-manager';
+export type { FolderNode, FolderManagerProps } from './folder-manager';

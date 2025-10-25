@@ -59,9 +59,10 @@ export async function POST(request: NextRequest) {
     }
 
     // 获取客户端 IP
-    const clientIp = request.headers.get('x-real-ip') ||
-                     request.headers.get('x-forwarded-for')?.split(',')[0] ||
-                     '127.0.0.1';
+    const clientIp =
+      request.headers.get('x-real-ip') ||
+      request.headers.get('x-forwarded-for')?.split(',')[0] ||
+      '127.0.0.1';
 
     // 获取回调 URL
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || request.nextUrl.origin;
@@ -102,4 +103,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

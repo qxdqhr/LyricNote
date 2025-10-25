@@ -4,7 +4,8 @@
 
 ### 1. **通用文件上传组件集成**
 
-首页配置的图片上传已成功集成 `FileUploader` 通用上传组件，实现真实的文件上传到服务器。
+首页配置的图片上传已成功集成 `FileUploader`
+通用上传组件，实现真实的文件上传到服务器。
 
 ---
 
@@ -35,12 +36,16 @@
 ### 1. **文件服务初始化**
 
 ```tsx
-const [fileService, setFileService] = useState<UniversalFileService | null>(null);
+const [fileService, setFileService] = useState<UniversalFileService | null>(
+  null
+);
 
 useEffect(() => {
   async function initFileService() {
     try {
-      const { createUniversalFileServiceWithConfigManager } = await import('@/lib/universalFile');
+      const { createUniversalFileServiceWithConfigManager } = await import(
+        '@/lib/universalFile'
+      );
       const service = await createUniversalFileServiceWithConfigManager();
       setFileService(service);
     } catch (error) {
@@ -52,6 +57,7 @@ useEffect(() => {
 ```
 
 **说明：**
+
 - 使用 `createUniversalFileServiceWithConfigManager()` 创建文件服务实例
 - 该服务会自动加载系统配置（OSS、CDN等）
 - 在组件挂载时初始化，确保上传功能可用
@@ -62,25 +68,27 @@ useEffect(() => {
 
 ```tsx
 <FileUploader
-  fileService={fileService}              // 文件服务实例
-  moduleId="homepage"                    // 模块标识
-  businessId="background-images"         // 业务标识
-  acceptedTypes={[                       // 允许的文件类型
+  fileService={fileService} // 文件服务实例
+  moduleId="homepage" // 模块标识
+  businessId="background-images" // 业务标识
+  acceptedTypes={[
+    // 允许的文件类型
     'image/jpeg',
     'image/png',
     'image/webp',
-    'image/gif'
+    'image/gif',
   ]}
-  maxFileSize={10}                       // 最大10MB
-  maxFiles={1}                           // 只允许上传1个文件
-  multiple={false}                       // 不支持多选
-  mode="compact"                         // 紧凑模式
-  onUploadSuccess={handleUploadSuccess}  // 上传成功回调
-  onUploadError={handleUploadError}      // 上传失败回调
+  maxFileSize={10} // 最大10MB
+  maxFiles={1} // 只允许上传1个文件
+  multiple={false} // 不支持多选
+  mode="compact" // 紧凑模式
+  onUploadSuccess={handleUploadSuccess} // 上传成功回调
+  onUploadError={handleUploadError} // 上传失败回调
 />
 ```
 
 **参数说明：**
+
 - `moduleId`: 用于标识文件属于哪个模块（这里是 "homepage"）
 - `businessId`: 业务标识（这里是 "background-images"）
 - `acceptedTypes`: 限制文件类型为图片格式
@@ -110,6 +118,7 @@ const handleUploadSuccess = (files: FileMetadata[]) => {
 ```
 
 **URL 优先级：**
+
 1. `cdnUrl` - CDN 加速 URL（如果配置了 CDN）
 2. `storagePath` - 原始存储路径
 
@@ -136,6 +145,7 @@ WHERE module_id = 'homepage'
 ```
 
 **存储的信息包括：**
+
 - 原始文件名
 - 系统生成的存储文件名
 - CDN URL
@@ -148,6 +158,7 @@ WHERE module_id = 'homepage'
 ## 🎨 UI 交互
 
 ### 初始状态
+
 ```
 ┌─────────────────────────────┐
 │ 背景图片                     │
@@ -159,6 +170,7 @@ WHERE module_id = 'homepage'
 ```
 
 ### 显示上传器
+
 ```
 ┌─────────────────────────────┐
 │ 背景图片                     │
@@ -175,6 +187,7 @@ WHERE module_id = 'homepage'
 ```
 
 ### 上传中
+
 ```
 ┌─────────────────────────────┐
 │ 背景图片                     │
@@ -188,6 +201,7 @@ WHERE module_id = 'homepage'
 ```
 
 ### 上传成功
+
 ```
 ┌─────────────────────────────┐
 │ 背景图片                     │
@@ -206,18 +220,22 @@ WHERE module_id = 'homepage'
 ## 🔐 文件安全
 
 ### 1. **类型验证**
+
 - 只允许上传图片格式（JPEG, PNG, WebP, GIF）
 - 前端和后端双重验证
 
 ### 2. **大小限制**
+
 - 最大文件大小：10MB
 - 防止超大文件上传
 
 ### 3. **文件命名**
+
 - 自动生成唯一的存储文件名
 - 避免文件名冲突
 
 ### 4. **MD5 校验**
+
 - 自动计算文件 MD5 哈希
 - 支持文件去重
 
@@ -226,6 +244,7 @@ WHERE module_id = 'homepage'
 ## 📁 文件存储位置
 
 ### 本地存储
+
 ```
 uploads/
   └── homepage/
@@ -236,6 +255,7 @@ uploads/
 ```
 
 ### OSS 存储（如果配置了阿里云 OSS）
+
 ```
 bucket-name/
   └── homepage/
@@ -252,6 +272,7 @@ bucket-name/
 ### 管理后台操作
 
 1. **访问配置页面**
+
    ```
    /admin/config?category=homepage
    ```
@@ -278,24 +299,28 @@ bucket-name/
 ### 常见错误及解决方案
 
 #### 1. **文件服务正在初始化**
+
 ```
 错误提示：文件服务正在初始化，请稍候...
 解决方案：等待几秒后再试
 ```
 
 #### 2. **文件类型不支持**
+
 ```
 错误提示：不支持的文件类型: image/bmp
 解决方案：转换为 JPG、PNG、WebP 或 GIF 格式
 ```
 
 #### 3. **文件过大**
+
 ```
 错误提示：文件大小不能超过 10MB
 解决方案：压缩图片后再上传
 ```
 
 #### 4. **上传失败**
+
 ```
 错误提示：图片上传失败: [具体错误]
 解决方案：
@@ -338,6 +363,7 @@ tail -f /path/to/logs/backend.log | grep UniversalFileService
 ## ✨ 功能特性
 
 ### ✅ 已实现
+
 - ✅ 真实文件上传到服务器
 - ✅ 支持本地存储和 OSS 存储
 - ✅ 自动生成 CDN URL（如果配置了 CDN）
@@ -348,6 +374,7 @@ tail -f /path/to/logs/backend.log | grep UniversalFileService
 - ✅ 文件去重（基于 MD5）
 
 ### 🔜 待优化
+
 - 图片压缩（自动压缩大图）
 - 图片裁剪（指定尺寸）
 - 批量上传（多张图片）
@@ -400,6 +427,4 @@ const imageUrl = fileMetadata.cdnUrl || fileMetadata.storagePath;
 
 **状态：** 🎉 **已完成并可使用**
 
-**维护团队：** LyricNote Team
-**更新时间：** 2024-10-25
-
+**维护团队：** LyricNote Team **更新时间：** 2024-10-25

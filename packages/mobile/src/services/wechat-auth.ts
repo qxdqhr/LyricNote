@@ -149,4 +149,3 @@ export async function isWechatInstalled(): Promise<boolean> {
     return false;
   }
 }
-

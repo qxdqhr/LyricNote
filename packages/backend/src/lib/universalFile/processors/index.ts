@@ -14,7 +14,7 @@ export type {
   TaskPriority,
   TaskStatus,
   QueueOptions,
-  QueueStats
+  QueueStats,
 } from './ProcessingQueue';
 
 // 导入队列类型以在文件中使用
@@ -135,7 +135,6 @@ export class ProcessorManager {
 
       this.isInitialized = true;
       logger.info('✅ [ProcessorManager] 处理器管理器初始化完成');
-
     } catch (error) {
       console.error('❌ [ProcessorManager] 初始化失败:', error);
       throw error;
@@ -195,7 +194,9 @@ export class ProcessorManager {
     inputPath: string,
     outputPath: string,
     options: import('../types').ProcessingOptions,
-    taskOptions?: Partial<Pick<QueueTask, 'priority' | 'maxRetries' | 'onProgress' | 'onComplete' | 'onError'>>
+    taskOptions?: Partial<
+      Pick<QueueTask, 'priority' | 'maxRetries' | 'onProgress' | 'onComplete' | 'onError'>
+    >
   ): string {
     this.ensureInitialized();
 
@@ -237,20 +238,36 @@ export class ProcessorManager {
       switch (type) {
         case 'image':
           supportedTypes[type] = [
-            'image/jpeg', 'image/jpg', 'image/png', 'image/webp',
-            'image/avif', 'image/gif', 'image/tiff', 'image/bmp'
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/webp',
+            'image/avif',
+            'image/gif',
+            'image/tiff',
+            'image/bmp',
           ];
           break;
         case 'audio':
           supportedTypes[type] = [
-            'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg',
-            'audio/aac', 'audio/m4a', 'audio/flac', 'audio/webm'
+            'audio/mpeg',
+            'audio/mp3',
+            'audio/wav',
+            'audio/ogg',
+            'audio/aac',
+            'audio/m4a',
+            'audio/flac',
+            'audio/webm',
           ];
           break;
         case 'video':
           supportedTypes[type] = [
-            'video/mp4', 'video/x-msvideo', 'video/quicktime',
-            'video/webm', 'video/ogg', 'video/3gpp'
+            'video/mp4',
+            'video/x-msvideo',
+            'video/quicktime',
+            'video/webm',
+            'video/ogg',
+            'video/3gpp',
           ];
           break;
       }
@@ -283,7 +300,7 @@ export class ProcessorManager {
     return {
       processorsCount: this.processors.size,
       queueStats: this.queue.getStats(),
-      healthStatus: this.queue.getHealthStatus()
+      healthStatus: this.queue.getHealthStatus(),
     };
   }
 
@@ -339,7 +356,9 @@ export function queueFile(
   inputPath: string,
   outputPath: string,
   options: import('../types').ProcessingOptions,
-  taskOptions?: Partial<Pick<QueueTask, 'priority' | 'maxRetries' | 'onProgress' | 'onComplete' | 'onError'>>
+  taskOptions?: Partial<
+    Pick<QueueTask, 'priority' | 'maxRetries' | 'onProgress' | 'onComplete' | 'onError'>
+  >
 ): string {
   if (!defaultProcessorManager.isReady()) {
     throw new Error('处理器管理器未初始化，请先调用 initialize() 方法');

@@ -77,9 +77,9 @@ export class CacheManager {
       redisConfig: options.redisConfig || {
         host: 'localhost',
         port: 6379,
-        db: 0
+        db: 0,
       },
-      keyPrefix: options.keyPrefix || 'universal-file:'
+      keyPrefix: options.keyPrefix || 'universal-file:',
     };
 
     // 初始化内存缓存
@@ -87,7 +87,7 @@ export class CacheManager {
       max: this.options.maxMemoryItems,
       ttl: this.options.defaultTTL * 1000, // LRU缓存使用毫秒
       updateAgeOnGet: true,
-      allowStale: false
+      allowStale: false,
     });
 
     // 初始化统计信息
@@ -97,7 +97,7 @@ export class CacheManager {
       misses: 0,
       hitRate: 0,
       memorySize: 0,
-      redisConnected: false
+      redisConnected: false,
     };
 
     // 初始化Redis连接（如果启用）
@@ -160,7 +160,7 @@ export class CacheManager {
             createdAt: parsedData.createdAt,
             expiresAt: parsedData.expiresAt,
             accessCount: parsedData.accessCount + 1,
-            lastAccessAt: Date.now()
+            lastAccessAt: Date.now(),
           };
 
           this.memoryCache.set(cacheKey, cacheItem);
@@ -193,9 +193,9 @@ export class CacheManager {
     const cacheItem: CacheItem<T> = {
       data,
       createdAt: now,
-      expiresAt: now + (expireTime * 1000),
+      expiresAt: now + expireTime * 1000,
       accessCount: 0,
-      lastAccessAt: now
+      lastAccessAt: now,
     };
 
     try {
@@ -204,11 +204,7 @@ export class CacheManager {
 
       // 如果启用Redis，也设置到Redis
       if (this.redisClient && this.stats.redisConnected) {
-        await this.redisClient.setex(
-          cacheKey,
-          expireTime,
-          JSON.stringify(cacheItem)
-        );
+        await this.redisClient.setex(cacheKey, expireTime, JSON.stringify(cacheItem));
       }
 
       this.updateMemorySize();
@@ -316,9 +312,7 @@ export class CacheManager {
   async warmup<T>(items: Array<{ key: string; data: T; ttl?: number }>): Promise<void> {
     logger.info(`开始预热缓存，共 ${items.length} 项...`);
 
-    const promises = items.map(item =>
-      this.set(item.key, item.data, item.ttl)
-    );
+    const promises = items.map((item) => this.set(item.key, item.data, item.ttl));
 
     try {
       await Promise.all(promises);
@@ -332,9 +326,8 @@ export class CacheManager {
    * 更新命中率
    */
   private updateHitRate(): void {
-    this.stats.hitRate = this.stats.totalRequests > 0
-      ? (this.stats.hits / this.stats.totalRequests) * 100
-      : 0;
+    this.stats.hitRate =
+      this.stats.totalRequests > 0 ? (this.stats.hits / this.stats.totalRequests) * 100 : 0;
   }
 
   /**
@@ -349,9 +342,7 @@ export class CacheManager {
    */
   private matchPattern(key: string, pattern: string): boolean {
     // 简单的通配符匹配，* 匹配任意字符
-    const regexPattern = pattern
-      .replace(/\*/g, '.*')
-      .replace(/\?/g, '.');
+    const regexPattern = pattern.replace(/\*/g, '.*').replace(/\?/g, '.');
 
     const regex = new RegExp(`^${regexPattern}$`);
     return regex.test(key);
@@ -360,11 +351,7 @@ export class CacheManager {
   /**
    * 获取或设置缓存（如果不存在则调用生成函数）
    */
-  async getOrSet<T>(
-    key: string,
-    generator: () => Promise<T>,
-    ttl?: number
-  ): Promise<T> {
+  async getOrSet<T>(key: string, generator: () => Promise<T>, ttl?: number): Promise<T> {
     // 尝试获取缓存
     const cachedData = await this.get<T>(key);
     if (cachedData !== null) {
@@ -407,5 +394,5 @@ export const cacheManager = new CacheManager({
   defaultTTL: 300, // 5分钟
   maxMemoryItems: 2000,
   enableRedis: false, // 开发环境暂时禁用Redis
-  keyPrefix: 'universal-file:'
+  keyPrefix: 'universal-file:',
 });

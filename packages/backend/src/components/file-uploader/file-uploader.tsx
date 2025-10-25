@@ -5,14 +5,24 @@
 'use client';
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, X, FileText, Image, Film, Music, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import {
+  Upload,
+  X,
+  FileText,
+  Image,
+  Film,
+  Music,
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+} from 'lucide-react';
 
 import type {
   UniversalFileService,
   FileMetadata,
   UploadProgress,
   UploadFileInfo,
-  ProcessingOptions
+  ProcessingOptions,
 } from '@/lib/universalFile';
 
 // ============= 类型定义 =============
@@ -75,7 +85,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
   onProgress,
   className = '',
   disabled = false,
-  mode = 'normal'
+  mode = 'normal',
 }) => {
   // ============= 状态管理 =============
 
@@ -111,101 +121,110 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
 
   // ============= 文件上传逻辑 =============
 
-  const uploadFile = useCallback(async (file: File): Promise<void> => {
-    const fileId = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const uploadFile = useCallback(
+    async (file: File): Promise<void> => {
+      const fileId = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // 验证文件
-    const error = validateFile(file);
-    if (error) {
-      onUploadError?.(error);
-      return;
-    }
+      // 验证文件
+      const error = validateFile(file);
+      if (error) {
+        onUploadError?.(error);
+        return;
+      }
 
-    // 初始化上传进度
-    const initialProgress: UploadProgress = {
-      fileId,
-      status: 'pending',
-      progress: 0,
-      uploadedBytes: 0,
-      totalBytes: file.size,
-      speed: 0,
-      remainingTime: 0
-    };
-
-    const uploadingFile: UploadingFile = {
-      id: fileId,
-      file,
-      progress: initialProgress
-    };
-
-    setUploadingFiles(prev => [...prev, uploadingFile]);
-
-    try {
-      // 构建上传文件信息
-      const uploadInfo: UploadFileInfo = {
-        file,
-        moduleId,
-        businessId,
-        permission: 'public',
-        needsProcessing: enableProcessing,
-        processingOptions: defaultProcessingOptions
+      // 初始化上传进度
+      const initialProgress: UploadProgress = {
+        fileId,
+        status: 'pending',
+        progress: 0,
+        uploadedBytes: 0,
+        totalBytes: file.size,
+        speed: 0,
+        remainingTime: 0,
       };
 
-      // 开始上传
-      const result = await fileService.uploadFile(
-        uploadInfo,
-        undefined, // 使用默认存储类型
-        (progress) => {
-          setUploadingFiles(prev =>
-            prev.map(f =>
-              f.id === fileId
-                ? { ...f, progress }
-                : f
-            )
-          );
+      const uploadingFile: UploadingFile = {
+        id: fileId,
+        file,
+        progress: initialProgress,
+      };
 
-          // 调用外部进度回调
-          const allProgress = uploadingFiles.map(f => f.progress);
-          onProgress?.(allProgress);
-        }
-      );
+      setUploadingFiles((prev) => [...prev, uploadingFile]);
 
-      // 上传成功，result直接是FileMetadata
-      setUploadingFiles(prev => prev.filter(f => f.id !== fileId));
-      setCompletedFiles(prev => [...prev, result]);
-      onUploadSuccess?.([result]);
+      try {
+        // 构建上传文件信息
+        const uploadInfo: UploadFileInfo = {
+          file,
+          moduleId,
+          businessId,
+          permission: 'public',
+          needsProcessing: enableProcessing,
+          processingOptions: defaultProcessingOptions,
+        };
 
-    } catch (error) {
-      console.error('文件上传失败:', error);
+        // 开始上传
+        const result = await fileService.uploadFile(
+          uploadInfo,
+          undefined, // 使用默认存储类型
+          (progress) => {
+            setUploadingFiles((prev) =>
+              prev.map((f) => (f.id === fileId ? { ...f, progress } : f))
+            );
 
-      const errorMessage = error instanceof Error ? error.message : '上传失败';
+            // 调用外部进度回调
+            const allProgress = uploadingFiles.map((f) => f.progress);
+            onProgress?.(allProgress);
+          }
+        );
 
-      setUploadingFiles(prev =>
-        prev.map(f =>
-          f.id === fileId
-            ? { ...f, error: errorMessage }
-            : f
-        )
-      );
+        // 上传成功，result直接是FileMetadata
+        setUploadingFiles((prev) => prev.filter((f) => f.id !== fileId));
+        setCompletedFiles((prev) => [...prev, result]);
+        onUploadSuccess?.([result]);
+      } catch (error) {
+        console.error('文件上传失败:', error);
 
-      onUploadError?.(errorMessage);
-    }
-  }, [fileService, moduleId, businessId, enableProcessing, defaultProcessingOptions, maxFileSize, acceptedTypes, onUploadSuccess, onUploadError, onProgress, uploadingFiles]);
+        const errorMessage = error instanceof Error ? error.message : '上传失败';
+
+        setUploadingFiles((prev) =>
+          prev.map((f) => (f.id === fileId ? { ...f, error: errorMessage } : f))
+        );
+
+        onUploadError?.(errorMessage);
+      }
+    },
+    [
+      fileService,
+      moduleId,
+      businessId,
+      enableProcessing,
+      defaultProcessingOptions,
+      maxFileSize,
+      acceptedTypes,
+      onUploadSuccess,
+      onUploadError,
+      onProgress,
+      uploadingFiles,
+    ]
+  );
 
   // ============= 文件选择处理 =============
 
-  const handleFileSelect = useCallback((files: FileList | File[]) => {
-    const fileArray = Array.from(files);
+  const handleFileSelect = useCallback(
+    (files: FileList | File[]) => {
+      const fileArray = Array.from(files);
 
-    // 检查文件数量限制
-    if (completedFiles.length + uploadingFiles.length + fileArray.length > maxFiles) {
-      onUploadError?.(`最多只能上传 ${maxFiles} 个文件`);
-      return;
-    }
+      // 检查文件数量限制
+      if (completedFiles.length + uploadingFiles.length + fileArray.length > maxFiles) {
+        onUploadError?.(`最多只能上传 ${maxFiles} 个文件`);
+        return;
+      }
 
-    // 逐个上传文件
-    fileArray.forEach(uploadFile);
-  }, [completedFiles.length, uploadingFiles.length, maxFiles, onUploadError, uploadFile]);
+      // 逐个上传文件
+      fileArray.forEach(uploadFile);
+    },
+    [completedFiles.length, uploadingFiles.length, maxFiles, onUploadError, uploadFile]
+  );
 
   // ============= 事件处理 =============
 
@@ -245,11 +264,11 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
   };
 
   const removeUploadingFile = (fileId: string) => {
-    setUploadingFiles(prev => prev.filter(f => f.id !== fileId));
+    setUploadingFiles((prev) => prev.filter((f) => f.id !== fileId));
   };
 
   const removeCompletedFile = (fileId: string) => {
-    setCompletedFiles(prev => prev.filter(f => f.id !== fileId));
+    setCompletedFiles((prev) => prev.filter((f) => f.id !== fileId));
   };
 
   // ============= 渲染辅助函数 =============
@@ -283,14 +302,12 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
 
   const containerClasses = `
     border-2 border-dashed rounded-lg transition-all duration-200
-    ${isDragOver
-      ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
-      : 'border-gray-300 dark:border-gray-600'
+    ${
+      isDragOver
+        ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+        : 'border-gray-300 dark:border-gray-600'
     }
-    ${disabled
-      ? 'opacity-50 cursor-not-allowed'
-      : 'hover:border-blue-400 cursor-pointer'
-    }
+    ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-blue-400 cursor-pointer'}
     ${className}
   `;
 
@@ -312,26 +329,24 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         onClick={handleClick}
       >
         <div className={uploadAreaClasses}>
-          <Upload className={`mx-auto mb-4 text-gray-400 ${mode === 'compact' ? 'w-8 h-8 mb-2' : 'w-12 h-12'}`} />
+          <Upload
+            className={`mx-auto mb-4 text-gray-400 ${mode === 'compact' ? 'w-8 h-8 mb-2' : 'w-12 h-12'}`}
+          />
 
           {mode === 'compact' ? (
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              点击上传或拖拽文件到这里
-            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">点击上传或拖拽文件到这里</p>
           ) : (
             <>
               <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 上传文件
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-2">
-                点击选择文件或拖拽文件到这里
-              </p>
+              <p className="text-gray-600 dark:text-gray-400 mb-2">点击选择文件或拖拽文件到这里</p>
               {mode === 'detailed' && (
                 <div className="text-sm text-gray-500 space-y-1">
-                  {acceptedTypes.length > 0 && (
-                    <p>支持格式: {acceptedTypes.join(', ')}</p>
-                  )}
-                  <p>最大大小: {maxFileSize}MB | 最多文件: {maxFiles}个</p>
+                  {acceptedTypes.length > 0 && <p>支持格式: {acceptedTypes.join(', ')}</p>}
+                  <p>
+                    最大大小: {maxFileSize}MB | 最多文件: {maxFiles}个
+                  </p>
                 </div>
               )}
             </>
@@ -428,9 +443,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
               className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"
             >
               {/* 文件图标 */}
-              <div className="flex-shrink-0">
-                {getFileIcon(file.mimeType)}
-              </div>
+              <div className="flex-shrink-0">{getFileIcon(file.mimeType)}</div>
 
               {/* 文件信息 */}
               <div className="flex-grow min-w-0">
@@ -438,9 +451,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
                     {file.originalName}
                   </p>
-                  <span className="text-xs text-gray-500">
-                    {formatFileSize(file.size)}
-                  </span>
+                  <span className="text-xs text-gray-500">{formatFileSize(file.size)}</span>
                 </div>
                 <p className="text-xs text-green-600 dark:text-green-400">
                   上传成功 • {new Date(file.uploadTime).toLocaleTimeString()}
@@ -465,14 +476,13 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
       {/* 统计信息 */}
       {mode === 'detailed' && (completedFiles.length > 0 || uploadingFiles.length > 0) && (
         <div className="flex justify-between items-center text-sm text-gray-500 pt-2 border-t border-gray-200 dark:border-gray-700">
+          <span>总计: {completedFiles.length + uploadingFiles.length} 文件</span>
           <span>
-            总计: {completedFiles.length + uploadingFiles.length} 文件
-          </span>
-          <span>
-            大小: {formatFileSize(
+            大小:{' '}
+            {formatFileSize(
               [
-                ...completedFiles.map(f => f.size),
-                ...uploadingFiles.map(f => f.file.size)
+                ...completedFiles.map((f) => f.size),
+                ...uploadingFiles.map((f) => f.file.size),
               ].reduce((total, size) => total + size, 0)
             )}
           </span>
@@ -483,4 +493,3 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
 };
 
 export default FileUploader;
-

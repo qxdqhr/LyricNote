@@ -19,7 +19,7 @@ import type {
   AliyunOSSConfig,
   AliyunCDNConfig,
   StorageConfig,
-  CDNConfig
+  CDNConfig,
 } from '../types';
 
 /**
@@ -28,11 +28,11 @@ import type {
 const DEFAULT_CONFIG: UniversalFileServiceConfig = {
   defaultStorage: 'aliyun-oss', // 修改默认存储为OSS
   storageProviders: {
-    'local': {
+    local: {
       type: 'local',
       enabled: false, // 默认禁用本地存储
       rootPath: process.env.FILE_STORAGE_PATH || 'uploads',
-      baseUrl: process.env.FILE_BASE_URL || '/uploads'
+      baseUrl: process.env.FILE_BASE_URL || '/uploads',
     } as LocalStorageConfig,
     'aliyun-oss': {
       type: 'aliyun-oss',
@@ -40,38 +40,38 @@ const DEFAULT_CONFIG: UniversalFileServiceConfig = {
       region: '',
       bucket: '',
       accessKeyId: '',
-      accessKeySecret: ''
+      accessKeySecret: '',
     } as AliyunOSSConfig,
     'aws-s3': {
       type: 'aws-s3',
-      enabled: false
+      enabled: false,
     } as StorageConfig,
     'qcloud-cos': {
       type: 'qcloud-cos',
-      enabled: false
-    } as StorageConfig
+      enabled: false,
+    } as StorageConfig,
   },
   defaultCDN: 'none',
   cdnProviders: {
-    'none': {
+    none: {
       type: 'none',
-      enabled: false
+      enabled: false,
     } as CDNConfig,
     'aliyun-cdn': {
       type: 'aliyun-cdn',
       enabled: false,
       domain: '',
       accessKeyId: '',
-      accessKeySecret: ''
+      accessKeySecret: '',
     } as AliyunCDNConfig,
     'aws-cloudfront': {
       type: 'aws-cloudfront',
-      enabled: false
+      enabled: false,
     } as CDNConfig,
     'qcloud-cdn': {
       type: 'qcloud-cdn',
-      enabled: false
-    } as CDNConfig
+      enabled: false,
+    } as CDNConfig,
   },
   maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '104857600'), // 100MB
   allowedMimeTypes: [
@@ -109,14 +109,14 @@ const DEFAULT_CONFIG: UniversalFileServiceConfig = {
     // 3D模型文件
     'application/octet-stream', // PMD/PMX文件
     'model/gltf+json',
-    'model/gltf-binary'
+    'model/gltf-binary',
   ],
   enableProcessing: process.env.ENABLE_FILE_PROCESSING === 'true',
   processingQueueSize: parseInt(process.env.PROCESSING_QUEUE_SIZE || '10'),
   cache: {
     metadataTTL: parseInt(process.env.METADATA_CACHE_TTL || '3600'), // 1小时
-    urlTTL: parseInt(process.env.URL_CACHE_TTL || '1800') // 30分钟
-  }
+    urlTTL: parseInt(process.env.URL_CACHE_TTL || '1800'), // 30分钟
+  },
 };
 
 /**
@@ -167,7 +167,7 @@ export class FileServiceConfigManager {
       this.config.storageProviders[type] = {
         ...this.config.storageProviders[type],
         ...config,
-        enabled: true
+        enabled: true,
       };
     }
   }
@@ -189,7 +189,7 @@ export class FileServiceConfigManager {
       this.config.cdnProviders[type] = {
         ...this.config.cdnProviders[type],
         ...config,
-        enabled: true
+        enabled: true,
       };
       this.config.defaultCDN = type;
     }
@@ -218,7 +218,7 @@ export class FileServiceConfigManager {
       accessKeySecret: process.env.ALIYUN_OSS_ACCESS_KEY_SECRET,
       customDomain: process.env.ALIYUN_OSS_CUSTOM_DOMAIN,
       secure: process.env.ALIYUN_OSS_SECURE === 'true',
-      internal: process.env.ALIYUN_OSS_INTERNAL === 'true'
+      internal: process.env.ALIYUN_OSS_INTERNAL === 'true',
     };
 
     // 检查必需的配置项
@@ -227,7 +227,7 @@ export class FileServiceConfigManager {
       bucket: config.bucket,
       accessKeyId: config.accessKeyId ? '***' : '未设置',
       accessKeySecret: config.accessKeySecret ? '***' : '未设置',
-      customDomain: config.customDomain || '未设置'
+      customDomain: config.customDomain || '未设置',
     });
     if (config.region && config.bucket && config.accessKeyId && config.accessKeySecret) {
       this.enableStorageProvider('aliyun-oss', config);
@@ -245,7 +245,9 @@ export class FileServiceConfigManager {
     try {
       // 在服务器端运行时，从配置管理模块加载配置
       if (typeof window === 'undefined') {
-        const { EnvConfigService } = await import('@/modules/configManager/services/envConfigService');
+        const { EnvConfigService } = await import(
+          '@/modules/configManager/services/envConfigService'
+        );
         const service = EnvConfigService.getInstance();
 
         // 先加载配置到缓存
@@ -259,7 +261,7 @@ export class FileServiceConfigManager {
           accessKeySecret: config.ALIYUN_OSS_ACCESS_KEY_SECRET,
           customDomain: config.ALIYUN_OSS_CUSTOM_DOMAIN,
           secure: config.ALIYUN_OSS_SECURE === 'true',
-          internal: config.ALIYUN_OSS_INTERNAL === 'true'
+          internal: config.ALIYUN_OSS_INTERNAL === 'true',
         };
 
         logger.info('🔍 [ConfigManager] 从配置管理模块加载阿里云OSS配置:', {
@@ -267,10 +269,15 @@ export class FileServiceConfigManager {
           bucket: ossConfig.bucket,
           accessKeyId: ossConfig.accessKeyId ? '***' : '未设置',
           accessKeySecret: ossConfig.accessKeySecret ? '***' : '未设置',
-          customDomain: ossConfig.customDomain || '未设置'
+          customDomain: ossConfig.customDomain || '未设置',
         });
 
-        if (ossConfig.region && ossConfig.bucket && ossConfig.accessKeyId && ossConfig.accessKeySecret) {
+        if (
+          ossConfig.region &&
+          ossConfig.bucket &&
+          ossConfig.accessKeyId &&
+          ossConfig.accessKeySecret
+        ) {
           this.enableStorageProvider('aliyun-oss', ossConfig);
           this.config.defaultStorage = 'aliyun-oss';
           logger.info('✅ [ConfigManager] 从配置管理模块加载阿里云OSS配置成功');
@@ -291,7 +298,7 @@ export class FileServiceConfigManager {
       domain: process.env.ALIYUN_CDN_DOMAIN,
       accessKeyId: process.env.ALIYUN_CDN_ACCESS_KEY_ID,
       accessKeySecret: process.env.ALIYUN_CDN_ACCESS_KEY_SECRET,
-      region: process.env.ALIYUN_CDN_REGION
+      region: process.env.ALIYUN_CDN_REGION,
     };
 
     // 检查必需的配置项
@@ -344,16 +351,16 @@ export class FileServiceConfigManager {
       ...override,
       storageProviders: {
         ...base.storageProviders,
-        ...(override.storageProviders || {})
+        ...(override.storageProviders || {}),
       },
       cdnProviders: {
         ...base.cdnProviders,
-        ...(override.cdnProviders || {})
+        ...(override.cdnProviders || {}),
       },
       cache: {
         ...base.cache,
-        ...(override.cache || {})
-      }
+        ...(override.cache || {}),
+      },
     };
   }
 }
@@ -361,7 +368,9 @@ export class FileServiceConfigManager {
 /**
  * 创建默认配置管理器
  */
-export function createFileServiceConfig(customConfig?: Partial<UniversalFileServiceConfig>): FileServiceConfigManager {
+export function createFileServiceConfig(
+  customConfig?: Partial<UniversalFileServiceConfig>
+): FileServiceConfigManager {
   const configManager = new FileServiceConfigManager(customConfig);
 
   // 尝试从环境变量加载云服务配置
@@ -374,7 +383,9 @@ export function createFileServiceConfig(customConfig?: Partial<UniversalFileServ
 /**
  * 创建配置管理器（优先从配置管理模块加载）
  */
-export async function createFileServiceConfigWithConfigManager(customConfig?: Partial<UniversalFileServiceConfig>): Promise<FileServiceConfigManager> {
+export async function createFileServiceConfigWithConfigManager(
+  customConfig?: Partial<UniversalFileServiceConfig>
+): Promise<FileServiceConfigManager> {
   const configManager = new FileServiceConfigManager(customConfig);
 
   // 优先从配置管理模块加载配置
@@ -388,7 +399,11 @@ export async function createFileServiceConfigWithConfigManager(customConfig?: Pa
 
   // 检查OSS配置是否有效
   const finalOssConfig = configManager.getStorageConfig('aliyun-oss');
-  if (!finalOssConfig || !finalOssConfig.enabled || !validateAliyunOSSConfig(finalOssConfig as AliyunOSSConfig)) {
+  if (
+    !finalOssConfig ||
+    !finalOssConfig.enabled ||
+    !validateAliyunOSSConfig(finalOssConfig as AliyunOSSConfig)
+  ) {
     console.warn('⚠️ [ConfigManager] OSS配置无效或未启用，启用本地存储作为备用方案');
     // 启用本地存储作为备用
     configManager.enableStorageProvider('local');
@@ -420,23 +435,14 @@ export function getDefaultConfig(): UniversalFileServiceConfig {
  * 验证阿里云OSS配置
  */
 export function validateAliyunOSSConfig(config: AliyunOSSConfig): boolean {
-  return !!(
-    config.region &&
-    config.bucket &&
-    config.accessKeyId &&
-    config.accessKeySecret
-  );
+  return !!(config.region && config.bucket && config.accessKeyId && config.accessKeySecret);
 }
 
 /**
  * 验证阿里云CDN配置
  */
 export function validateAliyunCDNConfig(config: AliyunCDNConfig): boolean {
-  return !!(
-    config.domain &&
-    config.accessKeyId &&
-    config.accessKeySecret
-  );
+  return !!(config.domain && config.accessKeyId && config.accessKeySecret);
 }
 
 /**
@@ -465,10 +471,10 @@ export function isMimeTypeSupported(mimeType: string, allowedTypes: string[]): b
  */
 export function getStorageProviderDisplayName(type: StorageType): string {
   const names: Record<StorageType, string> = {
-    'local': '本地存储',
+    local: '本地存储',
     'aliyun-oss': '阿里云OSS',
     'aws-s3': 'AWS S3',
-    'qcloud-cos': '腾讯云COS'
+    'qcloud-cos': '腾讯云COS',
   };
 
   return names[type] || type;
@@ -479,10 +485,10 @@ export function getStorageProviderDisplayName(type: StorageType): string {
  */
 export function getCDNProviderDisplayName(type: CDNType): string {
   const names: Record<CDNType, string> = {
-    'none': '无CDN',
+    none: '无CDN',
     'aliyun-cdn': '阿里云CDN',
     'aws-cloudfront': 'AWS CloudFront',
-    'qcloud-cdn': '腾讯云CDN'
+    'qcloud-cdn': '腾讯云CDN',
   };
 
   return names[type] || type;

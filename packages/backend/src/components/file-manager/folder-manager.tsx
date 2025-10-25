@@ -85,7 +85,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({
   onFolderCreate,
   onFolderRename,
   onFolderDelete,
-  onFileMove
+  onFileMove,
 }) => {
   const [state, setState] = useState<FolderManagerState>({
     expandedFolders: new Set(currentFolderId ? [currentFolderId] : []),
@@ -94,12 +94,12 @@ const FolderManager: React.FC<FolderManagerProps> = ({
     creatingFolder: null,
     newFolderName: '',
     dragOverFolder: null,
-    contextMenu: null
+    contextMenu: null,
   });
 
   // 切换文件夹展开状态
   const toggleFolder = useCallback((folderId: string) => {
-    setState(prev => {
+    setState((prev) => {
       const newExpanded = new Set(prev.expandedFolders);
       if (newExpanded.has(folderId)) {
         newExpanded.delete(folderId);
@@ -111,19 +111,22 @@ const FolderManager: React.FC<FolderManagerProps> = ({
   }, []);
 
   // 选择文件夹
-  const selectFolder = useCallback((folderId: string) => {
-    if (onFolderSelect) {
-      onFolderSelect(folderId);
-    }
-  }, [onFolderSelect]);
+  const selectFolder = useCallback(
+    (folderId: string) => {
+      if (onFolderSelect) {
+        onFolderSelect(folderId);
+      }
+    },
+    [onFolderSelect]
+  );
 
   // 开始创建文件夹
   const startCreateFolder = useCallback((parentId?: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       creatingFolder: parentId || null,
       newFolderName: '新建文件夹',
-      contextMenu: null
+      contextMenu: null,
     }));
   }, []);
 
@@ -133,10 +136,10 @@ const FolderManager: React.FC<FolderManagerProps> = ({
 
     try {
       await onFolderCreate(state.creatingFolder || undefined, state.newFolderName.trim());
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         creatingFolder: null,
-        newFolderName: ''
+        newFolderName: '',
       }));
     } catch (error) {
       console.error('创建文件夹失败:', error);
@@ -145,20 +148,20 @@ const FolderManager: React.FC<FolderManagerProps> = ({
 
   // 取消创建文件夹
   const cancelCreateFolder = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       creatingFolder: null,
-      newFolderName: ''
+      newFolderName: '',
     }));
   }, []);
 
   // 开始重命名文件夹
   const startRenameFolder = useCallback((folderId: string, currentName: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       editingFolder: folderId,
       editingName: currentName,
-      contextMenu: null
+      contextMenu: null,
     }));
   }, []);
 
@@ -168,10 +171,10 @@ const FolderManager: React.FC<FolderManagerProps> = ({
 
     try {
       await onFolderRename(state.editingFolder, state.editingName.trim());
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         editingFolder: null,
-        editingName: ''
+        editingName: '',
       }));
     } catch (error) {
       console.error('重命名文件夹失败:', error);
@@ -180,71 +183,80 @@ const FolderManager: React.FC<FolderManagerProps> = ({
 
   // 取消重命名文件夹
   const cancelRenameFolder = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       editingFolder: null,
-      editingName: ''
+      editingName: '',
     }));
   }, []);
 
   // 删除文件夹
-  const deleteFolder = useCallback(async (folderId: string, folderName: string) => {
-    if (!window.confirm(`确定要删除文件夹"${folderName}"吗？此操作将删除文件夹内的所有文件。`)) {
-      return;
-    }
+  const deleteFolder = useCallback(
+    async (folderId: string, folderName: string) => {
+      if (!window.confirm(`确定要删除文件夹"${folderName}"吗？此操作将删除文件夹内的所有文件。`)) {
+        return;
+      }
 
-    if (!onFolderDelete) return;
+      if (!onFolderDelete) return;
 
-    try {
-      await onFolderDelete(folderId);
-      setState(prev => ({ ...prev, contextMenu: null }));
-    } catch (error) {
-      console.error('删除文件夹失败:', error);
-    }
-  }, [onFolderDelete]);
+      try {
+        await onFolderDelete(folderId);
+        setState((prev) => ({ ...prev, contextMenu: null }));
+      } catch (error) {
+        console.error('删除文件夹失败:', error);
+      }
+    },
+    [onFolderDelete]
+  );
 
   // 右键菜单处理
   const handleContextMenu = useCallback((e: React.MouseEvent, folderId: string) => {
     e.preventDefault();
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       contextMenu: {
         folderId,
         x: e.clientX,
-        y: e.clientY
-      }
+        y: e.clientY,
+      },
     }));
   }, []);
 
   // 关闭右键菜单
   const closeContextMenu = useCallback(() => {
-    setState(prev => ({ ...prev, contextMenu: null }));
+    setState((prev) => ({ ...prev, contextMenu: null }));
   }, []);
 
   // 拖拽处理
-  const handleDragOver = useCallback((e: React.DragEvent, folderId: string) => {
-    if (!allowDrag) return;
-    e.preventDefault();
-    setState(prev => ({ ...prev, dragOverFolder: folderId }));
-  }, [allowDrag]);
+  const handleDragOver = useCallback(
+    (e: React.DragEvent, folderId: string) => {
+      if (!allowDrag) return;
+      e.preventDefault();
+      setState((prev) => ({ ...prev, dragOverFolder: folderId }));
+    },
+    [allowDrag]
+  );
 
   const handleDragLeave = useCallback(() => {
-    setState(prev => ({ ...prev, dragOverFolder: null }));
+    setState((prev) => ({ ...prev, dragOverFolder: null }));
   }, []);
 
-  const handleDrop = useCallback(async (e: React.DragEvent, folderId: string) => {
-    if (!allowDrag || !onFileMove) return;
+  const handleDrop = useCallback(
+    async (e: React.DragEvent, folderId: string) => {
+      if (!allowDrag || !onFileMove) return;
 
-    e.preventDefault();
-    setState(prev => ({ ...prev, dragOverFolder: null }));
+      e.preventDefault();
+      setState((prev) => ({ ...prev, dragOverFolder: null }));
 
-    try {
-      const fileIds = JSON.parse(e.dataTransfer.getData('application/json'));
-      await onFileMove(fileIds, folderId);
-    } catch (error) {
-      console.error('移动文件失败:', error);
-    }
-  }, [allowDrag, onFileMove]);
+      try {
+        const fileIds = JSON.parse(e.dataTransfer.getData('application/json'));
+        await onFileMove(fileIds, folderId);
+      } catch (error) {
+        console.error('移动文件失败:', error);
+      }
+    },
+    [allowDrag, onFileMove]
+  );
 
   // 格式化文件大小
   const formatSize = useCallback((bytes: number): string => {
@@ -256,139 +268,134 @@ const FolderManager: React.FC<FolderManagerProps> = ({
   }, []);
 
   // 渲染文件夹节点
-  const renderFolderNode = useCallback((folder: FolderNode, level: number = 0) => {
-    const isExpanded = state.expandedFolders.has(folder.id);
-    const isSelected = currentFolderId === folder.id;
-    const isEditing = state.editingFolder === folder.id;
-    const isDragOver = state.dragOverFolder === folder.id;
+  const renderFolderNode = useCallback(
+    (folder: FolderNode, level: number = 0) => {
+      const isExpanded = state.expandedFolders.has(folder.id);
+      const isSelected = currentFolderId === folder.id;
+      const isEditing = state.editingFolder === folder.id;
+      const isDragOver = state.dragOverFolder === folder.id;
 
-    return (
-      <div key={folder.id} className="select-none">
-        {/* 文件夹项 */}
-        <div
-          className={`flex items-center py-1 px-2 rounded-md cursor-pointer transition-colors ${
-            isSelected
-              ? 'bg-blue-100 text-blue-800'
-              : isDragOver
-              ? 'bg-green-100'
-              : 'hover:bg-gray-100'
-          }`}
-          style={{ paddingLeft: `${level * 16 + 8}px` }}
-          onClick={() => selectFolder(folder.id)}
-          onContextMenu={(e) => handleContextMenu(e, folder.id)}
-          onDragOver={allowDrag ? (e) => handleDragOver(e, folder.id) : undefined}
-          onDragLeave={allowDrag ? handleDragLeave : undefined}
-          onDrop={allowDrag ? (e) => handleDrop(e, folder.id) : undefined}
-        >
-          {/* 展开图标 */}
-          {folder.children.length > 0 && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFolder(folder.id);
-              }}
-              className="mr-1 p-1 hover:bg-gray-200 rounded"
+      return (
+        <div key={folder.id} className="select-none">
+          {/* 文件夹项 */}
+          <div
+            className={`flex items-center py-1 px-2 rounded-md cursor-pointer transition-colors ${
+              isSelected
+                ? 'bg-blue-100 text-blue-800'
+                : isDragOver
+                  ? 'bg-green-100'
+                  : 'hover:bg-gray-100'
+            }`}
+            style={{ paddingLeft: `${level * 16 + 8}px` }}
+            onClick={() => selectFolder(folder.id)}
+            onContextMenu={(e) => handleContextMenu(e, folder.id)}
+            onDragOver={allowDrag ? (e) => handleDragOver(e, folder.id) : undefined}
+            onDragLeave={allowDrag ? handleDragLeave : undefined}
+            onDrop={allowDrag ? (e) => handleDrop(e, folder.id) : undefined}
+          >
+            {/* 展开图标 */}
+            {folder.children.length > 0 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFolder(folder.id);
+                }}
+                className="mr-1 p-1 hover:bg-gray-200 rounded"
+              >
+                <span className={`text-xs transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
+                  ▶
+                </span>
+              </button>
+            )}
+
+            {/* 文件夹图标 */}
+            <span className="mr-2 text-yellow-600">{isExpanded ? '📂' : '📁'}</span>
+
+            {/* 文件夹名称 */}
+            <div className="flex-1 flex items-center justify-between">
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={state.editingName}
+                  onChange={(e) => setState((prev) => ({ ...prev, editingName: e.target.value }))}
+                  onBlur={confirmRenameFolder}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      confirmRenameFolder();
+                    } else if (e.key === 'Escape') {
+                      cancelRenameFolder();
+                    }
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex-1 px-1 py-0 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  autoFocus
+                />
+              ) : (
+                <span className="text-sm truncate">{folder.name}</span>
+              )}
+
+              {/* 文件信息 */}
+              <div className="flex items-center space-x-2 text-xs text-gray-500 ml-2">
+                {showFileCount && <span>{folder.fileCount} 项</span>}
+                {showSize && folder.totalSize > 0 && <span>{formatSize(folder.totalSize)}</span>}
+              </div>
+            </div>
+          </div>
+
+          {/* 创建新文件夹输入框 */}
+          {state.creatingFolder === folder.id && (
+            <div
+              className="flex items-center py-1 px-2 ml-4"
+              style={{ paddingLeft: `${(level + 1) * 16 + 8}px` }}
             >
-              <span className={`text-xs transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
-                ▶
-              </span>
-            </button>
-          )}
-
-          {/* 文件夹图标 */}
-          <span className="mr-2 text-yellow-600">
-            {isExpanded ? '📂' : '📁'}
-          </span>
-
-          {/* 文件夹名称 */}
-          <div className="flex-1 flex items-center justify-between">
-            {isEditing ? (
+              <span className="mr-2 text-yellow-600">📁</span>
               <input
                 type="text"
-                value={state.editingName}
-                onChange={(e) => setState(prev => ({ ...prev, editingName: e.target.value }))}
-                onBlur={confirmRenameFolder}
+                value={state.newFolderName}
+                onChange={(e) => setState((prev) => ({ ...prev, newFolderName: e.target.value }))}
+                onBlur={confirmCreateFolder}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    confirmRenameFolder();
+                    confirmCreateFolder();
                   } else if (e.key === 'Escape') {
-                    cancelRenameFolder();
+                    cancelCreateFolder();
                   }
                 }}
-                onClick={(e) => e.stopPropagation()}
                 className="flex-1 px-1 py-0 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                 autoFocus
               />
-            ) : (
-              <span className="text-sm truncate">{folder.name}</span>
-            )}
-
-            {/* 文件信息 */}
-            <div className="flex items-center space-x-2 text-xs text-gray-500 ml-2">
-              {showFileCount && (
-                <span>{folder.fileCount} 项</span>
-              )}
-              {showSize && folder.totalSize > 0 && (
-                <span>{formatSize(folder.totalSize)}</span>
-              )}
             </div>
-          </div>
+          )}
+
+          {/* 子文件夹 */}
+          {isExpanded && folder.children.map((child) => renderFolderNode(child, level + 1))}
         </div>
-
-        {/* 创建新文件夹输入框 */}
-        {state.creatingFolder === folder.id && (
-          <div
-            className="flex items-center py-1 px-2 ml-4"
-            style={{ paddingLeft: `${(level + 1) * 16 + 8}px` }}
-          >
-            <span className="mr-2 text-yellow-600">📁</span>
-            <input
-              type="text"
-              value={state.newFolderName}
-              onChange={(e) => setState(prev => ({ ...prev, newFolderName: e.target.value }))}
-              onBlur={confirmCreateFolder}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  confirmCreateFolder();
-                } else if (e.key === 'Escape') {
-                  cancelCreateFolder();
-                }
-              }}
-              className="flex-1 px-1 py-0 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-              autoFocus
-            />
-          </div>
-        )}
-
-        {/* 子文件夹 */}
-        {isExpanded && folder.children.map(child =>
-          renderFolderNode(child, level + 1)
-        )}
-      </div>
-    );
-  }, [
-    state.expandedFolders,
-    state.editingFolder,
-    state.editingName,
-    state.creatingFolder,
-    state.newFolderName,
-    state.dragOverFolder,
-    currentFolderId,
-    allowDrag,
-    showFileCount,
-    showSize,
-    selectFolder,
-    toggleFolder,
-    handleContextMenu,
-    handleDragOver,
-    handleDragLeave,
-    handleDrop,
-    confirmRenameFolder,
-    cancelRenameFolder,
-    confirmCreateFolder,
-    cancelCreateFolder,
-    formatSize
-  ]);
+      );
+    },
+    [
+      state.expandedFolders,
+      state.editingFolder,
+      state.editingName,
+      state.creatingFolder,
+      state.newFolderName,
+      state.dragOverFolder,
+      currentFolderId,
+      allowDrag,
+      showFileCount,
+      showSize,
+      selectFolder,
+      toggleFolder,
+      handleContextMenu,
+      handleDragOver,
+      handleDragLeave,
+      handleDrop,
+      confirmRenameFolder,
+      cancelRenameFolder,
+      confirmCreateFolder,
+      cancelCreateFolder,
+      formatSize,
+    ]
+  );
 
   // 渲染右键菜单
   const renderContextMenu = () => {
@@ -402,7 +409,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({
         className="fixed bg-white border border-gray-200 rounded-md shadow-lg z-50 py-1"
         style={{
           left: state.contextMenu.x,
-          top: state.contextMenu.y
+          top: state.contextMenu.y,
         }}
         onClick={closeContextMenu}
       >
@@ -493,9 +500,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({
             )}
           </div>
         ) : (
-          <div className="space-y-1">
-            {folderTree.map(folder => renderFolderNode(folder))}
-          </div>
+          <div className="space-y-1">{folderTree.map((folder) => renderFolderNode(folder))}</div>
         )}
 
         {/* 根目录创建文件夹 */}
@@ -505,7 +510,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({
             <input
               type="text"
               value={state.newFolderName}
-              onChange={(e) => setState(prev => ({ ...prev, newFolderName: e.target.value }))}
+              onChange={(e) => setState((prev) => ({ ...prev, newFolderName: e.target.value }))}
               onBlur={confirmCreateFolder}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {

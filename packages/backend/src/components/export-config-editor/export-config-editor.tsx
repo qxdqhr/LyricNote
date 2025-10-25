@@ -33,7 +33,7 @@ import {
   Layers,
   ArrowUpDown,
   FileSpreadsheet,
-  Database
+  Database,
 } from 'lucide-react';
 
 import type {
@@ -45,7 +45,7 @@ import type {
   GroupingConfig,
   GroupingField,
   GroupingMode,
-  GroupValueProcessing
+  GroupValueProcessing,
 } from '@/lib/universalExport';
 
 // ============= 类型定义 =============
@@ -180,7 +180,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
         fields: [],
         preserveOrder: true,
         nullValueHandling: 'separate',
-        nullGroupName: '未分组'
+        nullGroupName: '未分组',
       },
       fileNameTemplate: '导出数据_{date}',
       includeHeader: true,
@@ -221,7 +221,11 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
         setSavedConfigs(data.configs || []);
         logger.info('🔍 [ExportConfigEditor] 加载配置成功:', data.configs?.length || 0, '个配置');
       } else {
-        console.error('🔍 [ExportConfigEditor] 加载配置失败:', response.status, response.statusText);
+        console.error(
+          '🔍 [ExportConfigEditor] 加载配置失败:',
+          response.status,
+          response.statusText
+        );
       }
     } catch (error) {
       console.error('🔍 [ExportConfigEditor] 加载配置异常:', error);
@@ -231,24 +235,27 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
   }, [visible, activeTab, moduleId, businessId]);
 
   // 删除配置
-  const deleteConfig = useCallback(async (configId: string) => {
-    setDeletingConfigId(configId);
-    try {
-      const response = await fetch(`/api/universal-export/configs/${configId}`, {
-        method: 'DELETE'
-      });
-      if (response.ok) {
-        setSavedConfigs(prev => prev.filter(cfg => cfg.id !== configId));
-        // 通知外部组件配置已变化
-        onConfigChange?.();
-        logger.info('🔄 [ExportConfigEditor] 配置删除成功，通知外部组件刷新');
+  const deleteConfig = useCallback(
+    async (configId: string) => {
+      setDeletingConfigId(configId);
+      try {
+        const response = await fetch(`/api/universal-export/configs/${configId}`, {
+          method: 'DELETE',
+        });
+        if (response.ok) {
+          setSavedConfigs((prev) => prev.filter((cfg) => cfg.id !== configId));
+          // 通知外部组件配置已变化
+          onConfigChange?.();
+          logger.info('🔄 [ExportConfigEditor] 配置删除成功，通知外部组件刷新');
+        }
+      } catch (error) {
+        console.error('删除配置失败:', error);
+      } finally {
+        setDeletingConfigId(null);
       }
-    } catch (error) {
-      console.error('删除配置失败:', error);
-    } finally {
-      setDeletingConfigId(null);
-    }
-  }, [onConfigChange]);
+    },
+    [onConfigChange]
+  );
 
   // 加载配置到编辑器
   const loadConfigToEditor = useCallback((config: ExportConfig) => {
@@ -303,31 +310,27 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
   // ============= 字段管理 =============
 
   const toggleFieldEnabled = useCallback((fieldKey: string) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
-      fields: prev.fields.map(field =>
-        field.key === fieldKey
-          ? { ...field, enabled: !field.enabled }
-          : field
+      fields: prev.fields.map((field) =>
+        field.key === fieldKey ? { ...field, enabled: !field.enabled } : field
       ),
     }));
   }, []);
 
   const updateField = useCallback((fieldKey: string, updates: Partial<ExportField>) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
-      fields: prev.fields.map(field =>
-        field.key === fieldKey
-          ? { ...field, ...updates }
-          : field
+      fields: prev.fields.map((field) =>
+        field.key === fieldKey ? { ...field, ...updates } : field
       ),
     }));
   }, []);
 
   const moveField = useCallback((fieldKey: string, direction: 'up' | 'down') => {
-    setConfig(prev => {
+    setConfig((prev) => {
       const fields = [...prev.fields];
-      const index = fields.findIndex(f => f.key === fieldKey);
+      const index = fields.findIndex((f) => f.key === fieldKey);
 
       if (direction === 'up' && index > 0) {
         [fields[index], fields[index - 1]] = [fields[index - 1], fields[index]];
@@ -343,7 +346,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
   }, []);
 
   const addField = useCallback((field: ExportField) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
       fields: [
         ...prev.fields,
@@ -357,16 +360,16 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
   }, []);
 
   const removeField = useCallback((fieldKey: string) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
-      fields: prev.fields.filter(f => f.key !== fieldKey),
+      fields: prev.fields.filter((f) => f.key !== fieldKey),
     }));
   }, []);
 
   // ============= 分组配置管理 =============
 
   const toggleGrouping = useCallback((enabled: boolean) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
       grouping: {
         ...prev.grouping!,
@@ -375,56 +378,57 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
     }));
   }, []);
 
-  const addGroupingField = useCallback((fieldKey: string) => {
-    const field = config.fields.find(f => f.key === fieldKey);
-    if (!field) return;
+  const addGroupingField = useCallback(
+    (fieldKey: string) => {
+      const field = config.fields.find((f) => f.key === fieldKey);
+      if (!field) return;
 
-    const groupField: GroupingField = {
-      key: field.key,
-      label: field.label,
-      mode: 'merge',
-      valueProcessing: 'first',
-      showGroupHeader: false,
-      mergeCells: true,
-    };
+      const groupField: GroupingField = {
+        key: field.key,
+        label: field.label,
+        mode: 'merge',
+        valueProcessing: 'first',
+        showGroupHeader: false,
+        mergeCells: true,
+      };
 
-    setConfig(prev => ({
-      ...prev,
-      grouping: {
-        ...prev.grouping!,
-        fields: [...prev.grouping!.fields, groupField],
-      },
-    }));
-  }, [config.fields]);
+      setConfig((prev) => ({
+        ...prev,
+        grouping: {
+          ...prev.grouping!,
+          fields: [...prev.grouping!.fields, groupField],
+        },
+      }));
+    },
+    [config.fields]
+  );
 
   const removeGroupingField = useCallback((fieldKey: string) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
       grouping: {
         ...prev.grouping!,
-        fields: prev.grouping!.fields.filter(f => f.key !== fieldKey),
+        fields: prev.grouping!.fields.filter((f) => f.key !== fieldKey),
       },
     }));
   }, []);
 
   const updateGroupingField = useCallback((fieldKey: string, updates: Partial<GroupingField>) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
       grouping: {
         ...prev.grouping!,
-        fields: prev.grouping!.fields.map(field =>
-          field.key === fieldKey
-            ? { ...field, ...updates }
-            : field
+        fields: prev.grouping!.fields.map((field) =>
+          field.key === fieldKey ? { ...field, ...updates } : field
         ),
       },
     }));
   }, []);
 
   const moveGroupingField = useCallback((fieldKey: string, direction: 'up' | 'down') => {
-    setConfig(prev => {
+    setConfig((prev) => {
       const fields = [...prev.grouping!.fields];
-      const index = fields.findIndex(f => f.key === fieldKey);
+      const index = fields.findIndex((f) => f.key === fieldKey);
 
       if (direction === 'up' && index > 0) {
         [fields[index], fields[index - 1]] = [fields[index - 1], fields[index]];
@@ -443,7 +447,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
   }, []);
 
   const updateGroupingConfig = useCallback((updates: Partial<GroupingConfig>) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
       grouping: {
         ...prev.grouping!,
@@ -460,7 +464,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
       return;
     }
 
-    const enabledFields = config.fields.filter(f => f.enabled);
+    const enabledFields = config.fields.filter((f) => f.enabled);
     if (enabledFields.length === 0) {
       alert('至少需要启用一个字段');
       return;
@@ -500,9 +504,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
           <button
             onClick={() => toggleFieldEnabled(field.key)}
             className={`p-1 rounded transition-colors flex-shrink-0 ${
-              field.enabled
-                ? 'text-blue-600 hover:bg-blue-50'
-                : 'text-gray-400 hover:bg-gray-100'
+              field.enabled ? 'text-blue-600 hover:bg-blue-50' : 'text-gray-400 hover:bg-gray-100'
             }`}
             title={field.enabled ? '禁用字段' : '启用字段'}
           >
@@ -510,9 +512,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
           </button>
 
           {/* 字段类型图标 */}
-          <div className="flex-shrink-0 text-gray-500">
-            {FIELD_TYPE_ICONS[field.type]}
-          </div>
+          <div className="flex-shrink-0 text-gray-500">{FIELD_TYPE_ICONS[field.type]}</div>
 
           {/* 字段信息 */}
           <div className="flex-1 min-w-0">
@@ -525,9 +525,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
               </span>
             </div>
             {field.description && (
-              <p className="text-xs sm:text-sm text-gray-600 mt-1 truncate">
-                {field.description}
-              </p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1 truncate">{field.description}</p>
             )}
           </div>
 
@@ -538,9 +536,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
               onClick={() => moveField(field.key, 'up')}
               disabled={isFirst}
               className={`p-1 rounded transition-colors ${
-                isFirst
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-gray-600 hover:bg-gray-100'
+                isFirst ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100'
               }`}
               title="上移"
             >
@@ -552,9 +548,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
               onClick={() => moveField(field.key, 'down')}
               disabled={isLast}
               className={`p-1 rounded transition-colors ${
-                isLast
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-gray-600 hover:bg-gray-100'
+                isLast ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100'
               }`}
               title="下移"
             >
@@ -580,7 +574,9 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
               <label className="text-xs text-gray-600 whitespace-nowrap">对齐:</label>
               <select
                 value={field.alignment || 'left'}
-                onChange={(e) => updateField(field.key, { alignment: e.target.value as FieldAlignment })}
+                onChange={(e) =>
+                  updateField(field.key, { alignment: e.target.value as FieldAlignment })
+                }
                 className="text-xs border border-gray-300 rounded px-2 py-1 bg-white min-w-0"
                 title="对齐方式"
               >
@@ -598,7 +594,11 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
               <input
                 type="number"
                 value={field.width || ''}
-                onChange={(e) => updateField(field.key, { width: e.target.value ? Number(e.target.value) : undefined })}
+                onChange={(e) =>
+                  updateField(field.key, {
+                    width: e.target.value ? Number(e.target.value) : undefined,
+                  })
+                }
                 placeholder="自动"
                 className="w-16 text-xs border border-gray-300 rounded px-2 py-1 bg-white"
                 title="字段宽度"
@@ -625,9 +625,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Group className="w-4 h-4 text-blue-600" />
-            <span className="font-medium text-blue-900">
-              {groupField.label}
-            </span>
+            <span className="font-medium text-blue-900">{groupField.label}</span>
             <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
               {groupField.key}
             </span>
@@ -638,9 +636,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
               onClick={() => moveGroupingField(groupField.key, 'up')}
               disabled={isFirst}
               className={`p-1 rounded transition-colors ${
-                isFirst
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-blue-600 hover:bg-blue-100'
+                isFirst ? 'text-gray-300 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-100'
               }`}
               title="上移"
             >
@@ -652,9 +648,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
               onClick={() => moveGroupingField(groupField.key, 'down')}
               disabled={isLast}
               className={`p-1 rounded transition-colors ${
-                isLast
-                  ? 'text-gray-300 cursor-not-allowed'
-                  : 'text-blue-600 hover:bg-blue-100'
+                isLast ? 'text-gray-300 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-100'
               }`}
               title="下移"
             >
@@ -676,12 +670,12 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* 分组模式 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              分组模式
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">分组模式</label>
             <select
               value={groupField.mode}
-              onChange={(e) => updateGroupingField(groupField.key, { mode: e.target.value as GroupingMode })}
+              onChange={(e) =>
+                updateGroupingField(groupField.key, { mode: e.target.value as GroupingMode })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
             >
               {Object.entries(GROUPING_MODE_LABELS).map(([value, label]) => (
@@ -697,12 +691,14 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
 
           {/* 值处理方式 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              值处理方式
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">值处理方式</label>
             <select
               value={groupField.valueProcessing}
-              onChange={(e) => updateGroupingField(groupField.key, { valueProcessing: e.target.value as GroupValueProcessing })}
+              onChange={(e) =>
+                updateGroupingField(groupField.key, {
+                  valueProcessing: e.target.value as GroupValueProcessing,
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
             >
               {Object.entries(VALUE_PROCESSING_LABELS).map(([value, label]) => (
@@ -720,7 +716,9 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
             <input
               type="checkbox"
               checked={groupField.showGroupHeader}
-              onChange={(e) => updateGroupingField(groupField.key, { showGroupHeader: e.target.checked })}
+              onChange={(e) =>
+                updateGroupingField(groupField.key, { showGroupHeader: e.target.checked })
+              }
               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
             <span className="text-sm text-gray-700">显示分组头</span>
@@ -731,7 +729,9 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
               <input
                 type="checkbox"
                 checked={groupField.mergeCells}
-                onChange={(e) => updateGroupingField(groupField.key, { mergeCells: e.target.checked })}
+                onChange={(e) =>
+                  updateGroupingField(groupField.key, { mergeCells: e.target.checked })
+                }
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <span className="text-sm text-gray-700">合并单元格</span>
@@ -742,13 +742,13 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
         {/* 分组头模板 */}
         {groupField.showGroupHeader && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              分组头模板
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">分组头模板</label>
             <input
               type="text"
               value={groupField.groupHeaderTemplate || ''}
-              onChange={(e) => updateGroupingField(groupField.key, { groupHeaderTemplate: e.target.value })}
+              onChange={(e) =>
+                updateGroupingField(groupField.key, { groupHeaderTemplate: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
               placeholder="使用 {value} 表示分组值，如：用户: {value}"
             />
@@ -770,25 +770,25 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
       id: 'basic' as const,
       label: '基本配置',
       icon: <Settings className="w-4 h-4" />,
-      description: '配置名称、格式和基本选项'
+      description: '配置名称、格式和基本选项',
     },
     {
       id: 'fields' as const,
       label: '字段设置',
       icon: <Type className="w-4 h-4" />,
-      description: '选择和配置导出字段'
+      description: '选择和配置导出字段',
     },
     {
       id: 'grouping' as const,
       label: '分组设置',
       icon: <Group className="w-4 h-4" />,
-      description: '配置数据分组和合并选项'
+      description: '配置数据分组和合并选项',
     },
     {
       id: 'manage' as const,
       label: '配置管理',
       icon: <Database className="w-4 h-4" />,
-      description: '管理已保存的导出配置'
+      description: '管理已保存的导出配置',
     },
   ];
 
@@ -819,9 +819,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
                 导出配置编辑器
               </h2>
-              <p className="text-xs sm:text-sm text-gray-600 truncate">
-                配置导出字段和格式选项
-              </p>
+              <p className="text-xs sm:text-sm text-gray-600 truncate">配置导出字段和格式选项</p>
             </div>
           </div>
           <button
@@ -841,9 +839,10 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                 onClick={() => setActiveTab(tab.id)}
                 className={`
                   flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-lg transition-colors
-                  ${activeTab === tab.id
-                    ? 'bg-white text-blue-600 shadow-sm border border-gray-200'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                  ${
+                    activeTab === tab.id
+                      ? 'bg-white text-blue-600 shadow-sm border border-gray-200'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                   }
                 `}
               >
@@ -860,9 +859,9 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
           {/* 当前Tab的内容描述 */}
           <div className="bg-blue-50 border-b border-blue-100 p-4 flex-shrink-0">
             <div className="flex items-center gap-2 text-blue-800">
-              {tabs.find(t => t.id === activeTab)?.icon}
+              {tabs.find((t) => t.id === activeTab)?.icon}
               <span className="text-sm font-medium">
-                {tabs.find(t => t.id === activeTab)?.description}
+                {tabs.find((t) => t.id === activeTab)?.description}
               </span>
             </div>
           </div>
@@ -872,7 +871,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
             className="flex-1 overflow-y-auto"
             style={{
               scrollbarWidth: 'thin',
-              scrollbarColor: '#CBD5E0 #F7FAFC'
+              scrollbarColor: '#CBD5E0 #F7FAFC',
             }}
           >
             <div className="p-4 sm:p-6">
@@ -891,19 +890,19 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                         <input
                           type="text"
                           value={config.name}
-                          onChange={(e) => setConfig(prev => ({ ...prev, name: e.target.value }))}
+                          onChange={(e) => setConfig((prev) => ({ ...prev, name: e.target.value }))}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="输入配置名称"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          描述
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
                         <textarea
                           value={config.description}
-                          onChange={(e) => setConfig(prev => ({ ...prev, description: e.target.value }))}
+                          onChange={(e) =>
+                            setConfig((prev) => ({ ...prev, description: e.target.value }))
+                          }
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           rows={3}
                           placeholder="输入配置描述"
@@ -916,13 +915,21 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                         </label>
                         <div className="space-y-3">
                           {(['csv', 'excel', 'json'] as ExportFormat[]).map((format) => (
-                            <label key={format} className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer">
+                            <label
+                              key={format}
+                              className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:border-blue-300 cursor-pointer"
+                            >
                               <input
                                 type="radio"
                                 name="format"
                                 value={format}
                                 checked={config.format === format}
-                                onChange={(e) => setConfig(prev => ({ ...prev, format: e.target.value as ExportFormat }))}
+                                onChange={(e) =>
+                                  setConfig((prev) => ({
+                                    ...prev,
+                                    format: e.target.value as ExportFormat,
+                                  }))
+                                }
                                 className="mt-1 text-blue-600 focus:ring-blue-500"
                               />
                               <div className="flex-1">
@@ -966,16 +973,15 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                           <input
                             type="text"
                             value={config.fileNameTemplate}
-                            onChange={(e) => setConfig(prev => ({ ...prev, fileNameTemplate: e.target.value }))}
+                            onChange={(e) =>
+                              setConfig((prev) => ({ ...prev, fileNameTemplate: e.target.value }))
+                            }
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             placeholder="例如：导出数据_{date}"
                           />
                           <p className="text-xs text-gray-500 mt-1">
-                            支持变量：{' '}
-                            <code className="bg-gray-100 px-1 rounded">{'{date}'}</code>
-                            {' '}
-                            <code className="bg-gray-100 px-1 rounded">{'{time}'}</code>
-                            {' '}
+                            支持变量： <code className="bg-gray-100 px-1 rounded">{'{date}'}</code>{' '}
+                            <code className="bg-gray-100 px-1 rounded">{'{time}'}</code>{' '}
                             <code className="bg-gray-100 px-1 rounded">{'{timestamp}'}</code>
                           </p>
                         </div>
@@ -989,7 +995,9 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                               <input
                                 type="text"
                                 value={config.delimiter}
-                                onChange={(e) => setConfig(prev => ({ ...prev, delimiter: e.target.value }))}
+                                onChange={(e) =>
+                                  setConfig((prev) => ({ ...prev, delimiter: e.target.value }))
+                                }
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder=","
                               />
@@ -1000,7 +1008,12 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                                 <input
                                   type="checkbox"
                                   checked={config.includeHeader}
-                                  onChange={(e) => setConfig(prev => ({ ...prev, includeHeader: e.target.checked }))}
+                                  onChange={(e) =>
+                                    setConfig((prev) => ({
+                                      ...prev,
+                                      includeHeader: e.target.checked,
+                                    }))
+                                  }
                                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                 />
                                 <span className="text-sm text-gray-700">包含表头</span>
@@ -1010,7 +1023,9 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                                 <input
                                   type="checkbox"
                                   checked={config.addBOM}
-                                  onChange={(e) => setConfig(prev => ({ ...prev, addBOM: e.target.checked }))}
+                                  onChange={(e) =>
+                                    setConfig((prev) => ({ ...prev, addBOM: e.target.checked }))
+                                  }
                                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                 />
                                 <span className="text-sm text-gray-700">添加BOM</span>
@@ -1026,7 +1041,12 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                           <input
                             type="number"
                             value={config.maxRows || ''}
-                            onChange={(e) => setConfig(prev => ({ ...prev, maxRows: e.target.value ? Number(e.target.value) : undefined }))}
+                            onChange={(e) =>
+                              setConfig((prev) => ({
+                                ...prev,
+                                maxRows: e.target.value ? Number(e.target.value) : undefined,
+                              }))
+                            }
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             placeholder="不限制"
                             min="1"
@@ -1044,7 +1064,8 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-medium text-gray-900">字段配置</h3>
                     <div className="text-sm text-gray-500">
-                      已启用 {config.fields.filter(f => f.enabled).length} / {config.fields.length} 个字段
+                      已启用 {config.fields.filter((f) => f.enabled).length} /{' '}
+                      {config.fields.length} 个字段
                     </div>
                   </div>
 
@@ -1104,13 +1125,16 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                         >
                           <option value="">选择要分组的字段...</option>
                           {config.fields
-                            .filter(field => field.enabled && !config.grouping?.fields.some(gf => gf.key === field.key))
-                            .map(field => (
+                            .filter(
+                              (field) =>
+                                field.enabled &&
+                                !config.grouping?.fields.some((gf) => gf.key === field.key)
+                            )
+                            .map((field) => (
                               <option key={field.key} value={field.key}>
                                 {field.label} ({field.key})
                               </option>
-                            ))
-                          }
+                            ))}
                         </select>
                       </div>
 
@@ -1124,7 +1148,14 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                             </label>
                             <select
                               value={config.grouping.nullValueHandling}
-                              onChange={(e) => updateGroupingConfig({ nullValueHandling: e.target.value as 'skip' | 'group' | 'separate' })}
+                              onChange={(e) =>
+                                updateGroupingConfig({
+                                  nullValueHandling: e.target.value as
+                                    | 'skip'
+                                    | 'group'
+                                    | 'separate',
+                                })
+                              }
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                             >
                               <option value="skip">跳过空值</option>
@@ -1140,7 +1171,9 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                             <input
                               type="text"
                               value={config.grouping.nullGroupName || ''}
-                              onChange={(e) => updateGroupingConfig({ nullGroupName: e.target.value })}
+                              onChange={(e) =>
+                                updateGroupingConfig({ nullGroupName: e.target.value })
+                              }
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                               placeholder="未分组"
                             />
@@ -1151,7 +1184,9 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                               <input
                                 type="checkbox"
                                 checked={config.grouping.preserveOrder}
-                                onChange={(e) => updateGroupingConfig({ preserveOrder: e.target.checked })}
+                                onChange={(e) =>
+                                  updateGroupingConfig({ preserveOrder: e.target.checked })
+                                }
                                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                               />
                               <span className="text-sm text-gray-700">保持原始顺序</span>
@@ -1166,9 +1201,17 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                             <div className="text-sm text-blue-800">
                               <div className="font-medium mb-1">分组功能说明</div>
                               <ul className="text-xs space-y-1 text-blue-700">
-                                <li>• <strong>合并模式</strong>：同组数据的分组字段合并显示，Excel支持单元格合并</li>
-                                <li>• <strong>分离模式</strong>：每个分组独立显示，可添加分组头</li>
-                                <li>• <strong>Excel格式</strong>：推荐使用Excel格式以获得最佳的分组效果</li>
+                                <li>
+                                  • <strong>合并模式</strong>
+                                  ：同组数据的分组字段合并显示，Excel支持单元格合并
+                                </li>
+                                <li>
+                                  • <strong>分离模式</strong>：每个分组独立显示，可添加分组头
+                                </li>
+                                <li>
+                                  • <strong>Excel格式</strong>
+                                  ：推荐使用Excel格式以获得最佳的分组效果
+                                </li>
                               </ul>
                             </div>
                           </div>
@@ -1238,7 +1281,12 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
                                     分组: {savedConfig.grouping.fields?.length || 0}个
                                   </span>
                                 )}
-                                <span>创建时间: {savedConfig.createdAt ? new Date(savedConfig.createdAt).toLocaleDateString() : '未知'}</span>
+                                <span>
+                                  创建时间:{' '}
+                                  {savedConfig.createdAt
+                                    ? new Date(savedConfig.createdAt).toLocaleDateString()
+                                    : '未知'}
+                                </span>
                               </div>
                             </div>
 

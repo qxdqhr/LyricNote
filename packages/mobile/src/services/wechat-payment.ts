@@ -124,7 +124,11 @@ export async function queryPaymentStatus(orderId: string): Promise<any> {
 /**
  * 获取用户订单列表
  */
-export async function getUserOrders(userId: string, page: number = 1, pageSize: number = 20): Promise<any[]> {
+export async function getUserOrders(
+  userId: string,
+  page: number = 1,
+  pageSize: number = 20
+): Promise<any[]> {
   try {
     const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
@@ -185,4 +189,3 @@ export function formatAmount(amount: number, withSymbol: boolean = true): string
   const formatted = yuan.toFixed(2);
   return withSymbol ? `¥${formatted}` : formatted;
 }
-

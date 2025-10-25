@@ -9,7 +9,7 @@ import {
   type ExportConfig,
   type NewExportConfig,
   type ExportHistory,
-  type NewExportHistory
+  type NewExportHistory,
 } from './schema';
 import { eq, and, desc } from 'drizzle-orm';
 import type { ExportField } from '@lyricnote/shared/universalExport';
@@ -21,7 +21,9 @@ export class ExportConfigDatabaseService {
   /**
    * 创建导出配置
    */
-  async createConfig(config: Omit<NewExportConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<ExportConfig> {
+  async createConfig(
+    config: Omit<NewExportConfig, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<ExportConfig> {
     const id = `export_config_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const now = new Date();
 
@@ -42,11 +44,7 @@ export class ExportConfigDatabaseService {
    * 根据ID获取配置
    */
   async getConfigById(id: string): Promise<ExportConfig | null> {
-    const [config] = await db
-      .select()
-      .from(exportConfigs)
-      .where(eq(exportConfigs.id, id))
-      .limit(1);
+    const [config] = await db.select().from(exportConfigs).where(eq(exportConfigs.id, id)).limit(1);
 
     return config || null;
   }
@@ -69,7 +67,10 @@ export class ExportConfigDatabaseService {
   /**
    * 更新配置
    */
-  async updateConfig(id: string, updates: Partial<Omit<ExportConfig, 'id' | 'createdAt'>>): Promise<ExportConfig | null> {
+  async updateConfig(
+    id: string,
+    updates: Partial<Omit<ExportConfig, 'id' | 'createdAt'>>
+  ): Promise<ExportConfig | null> {
     const [updatedConfig] = await db
       .update(exportConfigs)
       .set({
@@ -86,9 +87,7 @@ export class ExportConfigDatabaseService {
    * 删除配置
    */
   async deleteConfig(id: string): Promise<boolean> {
-    await db
-      .delete(exportConfigs)
-      .where(eq(exportConfigs.id, id));
+    await db.delete(exportConfigs).where(eq(exportConfigs.id, id));
 
     return true;
   }

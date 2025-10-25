@@ -13,7 +13,7 @@ import type {
   LocalStorageConfig,
   StorageResult,
   UploadFileInfo,
-  StorageType
+  StorageType,
 } from '../types';
 
 import { StorageProviderError } from '../types';
@@ -48,7 +48,6 @@ export class LocalStorageProvider implements IStorageProvider {
 
       this.isInitialized = true;
       logger.info('✅ [LocalStorageProvider] 本地存储初始化完成');
-
     } catch (error) {
       console.error('❌ [LocalStorageProvider] 本地存储初始化失败:', error);
       throw new StorageProviderError(
@@ -101,16 +100,15 @@ export class LocalStorageProvider implements IStorageProvider {
         size: stats.size,
         data: {
           fullPath,
-          uploadTime
-        }
+          uploadTime,
+        },
       };
-
     } catch (error) {
       console.error(`❌ [LocalStorageProvider] 文件上传失败: ${filePath}:`, error);
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : '上传失败'
+        error: error instanceof Error ? error.message : '上传失败',
       };
     }
   }
@@ -137,7 +135,6 @@ export class LocalStorageProvider implements IStorageProvider {
       logger.info(`✅ [LocalStorageProvider] 文件下载完成: ${path}, 大小: ${buffer.length}`);
 
       return buffer;
-
     } catch (error) {
       console.error(`❌ [LocalStorageProvider] 文件下载失败: ${path}:`, error);
       throw new StorageProviderError(
@@ -162,7 +159,7 @@ export class LocalStorageProvider implements IStorageProvider {
         console.warn(`⚠️ [LocalStorageProvider] 文件不存在: ${path}`);
         return {
           success: true, // 文件不存在也视为删除成功
-          data: { reason: 'file_not_exists' }
+          data: { reason: 'file_not_exists' },
         };
       }
 
@@ -173,15 +170,14 @@ export class LocalStorageProvider implements IStorageProvider {
 
       return {
         success: true,
-        data: { deletedPath: fullPath }
+        data: { deletedPath: fullPath },
       };
-
     } catch (error) {
       console.error(`❌ [LocalStorageProvider] 文件删除失败: ${path}:`, error);
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : '删除失败'
+        error: error instanceof Error ? error.message : '删除失败',
       };
     }
   }
@@ -198,7 +194,7 @@ export class LocalStorageProvider implements IStorageProvider {
       if (!existsSync(fullPath)) {
         return {
           success: false,
-          error: '文件不存在'
+          error: '文件不存在',
         };
       }
 
@@ -213,14 +209,13 @@ export class LocalStorageProvider implements IStorageProvider {
           mtime: stats.mtime,
           ctime: stats.ctime,
           isFile: stats.isFile(),
-          isDirectory: stats.isDirectory()
-        }
+          isDirectory: stats.isDirectory(),
+        },
       };
-
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : '获取文件信息失败'
+        error: error instanceof Error ? error.message : '获取文件信息失败',
       };
     }
   }
@@ -277,10 +272,10 @@ export class LocalStorageProvider implements IStorageProvider {
 
       const entries = await fs.readdir(baseDir, { withFileTypes: true });
       let files = entries
-        .filter(entry => entry.isFile())
-        .map(entry => entry.name)
-        .filter(name => name.startsWith(filePattern))
-        .map(name => path.join(path.dirname(prefix), name));
+        .filter((entry) => entry.isFile())
+        .map((entry) => entry.name)
+        .filter((name) => name.startsWith(filePattern))
+        .map((name) => path.join(path.dirname(prefix), name));
 
       // 限制返回数量
       if (maxKeys && maxKeys > 0) {
@@ -288,7 +283,6 @@ export class LocalStorageProvider implements IStorageProvider {
       }
 
       return files;
-
     } catch (error) {
       console.error(`❌ [LocalStorageProvider] 列出文件失败: ${prefix}:`, error);
       return [];
@@ -400,7 +394,9 @@ export class LocalStorageProvider implements IStorageProvider {
       const accessUrl = this.generateAccessUrl(filePath);
 
       const uploadTime = Date.now() - startTime;
-      logger.info(`✅ [LocalStorageProvider] 流式上传完成: ${filePath}, 大小: ${stats.size}, 耗时: ${uploadTime}ms`);
+      logger.info(
+        `✅ [LocalStorageProvider] 流式上传完成: ${filePath}, 大小: ${stats.size}, 耗时: ${uploadTime}ms`
+      );
 
       return {
         success: true,
@@ -409,16 +405,15 @@ export class LocalStorageProvider implements IStorageProvider {
         size: stats.size,
         data: {
           fullPath,
-          uploadTime
-        }
+          uploadTime,
+        },
       };
-
     } catch (error) {
       console.error(`❌ [LocalStorageProvider] 流式上传失败: ${filePath}:`, error);
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : '流式上传失败'
+        error: error instanceof Error ? error.message : '流式上传失败',
       };
     }
   }

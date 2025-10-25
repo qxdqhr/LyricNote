@@ -56,9 +56,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (error) {
     logger.error('微信回调处理失败', error);
-    return NextResponse.redirect(
-      new URL('/login?error=callback_failed', request.url)
-    );
+    return NextResponse.redirect(new URL('/login?error=callback_failed', request.url));
   }
 }
-

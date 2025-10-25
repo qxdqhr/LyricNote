@@ -327,11 +327,7 @@ export class WechatAuthService {
     if (existingBinding.length > 0) {
       // 已有绑定，查询用户信息
       const userId = existingBinding[0].userId;
-      const existingUser = await db
-        .select()
-        .from(user)
-        .where(eq(user.id, userId))
-        .limit(1);
+      const existingUser = await db.select().from(user).where(eq(user.id, userId)).limit(1);
 
       if (existingUser.length > 0) {
         logger.info('找到已绑定用户', { userId });
@@ -374,11 +370,7 @@ export class WechatAuthService {
           updatedAt: new Date().toISOString(),
         });
 
-        const existingUser = await db
-          .select()
-          .from(user)
-          .where(eq(user.id, userId))
-          .limit(1);
+        const existingUser = await db.select().from(user).where(eq(user.id, userId)).limit(1);
 
         logger.info('为已有用户添加新平台绑定', { userId, platform });
         return existingUser[0];
@@ -471,14 +463,8 @@ export class WechatAuthService {
   async unbind(userId: string, platform: WechatPlatform): Promise<void> {
     await db
       .delete(userWechatBindings)
-      .where(
-        and(
-          eq(userWechatBindings.userId, userId),
-          eq(userWechatBindings.platform, platform)
-        )
-      );
+      .where(and(eq(userWechatBindings.userId, userId), eq(userWechatBindings.platform, platform)));
 
     logger.info('解绑微信账号', { userId, platform });
   }
 }
-

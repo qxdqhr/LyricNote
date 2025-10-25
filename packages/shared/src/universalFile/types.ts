@@ -270,4 +270,3 @@ export class CDNProviderError extends FileServiceError {
     this.name = 'CDNProviderError';
   }
 }
-

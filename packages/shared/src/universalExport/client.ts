@@ -4,12 +4,7 @@
  * 提供与后端API交互的客户端接口
  */
 
-import type {
-  ExportConfig,
-  ExportProgress,
-  ExportResult,
-  ExportRequest,
-} from './types';
+import type { ExportConfig, ExportProgress, ExportResult, ExportRequest } from './types';
 import { API_ENDPOINTS, ERROR_CODES } from './constants';
 import { createExportError, formatErrorMessage } from './utils';
 
@@ -77,7 +72,9 @@ export class UniversalExportClient {
   /**
    * 创建导出配置
    */
-  async createConfig(config: Omit<ExportConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<ExportConfig> {
+  async createConfig(
+    config: Omit<ExportConfig, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<ExportConfig> {
     const url = `${this.config.baseUrl}${API_ENDPOINTS.CREATE_CONFIG}`;
 
     try {
@@ -281,11 +278,10 @@ export class UniversalExportClient {
       return response;
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
-        throw createExportError(
-          ERROR_CODES.TIMEOUT_ERROR,
-          '请求超时',
-          { url, timeout: this.config.timeout }
-        );
+        throw createExportError(ERROR_CODES.TIMEOUT_ERROR, '请求超时', {
+          url,
+          timeout: this.config.timeout,
+        });
       }
       throw error;
     } finally {
@@ -322,7 +318,7 @@ export class UniversalExportClient {
    * 转换API返回的配置列表
    */
   private transformConfigsFromAPI(apiConfigs: any[]): ExportConfig[] {
-    return apiConfigs.map(config => this.transformConfigFromAPI(config));
+    return apiConfigs.map((config) => this.transformConfigFromAPI(config));
   }
 
   /**
@@ -375,4 +371,3 @@ export const universalExportClient = new UniversalExportClient();
 export function createExportClient(config?: UniversalExportClientConfig): UniversalExportClient {
   return new UniversalExportClient(config);
 }
-

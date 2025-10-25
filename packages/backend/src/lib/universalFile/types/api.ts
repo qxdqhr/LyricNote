@@ -558,4 +558,4 @@ export const ErrorHttpStatusMap: Record<ApiErrorCode, number> = {
   [ApiErrorCode.SHARE_PASSWORD_INCORRECT]: 401,
   [ApiErrorCode.SHARE_ACCESS_DENIED]: 403,
   [ApiErrorCode.SHARE_DOWNLOAD_LIMIT_EXCEEDED]: 429,
-}; 
+};

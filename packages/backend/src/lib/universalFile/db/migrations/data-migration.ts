@@ -18,7 +18,7 @@ import {
   fileMetadata,
   type NewFileStorageProvider,
   type NewFileFolder,
-  type NewFileMetadata
+  type NewFileMetadata,
 } from '../schema';
 
 // 导入旧的表结构
@@ -59,7 +59,7 @@ export class UniversalFileDataMigration {
       dryRun: false,
       batchSize: 100,
       logLevel: 'info',
-      ...options
+      ...options,
     };
 
     // 初始化数据库连接
@@ -90,7 +90,7 @@ export class UniversalFileDataMigration {
       migratedFiles: 0,
       createdFolders: 0,
       errors: [],
-      duration: 0
+      duration: 0,
     };
 
     try {
@@ -109,9 +109,8 @@ export class UniversalFileDataMigration {
       this.logger('info', '数据迁移完成', {
         migratedFiles: result.migratedFiles,
         createdFolders: result.createdFolders,
-        errors: result.errors.length
+        errors: result.errors.length,
       });
-
     } catch (error) {
       this.logger('error', '数据迁移失败', error);
       throw error;
@@ -143,12 +142,12 @@ export class UniversalFileDataMigration {
           uploadPath: './uploads',
           publicPath: '/uploads',
           allowedMimeTypes: ['*/*'],
-          maxFileSize: 100 * 1024 * 1024 // 100MB
+          maxFileSize: 100 * 1024 * 1024, // 100MB
         },
         isActive: true,
         isDefault: true,
         priority: 1,
-        supportedMimeTypes: ['*/*']
+        supportedMimeTypes: ['*/*'],
       };
 
       if (!this.options.dryRun) {
@@ -173,7 +172,7 @@ export class UniversalFileDataMigration {
       { moduleId: 'mmd', name: 'MMD模型' },
       { moduleId: 'cardmaker', name: '名片制作' },
       { moduleId: 'calendar', name: '日历事件' },
-      { moduleId: 'idealist', name: '想法清单' }
+      { moduleId: 'idealist', name: '想法清单' },
     ];
 
     let createdCount = 0;
@@ -195,7 +194,7 @@ export class UniversalFileDataMigration {
           depth: 1,
           sortOrder: createdCount,
           isSystem: true,
-          createdBy: 'migration'
+          createdBy: 'migration',
         };
 
         if (!this.options.dryRun) {
@@ -267,7 +266,10 @@ export class UniversalFileDataMigration {
           } catch (fileError) {
             this.logger('warn', `无法读取文件: ${filePath}`, fileError);
             // 使用文件路径和时间戳生成模拟哈希
-            md5Hash = crypto.createHash('md5').update(`${filePath}-${transfer.createdAt}`).digest('hex');
+            md5Hash = crypto
+              .createHash('md5')
+              .update(`${filePath}-${transfer.createdAt}`)
+              .digest('hex');
           }
 
           // 解析文件扩展名
@@ -293,7 +295,7 @@ export class UniversalFileDataMigration {
               originalTransferId: transfer.id,
               transferStatus: transfer.status,
               progress: transfer.progress,
-              migratedAt: new Date().toISOString()
+              migratedAt: new Date().toISOString(),
             },
             isTemporary: transfer.status !== 'completed',
             isDeleted: false,
@@ -304,7 +306,7 @@ export class UniversalFileDataMigration {
             lastAccessTime: transfer.updatedAt,
             expiresAt: transfer.expiresAt,
             createdAt: transfer.createdAt,
-            updatedAt: transfer.updatedAt
+            updatedAt: transfer.updatedAt,
           };
 
           if (!this.options.dryRun) {
@@ -313,7 +315,6 @@ export class UniversalFileDataMigration {
 
           migratedCount++;
           this.logger('debug', `迁移文件: ${transfer.fileName}`);
-
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           errors.push({ id: transfer.id, error: errorMessage });
@@ -322,7 +323,10 @@ export class UniversalFileDataMigration {
       }
 
       // 显示进度
-      this.logger('info', `已迁移 ${Math.min(i + this.options.batchSize, transfers.length)}/${transfers.length} 条记录`);
+      this.logger(
+        'info',
+        `已迁移 ${Math.min(i + this.options.batchSize, transfers.length)}/${transfers.length} 条记录`
+      );
     }
 
     if (errors.length > 0) {
@@ -340,13 +344,9 @@ export class UniversalFileDataMigration {
     this.logger('info', '验证迁移结果...');
 
     // 统计新表中的记录数
-    const fileCount = await this.db
-      .select({ count: sql<number>`count(*)` })
-      .from(fileMetadata);
+    const fileCount = await this.db.select({ count: sql<number>`count(*)` }).from(fileMetadata);
 
-    const folderCount = await this.db
-      .select({ count: sql<number>`count(*)` })
-      .from(fileFolders);
+    const folderCount = await this.db.select({ count: sql<number>`count(*)` }).from(fileFolders);
 
     const providerCount = await this.db
       .select({ count: sql<number>`count(*)` })
@@ -355,14 +355,14 @@ export class UniversalFileDataMigration {
     this.logger('info', '迁移结果统计', {
       files: fileCount[0].count,
       folders: folderCount[0].count,
-      providers: providerCount[0].count
+      providers: providerCount[0].count,
     });
 
     // 检查数据完整性
     const duplicateHashes = await this.db
       .select({
         md5Hash: fileMetadata.md5Hash,
-        count: sql<number>`count(*)`
+        count: sql<number>`count(*)`,
       })
       .from(fileMetadata)
       .groupBy(fileMetadata.md5Hash)
@@ -386,17 +386,12 @@ export class UniversalFileDataMigration {
 
     try {
       // 删除迁移创建的文件记录
-      await this.db
-        .delete(fileMetadata)
-        .where(sql`metadata->>'migratedAt' IS NOT NULL`);
+      await this.db.delete(fileMetadata).where(sql`metadata->>'migratedAt' IS NOT NULL`);
 
       // 删除系统创建的文件夹
-      await this.db
-        .delete(fileFolders)
-        .where(eq(fileFolders.createdBy, 'migration'));
+      await this.db.delete(fileFolders).where(eq(fileFolders.createdBy, 'migration'));
 
       this.logger('info', '迁移回滚完成');
-
     } catch (error) {
       this.logger('error', '回滚失败', error);
       throw error;

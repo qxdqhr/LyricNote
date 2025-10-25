@@ -1,6 +1,6 @@
 /**
  * 通用文件服务核心类型定义
- * 
+ *
  * 定义了文件存储、CDN、处理器等核心接口和类型
  */
 
@@ -143,31 +143,31 @@ export interface StorageResult {
 export interface IStorageProvider {
   /** 提供者类型 */
   readonly type: StorageType;
-  
+
   /** 初始化 */
   initialize(config: StorageConfig): Promise<void>;
-  
+
   /** 上传文件 */
   upload(fileInfo: UploadFileInfo, path: string): Promise<StorageResult>;
-  
+
   /** 下载文件 */
   download(path: string): Promise<Buffer>;
-  
+
   /** 删除文件 */
   delete(path: string): Promise<StorageResult>;
-  
+
   /** 获取文件信息 */
   getFileInfo(path: string): Promise<StorageResult>;
-  
+
   /** 生成访问URL */
   getAccessUrl(path: string, expiresIn?: number): Promise<string>;
-  
+
   /** 生成预签名上传URL */
   getUploadUrl(path: string, expiresIn?: number): Promise<string>;
-  
+
   /** 检查文件是否存在 */
   exists(path: string): Promise<boolean>;
-  
+
   /** 列出文件 */
   list(prefix: string, maxKeys?: number): Promise<string[]>;
 }
@@ -211,19 +211,19 @@ export interface CDNResult {
 export interface ICDNProvider {
   /** 提供者类型 */
   readonly type: CDNType;
-  
+
   /** 初始化 */
   initialize(config: CDNConfig): Promise<void>;
-  
+
   /** 生成CDN URL */
   generateUrl(originalUrl: string): Promise<string>;
-  
+
   /** 刷新缓存 */
   refreshCache(urls: string[]): Promise<CDNResult>;
-  
+
   /** 预热缓存 */
   preheatCache(urls: string[]): Promise<CDNResult>;
-  
+
   /** 获取访问统计 */
   getAccessStats(startTime: Date, endTime: Date): Promise<CDNResult>;
 }
@@ -306,16 +306,20 @@ export interface ProcessingResult {
 export interface IFileProcessor {
   /** 处理器类型 */
   readonly type: ProcessorType;
-  
+
   /** 初始化 */
   initialize(): Promise<void>;
-  
+
   /** 处理文件 */
-  process(inputPath: string, outputPath: string, options: ProcessingOptions): Promise<ProcessingResult>;
-  
+  process(
+    inputPath: string,
+    outputPath: string,
+    options: ProcessingOptions
+  ): Promise<ProcessingResult>;
+
   /** 检查文件是否支持处理 */
   supports(mimeType: string): boolean;
-  
+
   /** 获取文件信息 */
   getFileInfo(filePath: string): Promise<Record<string, any>>;
 }
@@ -427,9 +431,9 @@ export interface PaginatedResult<T> {
 // ============= 事件类型定义 =============
 
 /** 文件事件类型 */
-export type FileEventType = 
+export type FileEventType =
   | 'upload:start'
-  | 'upload:progress' 
+  | 'upload:progress'
   | 'upload:complete'
   | 'upload:error'
   | 'processing:start'
@@ -500,4 +504,4 @@ export class CDNProviderError extends FileServiceError {
     super(message, 'CDN_PROVIDER_ERROR', details);
     this.name = 'CDNProviderError';
   }
-} 
+}

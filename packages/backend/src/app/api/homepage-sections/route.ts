@@ -15,10 +15,7 @@ export async function GET() {
     return NextResponse.json({ success: true, data: sections });
   } catch (error) {
     console.error('获取首页配置失败:', error);
-    return NextResponse.json(
-      { success: false, error: '获取首页配置失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: '获取首页配置失败' }, { status: 500 });
   }
 }
 
@@ -42,10 +39,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data: newSection });
   } catch (error) {
     console.error('创建首页配置失败:', error);
-    return NextResponse.json(
-      { success: false, error: '创建首页配置失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: '创建首页配置失败' }, { status: 500 });
   }
 }
 
@@ -66,10 +60,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('更新首页配置顺序失败:', error);
-    return NextResponse.json(
-      { success: false, error: '更新首页配置顺序失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: '更新首页配置顺序失败' }, { status: 500 });
   }
 }
-

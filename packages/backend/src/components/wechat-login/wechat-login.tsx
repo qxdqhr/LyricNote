@@ -142,9 +142,7 @@ export function WechatLogin({ onSuccess, onError, size = 256 }: WechatLoginProps
         </div>
       ) : null}
 
-      <p className="mt-4 text-sm text-gray-600 text-center">
-        请使用微信扫描二维码登录
-      </p>
+      <p className="mt-4 text-sm text-gray-600 text-center">请使用微信扫描二维码登录</p>
 
       <button
         onClick={handleRefresh}
@@ -155,4 +153,3 @@ export function WechatLogin({ onSuccess, onError, size = 256 }: WechatLoginProps
     </div>
   );
 }
-

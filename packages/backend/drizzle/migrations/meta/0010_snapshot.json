@@ -118,12 +118,8 @@
           "name": "Account_userId_fkey",
           "tableFrom": "Account",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -817,12 +813,8 @@
           "name": "Session_userId_fkey",
           "tableFrom": "Session",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1108,11 +1100,7 @@
     "public.UserRole": {
       "name": "UserRole",
       "schema": "public",
-      "values": [
-        "USER",
-        "ADMIN",
-        "SUPER_ADMIN"
-      ]
+      "values": ["USER", "ADMIN", "SUPER_ADMIN"]
     }
   },
   "schemas": {},

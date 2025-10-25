@@ -498,7 +498,8 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
       type: ConfigType.STRING,
       isRequired: false,
       isSensitive: false,
-      description: '微信支付回调通知URL（必须HTTPS，例如：https://your-domain.com/api/payment/wechat/notify）',
+      description:
+        '微信支付回调通知URL（必须HTTPS，例如：https://your-domain.com/api/payment/wechat/notify）',
       defaultValue: '',
       group: '支付配置',
     },

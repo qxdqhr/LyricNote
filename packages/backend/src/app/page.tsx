@@ -159,57 +159,55 @@ export default function HomePage() {
                 </div>
               </div>
             )}
-          {/* 内容 */}
-          <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-fade-in-up">
-              {section.title}
-            </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-8 animate-fade-in-up animation-delay-200">
-              {section.description}
-            </p>
+            {/* 内容 */}
+            <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
+              <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-fade-in-up">
+                {section.title}
+              </h1>
+              <p className="text-xl md:text-2xl text-white/90 mb-8 animate-fade-in-up animation-delay-200">
+                {section.description}
+              </p>
 
-            {index === 0 && (
-              <a
-                href="/admin"
-                className="inline-block px-8 py-4 bg-white text-blue-600 rounded-full font-semibold text-lg hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 animate-fade-in-up animation-delay-400"
-              >
-                进入后台管理
-              </a>
-            )}
-          </div>
+              {index === 0 && (
+                <a
+                  href="/admin"
+                  className="inline-block px-8 py-4 bg-white text-blue-600 rounded-full font-semibold text-lg hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 animate-fade-in-up animation-delay-400"
+                >
+                  进入后台管理
+                </a>
+              )}
+            </div>
 
-          {/* 滚动提示 */}
-          {index < sections.length - 1 && (
-            <button
-              onClick={scrollToNext}
-              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce cursor-pointer bg-white/10 backdrop-blur-sm rounded-full p-3 hover:bg-white/20 transition-all z-30"
-              aria-label="滚动到下一节"
-            >
-              <ChevronDown className="w-6 h-6" />
-            </button>
-          )}
-
-          {/* 页面指示器 */}
-          <div className="absolute bottom-8 right-8 flex flex-col gap-2 z-30">
-            {sections.map((_, idx) => (
+            {/* 滚动提示 */}
+            {index < sections.length - 1 && (
               <button
-                key={idx}
-                onClick={() => {
-                  setCurrentSection(idx);
-                  document.getElementById(`section-${idx}`)?.scrollIntoView({
-                    behavior: 'smooth',
-                  });
-                }}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  idx === currentSection
-                    ? 'bg-white h-8'
-                    : 'bg-white/50 hover:bg-white/75'
-                }`}
-                aria-label={`跳转到第 ${idx + 1} 节`}
-              />
-            ))}
-          </div>
-        </section>
+                onClick={scrollToNext}
+                className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce cursor-pointer bg-white/10 backdrop-blur-sm rounded-full p-3 hover:bg-white/20 transition-all z-30"
+                aria-label="滚动到下一节"
+              >
+                <ChevronDown className="w-6 h-6" />
+              </button>
+            )}
+
+            {/* 页面指示器 */}
+            <div className="absolute bottom-8 right-8 flex flex-col gap-2 z-30">
+              {sections.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setCurrentSection(idx);
+                    document.getElementById(`section-${idx}`)?.scrollIntoView({
+                      behavior: 'smooth',
+                    });
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    idx === currentSection ? 'bg-white h-8' : 'bg-white/50 hover:bg-white/75'
+                  }`}
+                  aria-label={`跳转到第 ${idx + 1} 节`}
+                />
+              ))}
+            </div>
+          </section>
         );
       })}
 

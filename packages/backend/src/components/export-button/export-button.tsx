@@ -15,7 +15,7 @@ import {
   AlertCircle,
   Loader2,
   ChevronDown,
-  Plus
+  Plus,
 } from 'lucide-react';
 
 import type {
@@ -23,7 +23,7 @@ import type {
   ExportField,
   ExportRequest,
   ExportResult,
-  ExportProgress
+  ExportProgress,
 } from '@/lib/universalExport';
 
 import { ExportConfigEditor } from '../export-config-editor/export-config-editor';
@@ -126,75 +126,78 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
 
   // ============= 导出处理 =============
 
-  const handleExport = useCallback(async (config: ExportConfig) => {
-    logger.info('🚀 [ExportButton] 开始导出:', {
-      configId: config.id,
-      configName: config.name,
-      format: config.format,
-      fieldsCount: config.fields.length,
-    });
+  const handleExport = useCallback(
+    async (config: ExportConfig) => {
+      logger.info('🚀 [ExportButton] 开始导出:', {
+        configId: config.id,
+        configName: config.name,
+        format: config.format,
+        fieldsCount: config.fields.length,
+      });
 
-    if (!exportService) {
-      console.error('❌ [ExportButton] 导出服务未初始化');
-      onExportError?.('导出服务未初始化');
-      return;
-    }
+      if (!exportService) {
+        console.error('❌ [ExportButton] 导出服务未初始化');
+        onExportError?.('导出服务未初始化');
+        return;
+      }
 
-    setIsExporting(true);
-    setExportProgress(null);
-
-    try {
-      const request: ExportRequest = {
-        configId: config,
-        dataSource,
-        callbacks: {
-          onProgress: (progress) => {
-            logger.info('📊 [ExportButton] 导出进度:', progress);
-            setExportProgress(progress);
-          },
-          onSuccess: (result) => {
-            logger.info('✅ [ExportButton] 导出成功:', {
-              fileName: result.fileName,
-              fileSize: result.fileSize,
-              exportedRows: result.exportedRows,
-            });
-            setIsExporting(false);
-            setExportProgress(null);
-
-            // 下载文件
-            if (result.fileBlob) {
-              logger.info('📥 [ExportButton] 开始下载文件...');
-              const url = window.URL.createObjectURL(result.fileBlob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = result.fileName;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              window.URL.revokeObjectURL(url);
-              logger.info('✅ [ExportButton] 文件下载完成');
-            }
-
-            onExportSuccess?.(result);
-          },
-          onError: (error) => {
-            console.error('❌ [ExportButton] 导出失败:', error);
-            setIsExporting(false);
-            setExportProgress(null);
-            onExportError?.(error.message);
-          },
-        },
-      };
-
-      logger.info('📞 [ExportButton] 调用导出服务...');
-      await exportService.export(request);
-    } catch (error) {
-      console.error('❌ [ExportButton] 导出异常:', error);
-      setIsExporting(false);
+      setIsExporting(true);
       setExportProgress(null);
-      onExportError?.(error instanceof Error ? error.message : '导出失败');
-    }
-  }, [exportService, dataSource, onExportSuccess, onExportError]);
+
+      try {
+        const request: ExportRequest = {
+          configId: config,
+          dataSource,
+          callbacks: {
+            onProgress: (progress) => {
+              logger.info('📊 [ExportButton] 导出进度:', progress);
+              setExportProgress(progress);
+            },
+            onSuccess: (result) => {
+              logger.info('✅ [ExportButton] 导出成功:', {
+                fileName: result.fileName,
+                fileSize: result.fileSize,
+                exportedRows: result.exportedRows,
+              });
+              setIsExporting(false);
+              setExportProgress(null);
+
+              // 下载文件
+              if (result.fileBlob) {
+                logger.info('📥 [ExportButton] 开始下载文件...');
+                const url = window.URL.createObjectURL(result.fileBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = result.fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                logger.info('✅ [ExportButton] 文件下载完成');
+              }
+
+              onExportSuccess?.(result);
+            },
+            onError: (error) => {
+              console.error('❌ [ExportButton] 导出失败:', error);
+              setIsExporting(false);
+              setExportProgress(null);
+              onExportError?.(error.message);
+            },
+          },
+        };
+
+        logger.info('📞 [ExportButton] 调用导出服务...');
+        await exportService.export(request);
+      } catch (error) {
+        console.error('❌ [ExportButton] 导出异常:', error);
+        setIsExporting(false);
+        setExportProgress(null);
+        onExportError?.(error instanceof Error ? error.message : '导出失败');
+      }
+    },
+    [exportService, dataSource, onExportSuccess, onExportError]
+  );
 
   const handleQuickExport = useCallback(async () => {
     if (defaultConfig) {
@@ -228,19 +231,22 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
 
   // ============= 配置管理 =============
 
-  const handleConfigSave = useCallback(async (config: ExportConfig) => {
-    try {
-      if (exportService) {
-        const savedConfig = await exportService.createConfig(config);
-        // 重新加载配置列表
-        await loadSavedConfigs();
-        onConfigSave?.(savedConfig);
+  const handleConfigSave = useCallback(
+    async (config: ExportConfig) => {
+      try {
+        if (exportService) {
+          const savedConfig = await exportService.createConfig(config);
+          // 重新加载配置列表
+          await loadSavedConfigs();
+          onConfigSave?.(savedConfig);
+        }
+        setShowConfigEditor(false);
+      } catch (error) {
+        onExportError?.(error instanceof Error ? error.message : '保存配置失败');
       }
-      setShowConfigEditor(false);
-    } catch (error) {
-      onExportError?.(error instanceof Error ? error.message : '保存配置失败');
-    }
-  }, [exportService, onConfigSave, onExportError, loadSavedConfigs]);
+    },
+    [exportService, onConfigSave, onExportError, loadSavedConfigs]
+  );
 
   // ============= 渲染进度 =============
 
@@ -261,7 +267,9 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
         <div className="space-y-2">
           <div className="flex justify-between text-xs text-gray-600">
             <span>进度: {progress}%</span>
-            <span>{processedRows} / {totalRows} 行</span>
+            <span>
+              {processedRows} / {totalRows} 行
+            </span>
           </div>
 
           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -372,12 +380,7 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
       />
 
       {/* 点击外部关闭下拉菜单 */}
-      {showDropdown && (
-        <div
-          className="fixed inset-0 z-0"
-          onClick={() => setShowDropdown(false)}
-        />
-      )}
+      {showDropdown && <div className="fixed inset-0 z-0" onClick={() => setShowDropdown(false)} />}
     </div>
   );
 };

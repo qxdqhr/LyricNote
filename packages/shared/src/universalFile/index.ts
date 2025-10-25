@@ -15,11 +15,7 @@ export {
 } from './types';
 
 // 导出客户端
-export {
-  UniversalFileClient,
-  universalFileClient,
-  createFileClient,
-} from './client';
+export { UniversalFileClient, universalFileClient, createFileClient } from './client';
 export type { UniversalFileClientConfig } from './client';
 
 // 导出常量
@@ -27,4 +23,3 @@ export * from './constants';
 
 // 导出工具函数
 export * from './utils';
-

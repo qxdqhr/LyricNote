@@ -8,8 +8,8 @@
 
 **位置:** `/packages/backend/src/lib/universalFile/UniversalFileService.ts`
 
-**问题描述:**
-`UniversalFileService` 使用了**不存在的路径**来动态导入数据库实例：
+**问题描述:** `UniversalFileService`
+使用了**不存在的路径**来动态导入数据库实例：
 
 ```typescript
 // ❌ 错误的路径 (第771行)
@@ -17,6 +17,7 @@ const { db } = await import('@/db/index');
 ```
 
 **实际情况:**
+
 - ❌ `@/db/index` 文件**不存在**
 - ✅ 正确路径应该是 `@/lib/drizzle/db`
 
@@ -27,6 +28,7 @@ const { db } = await import('@/db/index');
 ### UniversalFileService.ts
 
 #### 1. saveFileMetadata 方法 (第771行)
+
 ```typescript
 private async saveFileMetadata(metadata: FileMetadata): Promise<void> {
   try {
@@ -39,6 +41,7 @@ private async saveFileMetadata(metadata: FileMetadata): Promise<void> {
 ```
 
 #### 2. getFileMetadata 方法 (第872行)
+
 ```typescript
 private async getFileMetadata(fileId: string): Promise<FileMetadata | null> {
   // ❌ 错误
@@ -49,6 +52,7 @@ private async getFileMetadata(fileId: string): Promise<FileMetadata | null> {
 ```
 
 #### 3. updateFileMetadata 方法 (第937行)
+
 ```typescript
 private async updateFileMetadata(fileId: string, updates: any): Promise<void> {
   // ❌ 错误
@@ -59,6 +63,7 @@ private async updateFileMetadata(fileId: string, updates: any): Promise<void> {
 ```
 
 #### 4. deleteFileMetadata 方法 (第964行)
+
 ```typescript
 private async deleteFileMetadata(fileId: string): Promise<void> {
   // ❌ 错误
@@ -86,14 +91,14 @@ Error: Cannot find module '@/db/index'
 
 ### 功能无法使用
 
-| 功能 | 状态 | 影响 |
-|------|------|------|
-| **文件上传** | 🔴 **失败** | 无法保存文件元数据到数据库 |
-| **文件查询** | 🔴 **失败** | 无法从数据库读取文件信息 |
-| **文件更新** | 🔴 **失败** | 无法更新文件元数据 |
-| **文件删除** | 🔴 **失败** | 无法标记文件为已删除 |
-| **FileManager组件** | 🔴 **失败** | 依赖这些方法，完全无法工作 |
-| **FileUploader组件** | 🔴 **失败** | 无法保存上传的文件 |
+| 功能                 | 状态        | 影响                       |
+| -------------------- | ----------- | -------------------------- |
+| **文件上传**         | 🔴 **失败** | 无法保存文件元数据到数据库 |
+| **文件查询**         | 🔴 **失败** | 无法从数据库读取文件信息   |
+| **文件更新**         | 🔴 **失败** | 无法更新文件元数据         |
+| **文件删除**         | 🔴 **失败** | 无法标记文件为已删除       |
+| **FileManager组件**  | 🔴 **失败** | 依赖这些方法，完全无法工作 |
+| **FileUploader组件** | 🔴 **失败** | 无法保存上传的文件         |
 
 ---
 
@@ -106,6 +111,7 @@ Error: Cannot find module '@/db/index'
 **需要修改的4个位置:**
 
 #### 修改 1: saveFileMetadata (第771行)
+
 ```typescript
 // ❌ 修改前
 const { db } = await import('@/db/index');
@@ -115,6 +121,7 @@ const { db } = await import('@/lib/drizzle/db');
 ```
 
 #### 修改 2: getFileMetadata (第872行)
+
 ```typescript
 // ❌ 修改前
 const { db } = await import('@/db/index');
@@ -124,6 +131,7 @@ const { db } = await import('@/lib/drizzle/db');
 ```
 
 #### 修改 3: updateFileMetadata (第937行)
+
 ```typescript
 // ❌ 修改前
 const { db } = await import('@/db/index');
@@ -133,6 +141,7 @@ const { db } = await import('@/lib/drizzle/db');
 ```
 
 #### 修改 4: deleteFileMetadata (第964行)
+
 ```typescript
 // ❌ 修改前
 const { db } = await import('@/db/index');
@@ -153,6 +162,7 @@ export * from '@/lib/drizzle/db';
 ```
 
 **不推荐原因:**
+
 - 增加不必要的间接层
 - 不符合项目现有结构
 - 容易造成混淆
@@ -195,6 +205,7 @@ await fileService.uploadFile({
 ## 🎯 完整修复代码
 
 ### 修改前
+
 ```typescript
 private async saveFileMetadata(metadata: FileMetadata): Promise<void> {
   try {
@@ -209,6 +220,7 @@ private async saveFileMetadata(metadata: FileMetadata): Promise<void> {
 ```
 
 ### 修改后
+
 ```typescript
 private async saveFileMetadata(metadata: FileMetadata): Promise<void> {
   try {
@@ -242,10 +254,10 @@ private async saveFileMetadata(metadata: FileMetadata): Promise<void> {
 
 ## 📊 对比：universalExport vs universalFile
 
-| 服务 | Schema导入 | Relations | 数据库路径 | 状态 |
-|------|-----------|-----------|-----------|------|
-| **universalExport** | ✅ 已修复 | ✅ 已添加 | ✅ 正确 | 🟢 **正常** |
-| **universalFile** | ✅ 已修复 | ✅ 已有 | 🔴 **错误** | 🔴 **需修复** |
+| 服务                | Schema导入 | Relations | 数据库路径  | 状态          |
+| ------------------- | ---------- | --------- | ----------- | ------------- |
+| **universalExport** | ✅ 已修复  | ✅ 已添加 | ✅ 正确     | 🟢 **正常**   |
+| **universalFile**   | ✅ 已修复  | ✅ 已有   | 🔴 **错误** | 🔴 **需修复** |
 
 ---
 
@@ -254,6 +266,7 @@ private async saveFileMetadata(metadata: FileMetadata): Promise<void> {
 **紧急程度:** 🔥 **高** - 阻塞核心功能
 
 **理由:**
+
 1. **运行时错误** - 模块找不到会直接抛出异常
 2. **核心功能受损** - 文件上传、管理完全无法使用
 3. **影响范围大** - 2个组件(FileManager, FileUploader)完全失效
@@ -265,22 +278,26 @@ private async saveFileMetadata(metadata: FileMetadata): Promise<void> {
 
 ### FileDbService 未被使用
 
-在 `/packages/backend/src/lib/universalFile/db/services/fileDbService.ts` 中定义了完整的 `FileDbService` 类，但是：
+在 `/packages/backend/src/lib/universalFile/db/services/fileDbService.ts`
+中定义了完整的 `FileDbService` 类，但是：
 
-❌ `UniversalFileService` **没有使用** `FileDbService`
-❌ 直接在方法内部动态导入 `db` 实例
-❌ 代码重复，缺少抽象层
+❌ `UniversalFileService` **没有使用** `FileDbService` ❌ 直接在方法内部动态导入
+`db` 实例 ❌ 代码重复，缺少抽象层
 
 **建议优化:**
+
 ```typescript
 // 推荐的方式
 export class UniversalFileService extends EventEmitter {
   private fileDbService: FileDbService;
 
-  constructor(config: UniversalFileServiceConfig, db: ReturnType<typeof drizzle>) {
+  constructor(
+    config: UniversalFileServiceConfig,
+    db: ReturnType<typeof drizzle>
+  ) {
     super();
     this.config = config;
-    this.fileDbService = new FileDbService(db);  // ✅ 使用 FileDbService
+    this.fileDbService = new FileDbService(db); // ✅ 使用 FileDbService
   }
 
   private async saveFileMetadata(metadata: FileMetadata): Promise<void> {
@@ -303,15 +320,10 @@ export class UniversalFileService extends EventEmitter {
 
 ---
 
-**修复优先级:** 🔥 **立即执行**
-**预计修复时间:** 5-10分钟
-**测试时间:** 10-15分钟
-**总计:** 15-25分钟
+**修复优先级:** 🔥 **立即执行** **预计修复时间:** 5-10分钟 **测试时间:**
+10-15分钟 **总计:** 15-25分钟
 
 ---
 
-**报告生成者:** LyricNote Team
-**检测工具:** Cursor AI
-**文档版本:** 1.0.0
+**报告生成者:** LyricNote Team **检测工具:** Cursor AI **文档版本:** 1.0.0
 **生成时间:** 2024-10-25
-

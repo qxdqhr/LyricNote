@@ -27,7 +27,7 @@ import {
   type NewFileProcessingRecord,
   type NewFileShare,
   type NewFileAccessLog,
-  type NewFileThumbnail
+  type NewFileThumbnail,
 } from '../schema';
 
 /**
@@ -65,10 +65,7 @@ export class FileDbService {
     const result = await this.db
       .select()
       .from(fileStorageProviders)
-      .where(and(
-        eq(fileStorageProviders.isDefault, true),
-        eq(fileStorageProviders.isActive, true)
-      ))
+      .where(and(eq(fileStorageProviders.isDefault, true), eq(fileStorageProviders.isActive, true)))
       .limit(1);
 
     return result[0] || null;
@@ -78,10 +75,7 @@ export class FileDbService {
    * 创建存储提供者
    */
   async createStorageProvider(provider: NewFileStorageProvider): Promise<FileStorageProvider> {
-    const result = await this.db
-      .insert(fileStorageProviders)
-      .values(provider)
-      .returning();
+    const result = await this.db.insert(fileStorageProviders).values(provider).returning();
 
     return result[0];
   }
@@ -93,7 +87,7 @@ export class FileDbService {
    */
   async getFolderByPath(path: string, moduleId?: string): Promise<FileFolder | null> {
     const conditions = [eq(fileFolders.path, path)];
-    
+
     if (moduleId) {
       conditions.push(eq(fileFolders.moduleId, moduleId));
     }
@@ -103,7 +97,7 @@ export class FileDbService {
       .from(fileFolders)
       .where(and(...conditions))
       .limit(1);
-      
+
     return result[0] || null;
   }
 
@@ -112,7 +106,7 @@ export class FileDbService {
    */
   async createFolder(folder: NewFileFolder): Promise<FileFolder> {
     const id = folder.id || uuidv4();
-    
+
     const result = await this.db
       .insert(fileFolders)
       .values({ ...folder, id })
@@ -126,7 +120,9 @@ export class FileDbService {
   /**
    * 获取文件列表
    */
-  async getFiles(options: FileQueryOptions = {}): Promise<{ files: FileMetadata[]; total: number }> {
+  async getFiles(
+    options: FileQueryOptions = {}
+  ): Promise<{ files: FileMetadata[]; total: number }> {
     // 构建基础查询
     let whereConditions: any[] = [];
 
@@ -188,7 +184,7 @@ export class FileDbService {
    */
   async getFileById(id: string): Promise<FileMetadata | null> {
     const cacheKey = `file:${id}`;
-    
+
     // 尝试从缓存获取
     const cached = await cacheManager.get<FileMetadata>(cacheKey);
     if (cached) {
@@ -198,18 +194,14 @@ export class FileDbService {
     // 缓存未命中，查询数据库
     const result = await queryOptimizer.monitorQuery(
       async () => {
-        return await this.db
-          .select()
-          .from(fileMetadata)
-          .where(eq(fileMetadata.id, id))
-          .limit(1);
+        return await this.db.select().from(fileMetadata).where(eq(fileMetadata.id, id)).limit(1);
       },
       `SELECT * FROM file_metadata WHERE id = $1 LIMIT 1`,
       [id]
     );
 
     const file = result[0] || null;
-    
+
     // 如果找到文件，缓存结果（5分钟）
     if (file) {
       await cacheManager.set(cacheKey, file, 300);
@@ -236,7 +228,7 @@ export class FileDbService {
    */
   async createFile(file: NewFileMetadata): Promise<FileMetadata> {
     const id = file.id || uuidv4();
-    
+
     const result = await queryOptimizer.monitorQuery(
       async () => {
         return await this.db
@@ -287,7 +279,7 @@ export class FileDbService {
       .set({
         isDeleted: true,
         deletedAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(fileMetadata.id, id))
       .returning();
@@ -305,7 +297,7 @@ export class FileDbService {
         .set({
           accessCount: sql`${fileMetadata.accessCount} + 1`,
           lastAccessTime: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(fileMetadata.id, id));
     } else if (accessType === 'download') {
@@ -314,7 +306,7 @@ export class FileDbService {
         .set({
           downloadCount: sql`${fileMetadata.downloadCount} + 1`,
           lastAccessTime: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(fileMetadata.id, id));
     }
@@ -353,7 +345,10 @@ export class FileDbService {
   /**
    * 更新处理记录
    */
-  async updateProcessingRecord(id: string, updates: Partial<NewFileProcessingRecord>): Promise<any> {
+  async updateProcessingRecord(
+    id: string,
+    updates: Partial<NewFileProcessingRecord>
+  ): Promise<any> {
     const result = await this.db
       .update(fileProcessingRecords)
       .set({ ...updates, updatedAt: new Date() })
@@ -372,10 +367,7 @@ export class FileDbService {
     const result = await this.db
       .select()
       .from(fileShares)
-      .where(and(
-        eq(fileShares.shareCode, shareCode),
-        eq(fileShares.isActive, true)
-      ))
+      .where(and(eq(fileShares.shareCode, shareCode), eq(fileShares.isActive, true)))
       .limit(1);
 
     return result[0] || null;
@@ -445,7 +437,7 @@ export class FileDbService {
     const totalStats = await this.db
       .select({
         count: sql<number>`count(*)`,
-        totalSize: sql<number>`sum(${fileMetadata.size})`
+        totalSize: sql<number>`sum(${fileMetadata.size})`,
       })
       .from(fileMetadata)
       .where(whereClause);
@@ -461,11 +453,7 @@ export class FileDbService {
   /**
    * 获取文件夹列表
    */
-  async getFolders(params: {
-    parentId?: string;
-    moduleId?: string;
-    businessId?: string;
-  }) {
+  async getFolders(params: { parentId?: string; moduleId?: string; businessId?: string }) {
     const conditions = [];
 
     if (params.parentId !== undefined) {
@@ -509,12 +497,15 @@ export class FileDbService {
   /**
    * 更新文件夹
    */
-  async updateFolder(folderId: string, data: Partial<{
-    name: string;
-    parentId: string;
-    description: string;
-    sortOrder: number;
-  }>) {
+  async updateFolder(
+    folderId: string,
+    data: Partial<{
+      name: string;
+      parentId: string;
+      description: string;
+      sortOrder: number;
+    }>
+  ) {
     const updateData: any = {
       updatedAt: new Date(),
     };
@@ -588,8 +579,6 @@ export class FileDbService {
     }
 
     // 删除文件夹
-    await this.db
-      .delete(fileFolders)
-      .where(eq(fileFolders.id, folderId));
+    await this.db.delete(fileFolders).where(eq(fileFolders.id, folderId));
   }
-} 
+}

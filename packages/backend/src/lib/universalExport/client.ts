@@ -49,7 +49,9 @@ export class UniversalExportClientService {
   /**
    * 创建新的配置
    */
-  async createConfig(config: Omit<ExportConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<ExportConfig> {
+  async createConfig(
+    config: Omit<ExportConfig, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<ExportConfig> {
     const response = await fetch('/api/universal-export/configs', {
       method: 'POST',
       headers: {

@@ -12,7 +12,7 @@ import type {
   ProcessorType,
   ProcessingOptions,
   AudioProcessingOptions,
-  ProcessingResult
+  ProcessingResult,
 } from '../types';
 
 // 音频处理相关类型定义
@@ -55,7 +55,6 @@ export class AudioProcessor implements IFileProcessor {
 
       this.isInitialized = true;
       logger.info('✅ [AudioProcessor] 音频处理器初始化完成');
-
     } catch (error) {
       console.error('❌ [AudioProcessor] 音频处理器初始化失败:', error);
       throw error;
@@ -93,7 +92,9 @@ export class AudioProcessor implements IFileProcessor {
 
       // 获取音频元数据
       const metadata = await this.getAudioMetadata(inputPath);
-      logger.info(`📊 [AudioProcessor] 音频信息: ${this.formatDuration(metadata.duration)}, ${metadata.bitrate}kbps, ${metadata.sampleRate}Hz`);
+      logger.info(
+        `📊 [AudioProcessor] 音频信息: ${this.formatDuration(metadata.duration)}, ${metadata.bitrate}kbps, ${metadata.sampleRate}Hz`
+      );
 
       // 确定输出格式
       const outputFormat = this.determineOutputFormat(outputPath, audioOptions.format);
@@ -122,17 +123,16 @@ export class AudioProcessor implements IFileProcessor {
           originalBitrate: metadata.bitrate,
           processedBitrate: audioOptions.bitrate || metadata.bitrate,
           sampleRate: audioOptions.sampleRate || metadata.sampleRate,
-          channels: audioOptions.channels || metadata.channels
-        }
+          channels: audioOptions.channels || metadata.channels,
+        },
       };
-
     } catch (error) {
       console.error(`❌ [AudioProcessor] 音频处理失败: ${inputPath}:`, error);
 
       return {
         success: false,
         error: `音频处理失败: ${error instanceof Error ? error.message : '未知错误'}`,
-        processingTime: Date.now() - startTime
+        processingTime: Date.now() - startTime,
       };
     }
   }
@@ -156,7 +156,7 @@ export class AudioProcessor implements IFileProcessor {
       'audio/flac',
       'audio/x-flac',
       'audio/webm',
-      'audio/opus'
+      'audio/opus',
     ];
 
     return supportedTypes.includes(mimeType.toLowerCase());
@@ -181,9 +181,8 @@ export class AudioProcessor implements IFileProcessor {
         format: metadata.format,
         codec: metadata.codec,
         fileSize: metadata.size,
-        quality: this.getQualityDescription(metadata.bitrate, metadata.sampleRate)
+        quality: this.getQualityDescription(metadata.bitrate, metadata.sampleRate),
       };
-
     } catch (error) {
       console.error(`❌ [AudioProcessor] 获取音频信息失败: ${filePath}:`, error);
       throw error;
@@ -214,7 +213,9 @@ export class AudioProcessor implements IFileProcessor {
             return;
           }
 
-          const audioStream = metadata.streams?.find((stream: any) => stream.codec_type === 'audio');
+          const audioStream = metadata.streams?.find(
+            (stream: any) => stream.codec_type === 'audio'
+          );
           if (!audioStream) {
             reject(new Error('文件中未找到音频流'));
             return;
@@ -227,7 +228,7 @@ export class AudioProcessor implements IFileProcessor {
             sampleRate: parseInt(audioStream.sample_rate || '0'),
             channels: parseInt(audioStream.channels || '0'),
             codec: audioStream.codec_name || 'unknown',
-            size: parseInt(metadata.format?.size || '0')
+            size: parseInt(metadata.format?.size || '0'),
           };
 
           resolve(result);
@@ -296,7 +297,6 @@ export class AudioProcessor implements IFileProcessor {
 
         // 开始处理
         command.save(outputPath);
-
       } catch (error) {
         reject(error);
       }
@@ -338,7 +338,7 @@ export class AudioProcessor implements IFileProcessor {
       '.wav': 'wav',
       '.ogg': 'ogg',
       '.aac': 'aac',
-      '.m4a': 'aac'
+      '.m4a': 'aac',
     };
 
     return formatMap[ext] || 'mp3';
@@ -358,11 +358,16 @@ export class AudioProcessor implements IFileProcessor {
    */
   private getChannelsDescription(channels: number): string {
     switch (channels) {
-      case 1: return '单声道';
-      case 2: return '立体声';
-      case 6: return '5.1环绕声';
-      case 8: return '7.1环绕声';
-      default: return `${channels}声道`;
+      case 1:
+        return '单声道';
+      case 2:
+        return '立体声';
+      case 6:
+        return '5.1环绕声';
+      case 8:
+        return '7.1环绕声';
+      default:
+        return `${channels}声道`;
     }
   }
 
@@ -438,7 +443,7 @@ export class AudioProcessor implements IFileProcessor {
           const outputDir = path.dirname(outputPath);
           await fs.mkdir(outputDir, { recursive: true });
           await fs.writeFile(outputPath, `Mock processed audio from ${input}`);
-        }
+        },
       };
     };
 
@@ -448,18 +453,20 @@ export class AudioProcessor implements IFileProcessor {
 
       setTimeout(() => {
         const mockMetadata = {
-          streams: [{
-            codec_type: 'audio',
-            codec_name: 'mp3',
-            bit_rate: '128000',
-            sample_rate: '44100',
-            channels: '2'
-          }],
+          streams: [
+            {
+              codec_type: 'audio',
+              codec_name: 'mp3',
+              bit_rate: '128000',
+              sample_rate: '44100',
+              channels: '2',
+            },
+          ],
           format: {
             format_name: 'mp3',
             duration: '180.5',
-            size: '1024000'
-          }
+            size: '1024000',
+          },
         };
 
         callback(null, mockMetadata);
@@ -498,17 +505,16 @@ export class AudioProcessor implements IFileProcessor {
         if (onProgress) {
           onProgress(i + 1, inputPaths.length);
         }
-
       } catch (error) {
         console.error(`❌ [AudioProcessor] 批量处理失败: ${inputPath}:`, error);
         results.push({
           success: false,
-          error: `处理失败: ${error instanceof Error ? error.message : '未知错误'}`
+          error: `处理失败: ${error instanceof Error ? error.message : '未知错误'}`,
         });
       }
     }
 
-    const successCount = results.filter(r => r.success).length;
+    const successCount = results.filter((r) => r.success).length;
     logger.info(`✅ [AudioProcessor] 批量处理完成，成功: ${successCount}/${inputPaths.length}`);
 
     return results;
@@ -557,7 +563,7 @@ export class AudioProcessor implements IFileProcessor {
             resolve({
               success: false,
               error: `降噪处理失败: ${err.message}`,
-              processingTime: Date.now() - startTime
+              processingTime: Date.now() - startTime,
             });
           })
           .on('end', async () => {
@@ -570,8 +576,8 @@ export class AudioProcessor implements IFileProcessor {
               processingTime: Date.now() - startTime,
               data: {
                 operation: 'denoise',
-                filters: 'highpass=f=200,lowpass=f=3000'
-              }
+                filters: 'highpass=f=200,lowpass=f=3000',
+              },
             });
           })
           .save(outputPath);
@@ -579,7 +585,7 @@ export class AudioProcessor implements IFileProcessor {
         resolve({
           success: false,
           error: `降噪处理异常: ${error instanceof Error ? error.message : '未知错误'}`,
-          processingTime: Date.now() - startTime
+          processingTime: Date.now() - startTime,
         });
       }
     });

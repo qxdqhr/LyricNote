@@ -22,7 +22,7 @@ import type {
   GroupingConfig,
   GroupingField,
   GroupingMode,
-  GroupValueProcessing
+  GroupValueProcessing,
 } from '@lyricnote/shared/universalExport';
 
 // Excel导出依赖
@@ -35,7 +35,7 @@ import {
   ExportServiceError,
   ExportConfigError,
   ExportDataError,
-  ExportFileError
+  ExportFileError,
 } from '@lyricnote/shared/universalExport';
 
 // ============= 默认配置 =============
@@ -127,7 +127,9 @@ export class UniversalExportService {
   /**
    * 创建导出配置
    */
-  async createConfig(config: Omit<ExportConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<ExportConfig> {
+  async createConfig(
+    config: Omit<ExportConfig, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<ExportConfig> {
     try {
       // 验证配置
       this.validateConfig({
@@ -270,7 +272,8 @@ export class UniversalExportService {
           hasGrouping: !!config.grouping,
           groupingEnabled: config.grouping?.enabled,
           groupingFieldsCount: config.grouping?.fields?.length || 0,
-          groupingFields: config.grouping?.fields?.map(f => ({ key: f.key, mergeCells: f.mergeCells })) || [],
+          groupingFields:
+            config.grouping?.fields?.map((f) => ({ key: f.key, mergeCells: f.mergeCells })) || [],
         });
       } else {
         // 从缓存获取配置
@@ -385,7 +388,6 @@ export class UniversalExportService {
       this.activeExports.delete(exportId);
 
       return result;
-
     } catch (error) {
       const errorObj: ExportError = {
         code: 'EXPORT_FAILED',
@@ -497,13 +499,13 @@ export class UniversalExportService {
       throw new ExportConfigError('至少需要定义一个字段');
     }
 
-    const enabledFields = config.fields.filter(f => f.enabled);
+    const enabledFields = config.fields.filter((f) => f.enabled);
     if (enabledFields.length === 0) {
       throw new ExportConfigError('至少需要启用一个字段');
     }
 
     // 检查字段键名唯一性
-    const keys = config.fields.map(f => f.key);
+    const keys = config.fields.map((f) => f.key);
     const uniqueKeys = new Set(keys);
     if (keys.length !== uniqueKeys.size) {
       throw new ExportConfigError('字段键名必须唯一');
@@ -632,8 +634,8 @@ export class UniversalExportService {
    * 应用过滤器
    */
   private applyFilters(data: any[], filters: any[]): any[] {
-    return data.filter(item => {
-      return filters.every(filter => {
+    return data.filter((item) => {
+      return filters.every((filter) => {
         const value = this.getNestedValue(item, filter.field);
 
         switch (filter.operator) {
@@ -699,7 +701,7 @@ export class UniversalExportService {
    * 过滤掉所有行都为空值的字段
    */
   private filterEmptyFields(data: any[], fields: ExportField[]): ExportField[] {
-    const filteredFields = fields.filter(field => {
+    const filteredFields = fields.filter((field) => {
       // 特殊处理：强制保留某些重要字段，即使所有行都为空值
       const forceKeepFields = ['pickupMethod', 'notes', 'adminNotes'];
       if (forceKeepFields.includes(field.key)) {
@@ -708,13 +710,15 @@ export class UniversalExportService {
       }
 
       // 检查所有数据行，如果至少有一行该字段有值，则保留该字段
-      const hasValue = data.some(item => {
+      const hasValue = data.some((item) => {
         const value = this.getNestedValue(item, field.key);
         return value !== null && value !== undefined && value !== '';
       });
 
       if (!hasValue) {
-        logger.info(`🔍 [UniversalExportService] 字段 "${field.key}" (${field.label}) 被过滤掉 - 所有行都为空值`);
+        logger.info(
+          `🔍 [UniversalExportService] 字段 "${field.key}" (${field.label}) 被过滤掉 - 所有行都为空值`
+        );
       }
 
       return hasValue;
@@ -723,8 +727,8 @@ export class UniversalExportService {
     logger.info('📊 [UniversalExportService] 字段过滤结果:', {
       原始字段数: fields.length,
       过滤后字段数: filteredFields.length,
-      被过滤的字段: fields.filter(f => !filteredFields.includes(f)).map(f => f.key),
-      保留的字段: filteredFields.map(f => f.key),
+      被过滤的字段: fields.filter((f) => !filteredFields.includes(f)).map((f) => f.key),
+      保留的字段: filteredFields.map((f) => f.key),
     });
 
     return filteredFields;
@@ -740,13 +744,13 @@ export class UniversalExportService {
     exportId: string
   ): Promise<ExportResult> {
     const startTime = new Date();
-    const enabledFields = config.fields.filter(f => f.enabled);
+    const enabledFields = config.fields.filter((f) => f.enabled);
 
     logger.info('📄 [UniversalExportService] generateFile 开始执行:', {
       dataLength: data.length,
       enabledFieldsCount: enabledFields.length,
       format: config.format,
-      enabledFields: enabledFields.map(f => ({ key: f.key, label: f.label })),
+      enabledFields: enabledFields.map((f) => ({ key: f.key, label: f.label })),
     });
 
     try {
@@ -757,7 +761,10 @@ export class UniversalExportService {
         case 'csv':
           logger.info('📊 [UniversalExportService] 生成CSV格式...');
           content = this.generateCSV(data, enabledFields, config);
-          fileName = this.generateFileName(request.customFileName || config.fileNameTemplate, 'csv');
+          fileName = this.generateFileName(
+            request.customFileName || config.fileNameTemplate,
+            'csv'
+          );
           logger.info('✅ [UniversalExportService] CSV生成完成:', {
             contentLength: content.length,
             fileName,
@@ -766,7 +773,10 @@ export class UniversalExportService {
         case 'excel':
           logger.info('📊 [UniversalExportService] 生成Excel格式...');
           const excelBuffer = this.generateExcel(data, enabledFields, config);
-          fileName = this.generateFileName(request.customFileName || config.fileNameTemplate, 'xlsx');
+          fileName = this.generateFileName(
+            request.customFileName || config.fileNameTemplate,
+            'xlsx'
+          );
           logger.info('✅ [UniversalExportService] Excel生成完成:', {
             bufferLength: excelBuffer.byteLength,
             fileName,
@@ -794,7 +804,10 @@ export class UniversalExportService {
         case 'json':
           logger.info('📄 [UniversalExportService] 生成JSON格式...');
           content = this.generateJSON(data, enabledFields);
-          fileName = this.generateFileName(request.customFileName || config.fileNameTemplate, 'json');
+          fileName = this.generateFileName(
+            request.customFileName || config.fileNameTemplate,
+            'json'
+          );
           logger.info('✅ [UniversalExportService] JSON生成完成:', {
             contentLength: content.length,
             fileName,
@@ -832,7 +845,6 @@ export class UniversalExportService {
           skippedRows: 0,
         },
       };
-
     } catch (error) {
       throw new ExportFileError(
         `生成文件失败: ${error instanceof Error ? error.message : '未知错误'}`,
@@ -866,12 +878,14 @@ export class UniversalExportService {
     logger.info('📊 [UniversalExportService] 过滤空字段:', {
       originalFieldsCount: fields.length,
       nonEmptyFieldsCount: nonEmptyFields.length,
-      removedFields: fields.filter((f: ExportField) => !nonEmptyFields.includes(f)).map((f: ExportField) => f.key),
+      removedFields: fields
+        .filter((f: ExportField) => !nonEmptyFields.includes(f))
+        .map((f: ExportField) => f.key),
     });
 
     // 添加表头
     if (config.includeHeader) {
-      const headers = nonEmptyFields.map(f => this.escapeCSVField(f.label));
+      const headers = nonEmptyFields.map((f) => this.escapeCSVField(f.label));
       lines.push(headers.join(config.delimiter));
       logger.info('📋 [UniversalExportService] 添加表头:', headers);
     }
@@ -884,7 +898,7 @@ export class UniversalExportService {
         logger.info('📊 [UniversalExportService] 第一行数据示例:', item);
       }
 
-      const row = nonEmptyFields.map(field => {
+      const row = nonEmptyFields.map((field) => {
         // 处理分组头行
         if (item.__isGroupHeader) {
           return this.escapeCSVField(item[field.key] || '');
@@ -923,7 +937,7 @@ export class UniversalExportService {
    * 生成JSON内容
    */
   private generateJSON(data: any[], fields: ExportField[]): string {
-    const processedData = data.map(item => {
+    const processedData = data.map((item) => {
       const processed: Record<string, any> = {};
 
       for (const field of fields) {
@@ -963,11 +977,12 @@ export class UniversalExportService {
     const dateStr = now.toISOString().split('T')[0];
     const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
 
-    return template
-      .replace('{date}', dateStr)
-      .replace('{time}', timeStr)
-      .replace('{timestamp}', now.getTime().toString())
-      + `.${extension}`;
+    return (
+      template
+        .replace('{date}', dateStr)
+        .replace('{time}', timeStr)
+        .replace('{timestamp}', now.getTime().toString()) + `.${extension}`
+    );
   }
 
   /**
@@ -992,7 +1007,7 @@ export class UniversalExportService {
   private emitEvent(event: ExportEvent): void {
     const listeners = this.eventListeners.get(event.type);
     if (listeners) {
-      listeners.forEach(listener => {
+      listeners.forEach((listener) => {
         try {
           listener(event);
         } catch (error) {
@@ -1010,7 +1025,7 @@ export class UniversalExportService {
   private applyGrouping(data: any[], groupingConfig: GroupingConfig): any[] {
     logger.info('📊 [UniversalExportService] applyGrouping 开始执行:', {
       dataLength: data.length,
-      groupingFields: groupingConfig.fields.map(f => f.key),
+      groupingFields: groupingConfig.fields.map((f) => f.key),
       preserveOrder: groupingConfig.preserveOrder,
     });
 
@@ -1055,7 +1070,7 @@ export class UniversalExportService {
    * 生成分组键
    */
   private generateGroupKey(item: any, groupingFields: GroupingField[]): string {
-    const keyParts = groupingFields.map(field => {
+    const keyParts = groupingFields.map((field) => {
       const value = this.getNestedValue(item, field.key);
 
       // 处理空值
@@ -1092,11 +1107,15 @@ export class UniversalExportService {
   /**
    * 处理单个分组
    */
-  private processGroup(groupItems: any[], groupingConfig: GroupingConfig, groupValues: string[]): any[] {
+  private processGroup(
+    groupItems: any[],
+    groupingConfig: GroupingConfig,
+    groupValues: string[]
+  ): any[] {
     const result: any[] = [];
 
     // 添加分组头行（如果需要）
-    const showGroupHeader = groupingConfig.fields.some(f => f.showGroupHeader);
+    const showGroupHeader = groupingConfig.fields.some((f) => f.showGroupHeader);
     if (showGroupHeader) {
       const groupHeader = this.createGroupHeader(groupValues, groupingConfig.fields);
       result.push(groupHeader);
@@ -1186,7 +1205,7 @@ export class UniversalExportService {
     firstItem.__isGroupFirst = true;
 
     // 为每个分组字段标记
-    groupFields.forEach(field => {
+    groupFields.forEach((field) => {
       firstItem[`__${field.key}_groupSize`] = groupItems.length;
       firstItem[`__${field.key}_isGroupFirst`] = true;
     });
@@ -1195,7 +1214,7 @@ export class UniversalExportService {
 
     logger.info('🔗 [UniversalExportService] 处理多字段合并模式:', {
       groupItemsLength: groupItems.length,
-      groupFields: groupFields.map(f => f.key),
+      groupFields: groupFields.map((f) => f.key),
       firstItem: firstItem,
     });
 
@@ -1204,7 +1223,7 @@ export class UniversalExportService {
       const item = { ...groupItems[i] };
 
       // 清空所有分组字段的值，用于单元格合并
-      groupFields.forEach(field => {
+      groupFields.forEach((field) => {
         item[field.key] = ''; // 空值表示需要合并
       });
 
@@ -1238,8 +1257,8 @@ export class UniversalExportService {
    * 统计分组数量
    */
   private countGroups(data: any[]): number {
-    const groupHeaders = data.filter(item => item.__isGroupHeader);
-    const groupFirsts = data.filter(item => item.__isGroupFirst);
+    const groupHeaders = data.filter((item) => item.__isGroupHeader);
+    const groupFirsts = data.filter((item) => item.__isGroupFirst);
     return Math.max(groupHeaders.length, groupFirsts.length);
   }
 
@@ -1267,7 +1286,13 @@ export class UniversalExportService {
 
     // 应用分组和合并单元格
     if (config.grouping && config.grouping.enabled) {
-      this.applyExcelGrouping(worksheet, data, nonEmptyFields, config.grouping, config.includeHeader);
+      this.applyExcelGrouping(
+        worksheet,
+        data,
+        nonEmptyFields,
+        config.grouping,
+        config.includeHeader
+      );
     }
 
     // 设置列宽和样式
@@ -1283,7 +1308,7 @@ export class UniversalExportService {
     const excelBuffer = XLSX.write(workbook, {
       bookType: 'xlsx',
       type: 'array',
-      cellStyles: true
+      cellStyles: true,
     });
 
     logger.info('✅ [UniversalExportService] generateExcel 执行完成');
@@ -1305,7 +1330,7 @@ export class UniversalExportService {
 
     // 添加表头
     if (config.includeHeader) {
-      const headers = fields.map(field => field.label);
+      const headers = fields.map((field) => field.label);
       result.push(headers);
       logger.info('📋 [UniversalExportService] 添加表头:', headers);
     }
@@ -1314,7 +1339,7 @@ export class UniversalExportService {
     for (let i = 0; i < data.length; i++) {
       const item = data[i];
 
-      const row = fields.map(field => {
+      const row = fields.map((field) => {
         // 跳过分组头行的处理
         if (item.__isGroupHeader) {
           return item[field.key] || '';
@@ -1353,7 +1378,13 @@ export class UniversalExportService {
   /**
    * 应用Excel分组和合并单元格
    */
-  private applyExcelGrouping(worksheet: XLSX.WorkSheet, data: any[], fields: ExportField[], groupingConfig: GroupingConfig, includeHeader: boolean = true): void {
+  private applyExcelGrouping(
+    worksheet: XLSX.WorkSheet,
+    data: any[],
+    fields: ExportField[],
+    groupingConfig: GroupingConfig,
+    includeHeader: boolean = true
+  ): void {
     if (!worksheet['!merges']) {
       worksheet['!merges'] = [];
     }
@@ -1364,7 +1395,7 @@ export class UniversalExportService {
     logger.info('📊 [UniversalExportService] 开始处理Excel分组和合并单元格:', {
       dataLength: data.length,
       headerOffset,
-      groupingFields: groupingConfig.fields.map(f => ({ key: f.key, mergeCells: f.mergeCells })),
+      groupingFields: groupingConfig.fields.map((f) => ({ key: f.key, mergeCells: f.mergeCells })),
     });
 
     for (let i = 0; i < data.length; i++) {
@@ -1378,17 +1409,17 @@ export class UniversalExportService {
         });
 
         // 找到需要合并的分组字段
-        groupingConfig.fields.forEach(groupField => {
+        groupingConfig.fields.forEach((groupField) => {
           if (groupField.mergeCells) {
-            const fieldIndex = fields.findIndex(f => f.key === groupField.key);
+            const fieldIndex = fields.findIndex((f) => f.key === groupField.key);
             if (fieldIndex >= 0) {
               // 获取分组大小 - 优先使用字段特定的分组大小
               const groupSize = item[`__${groupField.key}_groupSize`] || item.__groupSize;
 
               // 创建合并区域
               const mergeRange = {
-                s: { r: currentRow, c: fieldIndex },  // 开始行列
-                e: { r: currentRow + groupSize - 1, c: fieldIndex }  // 结束行列
+                s: { r: currentRow, c: fieldIndex }, // 开始行列
+                e: { r: currentRow + groupSize - 1, c: fieldIndex }, // 结束行列
               };
 
               logger.info('📊 [UniversalExportService] 添加合并区域:', {
@@ -1411,8 +1442,8 @@ export class UniversalExportService {
                     top: { style: 'thin', color: { rgb: '000000' } },
                     bottom: { style: 'thin', color: { rgb: '000000' } },
                     left: { style: 'thin', color: { rgb: '000000' } },
-                    right: { style: 'thin', color: { rgb: '000000' } }
-                  }
+                    right: { style: 'thin', color: { rgb: '000000' } },
+                  },
                 };
               }
             }
@@ -1432,8 +1463,8 @@ export class UniversalExportService {
    * 设置Excel列宽和样式
    */
   private setExcelColumnWidths(worksheet: XLSX.WorkSheet, fields: ExportField[]): void {
-    const colWidths = fields.map(field => ({
-      wch: field.width || 15  // 默认宽度15字符
+    const colWidths = fields.map((field) => ({
+      wch: field.width || 15, // 默认宽度15字符
     }));
 
     worksheet['!cols'] = colWidths;
@@ -1453,8 +1484,8 @@ export class UniversalExportService {
               top: { style: 'thin', color: { rgb: '000000' } },
               bottom: { style: 'thin', color: { rgb: '000000' } },
               left: { style: 'thin', color: { rgb: '000000' } },
-              right: { style: 'thin', color: { rgb: '000000' } }
-            }
+              right: { style: 'thin', color: { rgb: '000000' } },
+            },
           };
         }
       }
@@ -1495,12 +1526,12 @@ export class UniversalExportService {
               top: { style: 'thin', color: { rgb: 'CCCCCC' } },
               bottom: { style: 'thin', color: { rgb: 'CCCCCC' } },
               left: { style: 'thin', color: { rgb: 'CCCCCC' } },
-              right: { style: 'thin', color: { rgb: 'CCCCCC' } }
+              right: { style: 'thin', color: { rgb: 'CCCCCC' } },
             },
             alignment: {
               ...existingStyle.alignment,
-              vertical: 'center'
-            }
+              vertical: 'center',
+            },
           };
         }
       }

@@ -4,22 +4,24 @@
 
 ## 📊 检查结果概览
 
-| 组件 | 相关表 | Schema文件位置 | 主Schema | 迁移文件 | 状态 |
-|------|--------|---------------|---------|---------|------|
-| **FileManager** | 8张表 | ✅ 已定义 | ❌ 未导入 | ✅ 存在 | ⚠️ 需要导入 |
-| **FileUploader** | (共享FileManager表) | ✅ 已定义 | ❌ 未导入 | ✅ 存在 | ⚠️ 需要导入 |
-| **ExportButton** | 2张表 | ✅ 已定义 | ❌ 未导入 | ❌ 缺失 | ⚠️ 需要导入+迁移 |
-| **ExportConfigEditor** | (共享ExportButton表) | ✅ 已定义 | ❌ 未导入 | ❌ 缺失 | ⚠️ 需要导入+迁移 |
-| **OrderManager** | 0张表 | N/A | N/A | N/A | ✅ 纯UI组件 |
+| 组件                   | 相关表               | Schema文件位置 | 主Schema  | 迁移文件 | 状态             |
+| ---------------------- | -------------------- | -------------- | --------- | -------- | ---------------- |
+| **FileManager**        | 8张表                | ✅ 已定义      | ❌ 未导入 | ✅ 存在  | ⚠️ 需要导入      |
+| **FileUploader**       | (共享FileManager表)  | ✅ 已定义      | ❌ 未导入 | ✅ 存在  | ⚠️ 需要导入      |
+| **ExportButton**       | 2张表                | ✅ 已定义      | ❌ 未导入 | ❌ 缺失  | ⚠️ 需要导入+迁移 |
+| **ExportConfigEditor** | (共享ExportButton表) | ✅ 已定义      | ❌ 未导入 | ❌ 缺失  | ⚠️ 需要导入+迁移 |
+| **OrderManager**       | 0张表                | N/A            | N/A       | N/A      | ✅ 纯UI组件      |
 
 ---
 
 ## 📁 Schema 文件分析
 
 ### 1. 主Schema文件
+
 **路径:** `/packages/backend/drizzle/migrations/schema.ts`
 
 **包含的表:**
+
 - ✅ `User` - 用户表
 - ✅ `Session` - 会话表
 - ✅ `Account` - 账户表
@@ -35,9 +37,11 @@
 ---
 
 ### 2. UniversalFile Schema (FileManager/FileUploader组件)
+
 **路径:** `/packages/backend/src/lib/universalFile/db/schema.ts`
 
 **包含的表:**
+
 1. ✅ `file_storage_providers` - 存储提供者配置表
 2. ✅ `file_folders` - 文件夹表(支持层级结构)
 3. ✅ `file_metadata` - 文件元数据主表 ⭐ 核心表
@@ -48,6 +52,7 @@
 8. ✅ `file_thumbnails` - 文件缩略图表
 
 **状态:**
+
 - ✅ Schema定义完整(697行)
 - ✅ Relations定义完整
 - ✅ 类型导出完整
@@ -55,62 +60,69 @@
 - ❌ **未导入到主Schema文件**
 
 **影响的组件:**
+
 - `FileManager` - 依赖所有8张表
-- `FileUploader` - 主要依赖 `file_metadata`, `file_folders`, `file_storage_providers`
+- `FileUploader` - 主要依赖 `file_metadata`, `file_folders`,
+  `file_storage_providers`
 
 ---
 
 ### 3. UniversalExport Schema (ExportButton/ExportConfigEditor组件)
+
 **路径:** `/packages/backend/src/lib/universalExport/schema.ts`
 
 **包含的表:**
+
 1. ✅ `ExportConfig` - 导出配置表 ⭐ 核心表
 2. ✅ `ExportHistory` - 导出历史记录表
 
 **字段详情:**
 
 #### `ExportConfig` 表
+
 ```typescript
 {
-  id: text (PK)
-  name: text                    // 配置名称
-  description: text            // 配置描述
-  format: text                 // 导出格式: csv, excel, json
-  fields: jsonb                // 导出字段配置
-  grouping: jsonb              // 分组配置
-  fileNameTemplate: text       // 文件名模板
-  includeHeader: boolean       // 是否包含表头
-  delimiter: text              // CSV分隔符
-  encoding: text               // 编码方式
-  addBOM: boolean              // 是否添加BOM
-  maxRows: integer             // 最大行数限制
-  moduleId: text               // 模块ID
-  businessId: text             // 业务ID
-  createdBy: text              // 创建者
-  createdAt: timestamp         // 创建时间
-  updatedAt: timestamp         // 更新时间
+  id: text(PK);
+  name: text; // 配置名称
+  description: text; // 配置描述
+  format: text; // 导出格式: csv, excel, json
+  fields: jsonb; // 导出字段配置
+  grouping: jsonb; // 分组配置
+  fileNameTemplate: text; // 文件名模板
+  includeHeader: boolean; // 是否包含表头
+  delimiter: text; // CSV分隔符
+  encoding: text; // 编码方式
+  addBOM: boolean; // 是否添加BOM
+  maxRows: integer; // 最大行数限制
+  moduleId: text; // 模块ID
+  businessId: text; // 业务ID
+  createdBy: text; // 创建者
+  createdAt: timestamp; // 创建时间
+  updatedAt: timestamp; // 更新时间
 }
 ```
 
 #### `ExportHistory` 表
+
 ```typescript
 {
-  id: text (PK)
-  configId: text               // 关联的配置ID
-  fileName: text               // 导出文件名
-  fileSize: integer            // 文件大小
-  exportedRows: integer        // 导出行数
-  status: text                 // 状态: pending, processing, completed, failed
-  error: text                  // 错误信息
-  duration: integer            // 执行时长(毫秒)
-  startTime: timestamp         // 开始时间
-  endTime: timestamp           // 结束时间
-  createdBy: text              // 创建者
-  createdAt: timestamp         // 创建时间
+  id: text(PK);
+  configId: text; // 关联的配置ID
+  fileName: text; // 导出文件名
+  fileSize: integer; // 文件大小
+  exportedRows: integer; // 导出行数
+  status: text; // 状态: pending, processing, completed, failed
+  error: text; // 错误信息
+  duration: integer; // 执行时长(毫秒)
+  startTime: timestamp; // 开始时间
+  endTime: timestamp; // 结束时间
+  createdBy: text; // 创建者
+  createdAt: timestamp; // 创建时间
 }
 ```
 
 **状态:**
+
 - ✅ Schema定义完整(61行)
 - ✅ 类型导出完整
 - ❌ **缺少Relations定义**
@@ -118,6 +130,7 @@
 - ❌ **未导入到主Schema文件**
 
 **影响的组件:**
+
 - `ExportButton` - 依赖 `ExportConfig`, `ExportHistory`
 - `ExportConfigEditor` - 依赖 `ExportConfig`
 
@@ -128,6 +141,7 @@
 ### 1. 主Schema未导入子Schema ⚠️ 高优先级
 
 **现状:**
+
 ```typescript
 // /packages/backend/src/lib/drizzle/db.ts
 import * as schema from '../../../drizzle/migrations/schema';
@@ -138,11 +152,13 @@ const fullSchema = { ...schema, ...relations };
 ```
 
 **问题:**
+
 - Drizzle Kit 在生成迁移时看不到 `universalFile` 和 `universalExport` 的表定义
 - 类型推断不完整
 - 可能导致数据库结构和代码不同步
 
 **建议修复:**
+
 ```typescript
 // /packages/backend/drizzle/migrations/schema.ts
 // 应该导入所有子schema
@@ -159,9 +175,11 @@ export * from '../../src/lib/universalExport/schema';
 ### 2. UniversalExport缺少迁移文件 ⚠️ 高优先级
 
 **缺失的文件:**
+
 - SQL迁移文件 (如: `0011_create_export_tables.sql`)
 
 **需要创建:**
+
 ```sql
 -- 创建导出配置表
 CREATE TABLE IF NOT EXISTS "ExportConfig" (
@@ -211,6 +229,7 @@ CREATE INDEX IF NOT EXISTS "export_history_status_idx" ON "ExportHistory"("statu
 ### 3. UniversalExport缺少Relations定义 ⚠️ 中优先级
 
 **建议添加:**
+
 ```typescript
 // /packages/backend/src/lib/universalExport/schema.ts
 
@@ -238,6 +257,7 @@ export const exportHistoryRelations = relations(exportHistory, ({ one }) => ({
 **步骤:**
 
 #### 1. 修改主Schema文件
+
 ```typescript
 // /packages/backend/drizzle/migrations/schema.ts
 
@@ -296,6 +316,7 @@ export {
 ```
 
 #### 2. 为UniversalExport添加Relations
+
 ```typescript
 // /packages/backend/src/lib/universalExport/schema.ts
 // 在文件末尾添加
@@ -315,12 +336,14 @@ export const exportHistoryRelations = relations(exportHistory, ({ one }) => ({
 ```
 
 #### 3. 创建UniversalExport迁移文件
+
 ```bash
 cd /packages/backend
 npx drizzle-kit generate:pg
 ```
 
 #### 4. 运行迁移
+
 ```bash
 npx drizzle-kit push:pg
 # 或
@@ -338,6 +361,7 @@ npm run db:push
 3. 在应用层面协调不同的数据库连接
 
 **不推荐原因:**
+
 - 增加复杂度
 - 难以维护跨模块的关系
 - Drizzle Kit工具支持不完整
@@ -367,6 +391,7 @@ npm run db:push
 ## 📊 完整表结构清单
 
 ### 核心表 (Main Schema)
+
 1. `User` - 用户表
 2. `Session` - 会话表
 3. `Account` - 账户表
@@ -378,6 +403,7 @@ npm run db:push
 9. `analyticsEvents` - 埋点事件
 
 ### 文件服务表 (UniversalFile)
+
 10. `file_storage_providers` - 存储提供者
 11. `file_folders` - 文件夹
 12. `file_metadata` - 文件元数据 ⭐
@@ -388,6 +414,7 @@ npm run db:push
 17. `file_thumbnails` - 缩略图
 
 ### 导出服务表 (UniversalExport)
+
 18. `ExportConfig` - 导出配置 ⭐
 19. `ExportHistory` - 导出历史
 
@@ -421,6 +448,7 @@ npm run db:push
 修复后，请执行以下验证:
 
 ### 1. 检查Schema导入
+
 ```bash
 # 检查主schema文件是否包含所有表
 grep -r "export.*from.*universalFile" packages/backend/drizzle/migrations/schema.ts
@@ -428,6 +456,7 @@ grep -r "export.*from.*universalExport" packages/backend/drizzle/migrations/sche
 ```
 
 ### 2. 验证数据库表
+
 ```sql
 -- 连接数据库后执行
 \dt
@@ -440,6 +469,7 @@ grep -r "export.*from.*universalExport" packages/backend/drizzle/migrations/sche
 ```
 
 ### 3. 测试组件功能
+
 ```bash
 # 启动开发服务器
 npm run dev
@@ -452,6 +482,7 @@ npm run dev
 ```
 
 ### 4. 检查类型推断
+
 ```typescript
 // 在任意TypeScript文件中测试
 import { db } from '@/lib/drizzle/db';
@@ -472,8 +503,5 @@ const configs = await db.select().from(exportConfigs);
 
 ---
 
-**报告生成者:** LyricNote Team
-**检查工具:** Cursor AI
-**文档版本:** 1.0.0
+**报告生成者:** LyricNote Team **检查工具:** Cursor AI **文档版本:** 1.0.0
 **最后更新:** 2024-10-25
-

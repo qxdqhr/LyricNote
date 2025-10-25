@@ -3,6 +3,7 @@
 ## 📚 组件列表
 
 ### 1. OrderManager - 排序管理器
+
 **路径:** `@/components/order-manager`
 
 通用的排序管理组件，支持拖拽和按钮两种排序方式。
@@ -19,6 +20,7 @@ import { OrderManager, type OrderManagerProps } from '@/components/order-manager
 ```
 
 **特性:**
+
 - ✅ 拖拽排序
 - ✅ 按钮排序(上移/下移)
 - ✅ 批量保存
@@ -28,6 +30,7 @@ import { OrderManager, type OrderManagerProps } from '@/components/order-manager
 ---
 
 ### 2. FileUploader - 文件上传器
+
 **路径:** `@/components/file-uploader`
 
 通用文件上传组件，支持拖拽上传和进度显示。
@@ -45,6 +48,7 @@ import { FileUploader, type FileUploaderProps } from '@/components/file-uploader
 ```
 
 **特性:**
+
 - ✅ 拖拽上传
 - ✅ 多文件上传
 - ✅ 进度显示
@@ -54,6 +58,7 @@ import { FileUploader, type FileUploaderProps } from '@/components/file-uploader
 ---
 
 ### 3. FileManager - 文件管理器
+
 **路径:** `@/components/file-manager`
 
 完整的文件管理解决方案，包含列表、预览、搜索、筛选等功能。
@@ -71,10 +76,12 @@ import { FileManager, type FileManagerProps } from '@/components/file-manager';
 ```
 
 **子组件:**
+
 - `FileShareModal` - 文件分享弹窗
 - `FolderManager` - 文件夹管理
 
 **特性:**
+
 - ✅ 文件列表展示
 - ✅ 搜索和筛选
 - ✅ 文件预览
@@ -84,6 +91,7 @@ import { FileManager, type FileManagerProps } from '@/components/file-manager';
 ---
 
 ### 4. ExportButton - 导出按钮
+
 **路径:** `@/components/export-button`
 
 通用数据导出按钮，支持多种配置和格式。
@@ -100,6 +108,7 @@ import { ExportButton, type ExportButtonProps } from '@/components/export-button
 ```
 
 **特性:**
+
 - ✅ 快速导出
 - ✅ 配置管理
 - ✅ 进度显示
@@ -108,6 +117,7 @@ import { ExportButton, type ExportButtonProps } from '@/components/export-button
 ---
 
 ### 5. ExportConfigEditor - 导出配置编辑器
+
 **路径:** `@/components/export-config-editor`
 
 可视化的导出配置编辑器，支持字段选择、分组等高级功能。
@@ -124,6 +134,7 @@ import { ExportConfigEditor, type ExportConfigEditorProps } from '@/components/e
 ```
 
 **特性:**
+
 - ✅ 字段配置
 - ✅ 分组设置
 - ✅ 格式选项
@@ -139,6 +150,7 @@ import { ExportConfigEditor, type ExportConfigEditorProps } from '@/components/e
 本项目组件遵循以下命名规范：
 
 ### 目录名: kebab-case (小写短横线)
+
 ```
 order-manager/
 file-uploader/
@@ -146,6 +158,7 @@ export-button/
 ```
 
 ### 文件名: kebab-case (小写短横线)
+
 ```
 order-manager.tsx
 file-uploader.tsx
@@ -153,9 +166,10 @@ export-button.tsx
 ```
 
 ### 组件名: PascalCase (大写开头)
+
 ```typescript
-export function OrderManager() { }
-export const FileUploader = () => { }
+export function OrderManager() {}
+export const FileUploader = () => {};
 ```
 
 ### 为什么这样命名？
@@ -171,6 +185,7 @@ export const FileUploader = () => { }
 ## 📦 导入方式
 
 ### 推荐方式(从index导入)
+
 ```typescript
 import { OrderManager } from '@/components/order-manager';
 import { FileUploader } from '@/components/file-uploader';
@@ -178,15 +193,17 @@ import { ExportButton } from '@/components/export-button';
 ```
 
 ### 直接导入(也可以)
+
 ```typescript
 import { OrderManager } from '@/components/order-manager/order-manager';
 ```
 
 ### 类型导入
+
 ```typescript
 import type {
   OrderManagerProps,
-  OrderableItem
+  OrderableItem,
 } from '@/components/order-manager';
 ```
 
@@ -197,11 +214,13 @@ import type {
 ### 添加新组件
 
 1. **创建目录(kebab-case)**
+
    ```bash
    mkdir packages/backend/src/components/my-component
    ```
 
 2. **创建组件文件(kebab-case)**
+
    ```bash
    touch packages/backend/src/components/my-component/my-component.tsx
    ```
@@ -245,19 +264,20 @@ export function MyComponent({ }: MyComponentProps) {
 
 ## ✅ 组件状态
 
-| 组件 | 状态 | TypeScript | Linter |
-|------|------|-----------|--------|
-| OrderManager | ✅ | ✅ | ✅ |
-| FileUploader | ✅ | ✅ | ✅ |
-| FileManager | ✅ | ✅ | ✅ |
-| ExportButton | ✅ | ✅ | ✅ |
-| ExportConfigEditor | ✅ | ✅ | ✅ |
+| 组件               | 状态 | TypeScript | Linter |
+| ------------------ | ---- | ---------- | ------ |
+| OrderManager       | ✅   | ✅         | ✅     |
+| FileUploader       | ✅   | ✅         | ✅     |
+| FileManager        | ✅   | ✅         | ✅     |
+| ExportButton       | ✅   | ✅         | ✅     |
+| ExportConfigEditor | ✅   | ✅         | ✅     |
 
 ---
 
 ## 💡 最佳实践
 
 ### 1. 使用TypeScript类型
+
 ```typescript
 import type { OrderManagerProps } from '@/components/order-manager';
 
@@ -267,6 +287,7 @@ const props: OrderManagerProps = {
 ```
 
 ### 2. 适当的错误处理
+
 ```typescript
 <OrderManager
   operations={operations}
@@ -279,6 +300,7 @@ const props: OrderManagerProps = {
 ```
 
 ### 3. 使用泛型增强类型安全
+
 ```typescript
 interface MyItem {
   id: number;
@@ -306,6 +328,4 @@ interface MyItem {
 
 ---
 
-**维护团队:** LyricNote Team
-**最后更新:** 2024年10月25日
-
+**维护团队:** LyricNote Team **最后更新:** 2024年10月25日

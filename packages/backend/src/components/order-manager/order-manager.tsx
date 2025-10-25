@@ -1,14 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-  ChevronUp,
-  ChevronDown,
-  GripVertical,
-  Save,
-  RotateCcw,
-  AlertCircle
-} from 'lucide-react';
+import { ChevronUp, ChevronDown, GripVertical, Save, RotateCcw, AlertCircle } from 'lucide-react';
 
 export interface OrderableItem {
   id: number;
@@ -41,7 +34,7 @@ export function OrderManager<T extends OrderableItem>({
   description = '拖拽或使用按钮调整显示顺序',
   onOrderChanged,
   emptyMessage = '暂无数据',
-  loadingMessage = '加载数据...'
+  loadingMessage = '加载数据...',
 }: OrderManagerProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [originalOrder, setOriginalOrder] = useState<T[]>([]);
@@ -76,9 +69,7 @@ export function OrderManager<T extends OrderableItem>({
 
   // 检查是否有变更
   useEffect(() => {
-    const hasOrderChanged = items.some((item, index) =>
-      originalOrder[index]?.id !== item.id
-    );
+    const hasOrderChanged = items.some((item, index) => originalOrder[index]?.id !== item.id);
     setHasChanges(hasOrderChanged);
   }, [items, originalOrder]);
 
@@ -87,7 +78,7 @@ export function OrderManager<T extends OrderableItem>({
     try {
       setError(null);
 
-      const currentIndex = items.findIndex(item => item.id === itemId);
+      const currentIndex = items.findIndex((item) => item.id === itemId);
       if (currentIndex === -1) {
         setError('项目不存在');
         return;
@@ -105,7 +96,6 @@ export function OrderManager<T extends OrderableItem>({
 
       // 通知父组件顺序已变更
       onOrderChanged?.();
-
     } catch (err) {
       console.error('❌ [排序管理] 上移项目错误:', err);
       setError(err instanceof Error ? err.message : '上移失败');
@@ -117,7 +107,7 @@ export function OrderManager<T extends OrderableItem>({
     try {
       setError(null);
 
-      const currentIndex = items.findIndex(item => item.id === itemId);
+      const currentIndex = items.findIndex((item) => item.id === itemId);
       if (currentIndex === -1) {
         setError('项目不存在');
         return;
@@ -135,7 +125,6 @@ export function OrderManager<T extends OrderableItem>({
 
       // 通知父组件顺序已变更
       onOrderChanged?.();
-
     } catch (err) {
       console.error('❌ [排序管理] 下移项目错误:', err);
       setError(err instanceof Error ? err.message : '下移失败');
@@ -189,7 +178,6 @@ export function OrderManager<T extends OrderableItem>({
 
       // 通知父组件顺序已变更
       onOrderChanged?.();
-
     } catch (err) {
       console.error('❌ [排序管理] 拖拽排序错误:', err);
       setError(err instanceof Error ? err.message : '排序失败');
@@ -283,8 +271,15 @@ export function OrderManager<T extends OrderableItem>({
       <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6">
         <p className="m-0 mb-2 text-slate-600 text-sm">{description}</p>
         <ul className="m-0 pl-6 text-slate-600 text-sm">
-          <li className="mb-1">使用拖拽：点击并拖动 <GripVertical size={14} className="inline-block align-middle text-gray-600" /> 图标</li>
-          <li className="mb-1">使用按钮：点击 <ChevronUp size={14} className="inline-block align-middle text-gray-600" /> 或 <ChevronDown size={14} className="inline-block align-middle text-gray-600" /> 按钮</li>
+          <li className="mb-1">
+            使用拖拽：点击并拖动{' '}
+            <GripVertical size={14} className="inline-block align-middle text-gray-600" /> 图标
+          </li>
+          <li className="mb-1">
+            使用按钮：点击{' '}
+            <ChevronUp size={14} className="inline-block align-middle text-gray-600" /> 或{' '}
+            <ChevronDown size={14} className="inline-block align-middle text-gray-600" /> 按钮
+          </li>
           <li className="mb-1">完成调整后，点击"保存顺序"按钮保存更改</li>
         </ul>
       </div>
@@ -351,4 +346,3 @@ export function OrderManager<T extends OrderableItem>({
     </div>
   );
 }
-

@@ -3,7 +3,10 @@
  */
 
 // 导出核心服务类
-export { UniversalFileService, createUniversalFileServiceWithConfigManager } from './UniversalFileService';
+export {
+  UniversalFileService,
+  createUniversalFileServiceWithConfigManager,
+} from './UniversalFileService';
 
 // 导出配置管理
 export {
@@ -13,7 +16,7 @@ export {
   validateAliyunOSSConfig,
   validateAliyunCDNConfig,
   getStorageProviderDisplayName,
-  getCDNProviderDisplayName
+  getCDNProviderDisplayName,
 } from './config';
 
 // 从 shared 包重新导出客户端类型和工具

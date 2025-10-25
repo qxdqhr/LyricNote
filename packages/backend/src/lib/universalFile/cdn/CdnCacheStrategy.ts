@@ -20,7 +20,7 @@ export enum CacheStrategyType {
   /** 静态资源 */
   STATIC = 'static',
   /** 其他 */
-  OTHER = 'other'
+  OTHER = 'other',
 }
 
 /**
@@ -92,14 +92,8 @@ export class CdnCacheStrategy {
       cdnCacheTtl: 30 * 24 * 3600, // 30天
       enableWarmup: true,
       cacheControl: 'public, max-age=604800, s-maxage=2592000',
-      allowedMimeTypes: [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'image/webp',
-        'image/svg+xml'
-      ],
-      maxFileSize: 50 * 1024 * 1024 // 50MB
+      allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
+      maxFileSize: 50 * 1024 * 1024, // 50MB
     });
 
     // 视频缓存策略
@@ -112,14 +106,8 @@ export class CdnCacheStrategy {
       cdnCacheTtl: 7 * 24 * 3600, // 7天
       enableWarmup: false, // 视频文件通常较大，不预热
       cacheControl: 'public, max-age=86400, s-maxage=604800',
-      allowedMimeTypes: [
-        'video/mp4',
-        'video/avi',
-        'video/mov',
-        'video/wmv',
-        'video/webm'
-      ],
-      maxFileSize: 500 * 1024 * 1024 // 500MB
+      allowedMimeTypes: ['video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'video/webm'],
+      maxFileSize: 500 * 1024 * 1024, // 500MB
     });
 
     // 音频缓存策略
@@ -132,14 +120,8 @@ export class CdnCacheStrategy {
       cdnCacheTtl: 14 * 24 * 3600, // 14天
       enableWarmup: true,
       cacheControl: 'public, max-age=259200, s-maxage=1209600',
-      allowedMimeTypes: [
-        'audio/mpeg',
-        'audio/wav',
-        'audio/ogg',
-        'audio/m4a',
-        'audio/flac'
-      ],
-      maxFileSize: 100 * 1024 * 1024 // 100MB
+      allowedMimeTypes: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/m4a', 'audio/flac'],
+      maxFileSize: 100 * 1024 * 1024, // 100MB
     });
 
     // 文档缓存策略
@@ -159,9 +141,9 @@ export class CdnCacheStrategy {
         'application/vnd.ms-excel',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'text/plain',
-        'text/csv'
+        'text/csv',
       ],
-      maxFileSize: 50 * 1024 * 1024 // 50MB
+      maxFileSize: 50 * 1024 * 1024, // 50MB
     });
 
     // 压缩包缓存策略
@@ -179,9 +161,9 @@ export class CdnCacheStrategy {
         'application/x-rar-compressed',
         'application/x-7z-compressed',
         'application/gzip',
-        'application/x-tar'
+        'application/x-tar',
       ],
-      maxFileSize: 100 * 1024 * 1024 // 100MB
+      maxFileSize: 100 * 1024 * 1024, // 100MB
     });
 
     // 静态资源缓存策略
@@ -200,9 +182,9 @@ export class CdnCacheStrategy {
         'application/json',
         'font/woff',
         'font/woff2',
-        'font/ttf'
+        'font/ttf',
       ],
-      maxFileSize: 10 * 1024 * 1024 // 10MB
+      maxFileSize: 10 * 1024 * 1024, // 10MB
     });
 
     // 其他文件缓存策略
@@ -216,7 +198,7 @@ export class CdnCacheStrategy {
       enableWarmup: false,
       cacheControl: 'public, max-age=300',
       allowedMimeTypes: [],
-      maxFileSize: 10 * 1024 * 1024 // 10MB
+      maxFileSize: 10 * 1024 * 1024, // 10MB
     });
 
     // 初始化统计信息
@@ -227,7 +209,7 @@ export class CdnCacheStrategy {
         hitRate: 0,
         totalRequests: 0,
         estimatedSize: 0,
-        bandwidthSaved: 0
+        bandwidthSaved: 0,
       });
     }
   }
@@ -249,9 +231,18 @@ export class CdnCacheStrategy {
       return this.strategies.get(CacheStrategyType.VIDEO)!;
     } else if (mimeType.startsWith('audio/')) {
       return this.strategies.get(CacheStrategyType.AUDIO)!;
-    } else if (mimeType.includes('pdf') || mimeType.includes('document') || mimeType.includes('word') || mimeType.includes('excel')) {
+    } else if (
+      mimeType.includes('pdf') ||
+      mimeType.includes('document') ||
+      mimeType.includes('word') ||
+      mimeType.includes('excel')
+    ) {
       return this.strategies.get(CacheStrategyType.DOCUMENT)!;
-    } else if (mimeType.includes('zip') || mimeType.includes('compressed') || mimeType.includes('archive')) {
+    } else if (
+      mimeType.includes('zip') ||
+      mimeType.includes('compressed') ||
+      mimeType.includes('archive')
+    ) {
       return this.strategies.get(CacheStrategyType.ARCHIVE)!;
     }
 
@@ -263,19 +254,19 @@ export class CdnCacheStrategy {
    */
   generateCacheHeaders(mimeType: string, fileSize?: number): Record<string, string> {
     const strategy = this.getStrategyByMimeType(mimeType);
-    
+
     // 检查文件大小限制
     if (fileSize && strategy.maxFileSize && fileSize > strategy.maxFileSize) {
       // 大文件使用更短的缓存时间
       return {
         'Cache-Control': 'public, max-age=300', // 5分钟
-        'Expires': new Date(Date.now() + 300 * 1000).toUTCString()
+        Expires: new Date(Date.now() + 300 * 1000).toUTCString(),
       };
     }
 
     const headers: Record<string, string> = {
       'Cache-Control': strategy.cacheControl,
-      'Expires': new Date(Date.now() + strategy.browserCacheTtl * 1000).toUTCString()
+      Expires: new Date(Date.now() + strategy.browserCacheTtl * 1000).toUTCString(),
     };
 
     // 添加ETag用于缓存验证
@@ -308,12 +299,12 @@ export class CdnCacheStrategy {
   recordCacheHit(mimeType: string, fileSize: number = 0): void {
     const strategy = this.getStrategyByMimeType(mimeType);
     const stats = this.stats.get(strategy.type);
-    
+
     if (stats) {
       stats.hits++;
       stats.totalRequests++;
       stats.bandwidthSaved += fileSize;
-      stats.hitRate = stats.hits / stats.totalRequests * 100;
+      stats.hitRate = (stats.hits / stats.totalRequests) * 100;
     }
   }
 
@@ -323,12 +314,12 @@ export class CdnCacheStrategy {
   recordCacheMiss(mimeType: string, fileSize: number = 0): void {
     const strategy = this.getStrategyByMimeType(mimeType);
     const stats = this.stats.get(strategy.type);
-    
+
     if (stats) {
       stats.misses++;
       stats.totalRequests++;
       stats.estimatedSize += fileSize;
-      stats.hitRate = stats.hits / stats.totalRequests * 100;
+      stats.hitRate = (stats.hits / stats.totalRequests) * 100;
     }
   }
 
@@ -349,7 +340,7 @@ export class CdnCacheStrategy {
       hitRate: 0,
       totalRequests: 0,
       estimatedSize: 0,
-      bandwidthSaved: 0
+      bandwidthSaved: 0,
     };
 
     for (const stats of this.stats.values()) {
@@ -360,9 +351,7 @@ export class CdnCacheStrategy {
       overall.bandwidthSaved += stats.bandwidthSaved;
     }
 
-    overall.hitRate = overall.totalRequests > 0 
-      ? overall.hits / overall.totalRequests * 100 
-      : 0;
+    overall.hitRate = overall.totalRequests > 0 ? (overall.hits / overall.totalRequests) * 100 : 0;
 
     return overall;
   }
@@ -384,24 +373,26 @@ export class CdnCacheStrategy {
     }> = [];
 
     for (const [type, stats] of this.stats.entries()) {
-      if (stats.totalRequests > 100) { // 只对有足够请求量的资源类型分析
+      if (stats.totalRequests > 100) {
+        // 只对有足够请求量的资源类型分析
         // 命中率过低
         if (stats.hitRate < 60) {
           suggestions.push({
             type,
             issue: `${type}类型文件缓存命中率过低 (${stats.hitRate.toFixed(1)}%)`,
             suggestion: '考虑增加缓存时间或启用预热机制',
-            severity: stats.hitRate < 30 ? 'high' : 'medium'
+            severity: stats.hitRate < 30 ? 'high' : 'medium',
           });
         }
 
         // 缓存大小过大
-        if (stats.estimatedSize > 1024 * 1024 * 1024) { // 1GB
+        if (stats.estimatedSize > 1024 * 1024 * 1024) {
+          // 1GB
           suggestions.push({
             type,
             issue: `${type}类型文件缓存占用空间过大 (${(stats.estimatedSize / 1024 / 1024 / 1024).toFixed(2)}GB)`,
             suggestion: '考虑减少缓存时间或优化文件压缩',
-            severity: 'medium'
+            severity: 'medium',
           });
         }
       }
@@ -431,7 +422,7 @@ export class CdnCacheStrategy {
         hitRate: 0,
         totalRequests: 0,
         estimatedSize: 0,
-        bandwidthSaved: 0
+        bandwidthSaved: 0,
       });
     }
   }
@@ -440,4 +431,4 @@ export class CdnCacheStrategy {
 /**
  * 单例CDN缓存策略管理器
  */
-export const cdnCacheStrategy = new CdnCacheStrategy(); 
+export const cdnCacheStrategy = new CdnCacheStrategy();

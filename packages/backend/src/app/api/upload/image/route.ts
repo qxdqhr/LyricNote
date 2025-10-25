@@ -68,7 +68,8 @@ async function uploadToOSS(buffer: Buffer, filename: string, ossConfig: any) {
     const result = await client.put(path, buffer);
 
     // 返回 OSS URL（强制使用 HTTPS）
-    let ossUrl = result.url || `https://${ossConfig.bucket}.${ossConfig.region}.aliyuncs.com/${path}`;
+    let ossUrl =
+      result.url || `https://${ossConfig.bucket}.${ossConfig.region}.aliyuncs.com/${path}`;
     // 确保使用 HTTPS
     ossUrl = ossUrl.replace(/^http:\/\//i, 'https://');
     return ossUrl;
@@ -84,28 +85,19 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File;
 
     if (!file) {
-      return NextResponse.json(
-        { success: false, error: '未找到文件' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: '未找到文件' }, { status: 400 });
     }
 
     // 验证文件类型
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { success: false, error: '不支持的文件类型' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: '不支持的文件类型' }, { status: 400 });
     }
 
     // 验证文件大小 (10MB)
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      return NextResponse.json(
-        { success: false, error: '文件大小不能超过 10MB' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: '文件大小不能超过 10MB' }, { status: 400 });
     }
 
     // 读取文件数据
@@ -142,15 +134,10 @@ export async function POST(request: NextRequest) {
         size: file.size,
         type: file.type,
         storageType: 'oss',
-      }
+      },
     });
-
   } catch (error) {
     console.error('文件上传失败:', error);
-    return NextResponse.json(
-      { success: false, error: '文件上传失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: '文件上传失败' }, { status: 500 });
   }
 }
-

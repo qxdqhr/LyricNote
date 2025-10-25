@@ -158,7 +158,18 @@ export interface ExportFilter {
   /** 字段名 */
   field: string;
   /** 操作符 */
-  operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'startsWith' | 'endsWith' | 'in' | 'notIn';
+  operator:
+    | 'eq'
+    | 'ne'
+    | 'gt'
+    | 'gte'
+    | 'lt'
+    | 'lte'
+    | 'contains'
+    | 'startsWith'
+    | 'endsWith'
+    | 'in'
+    | 'notIn';
   /** 值 */
   value: any;
 }
@@ -343,4 +354,3 @@ export type Validator<T = any> = (data: T) => boolean | string;
 
 /** 格式化函数 */
 export type Formatter<T = any> = (value: T) => string;
-

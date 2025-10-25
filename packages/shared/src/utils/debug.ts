@@ -5,7 +5,6 @@
 import { logger } from '../logger';
 import { fileUtils } from './file';
 
-
 export const debugUtils = {
   /**
    * 安全的 JSON 序列化

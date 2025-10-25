@@ -113,7 +113,11 @@ export function Sidebar({ user }: SidebarProps) {
   const searchParams = useSearchParams();
   const { logout } = useAuth(apiClient);
   const [collapsed, setCollapsed] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(['网站管理', '内容管理', '系统管理']);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([
+    '网站管理',
+    '内容管理',
+    '系统管理',
+  ]);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [analytics] = useState<Analytics>(() => getWebAdminAnalytics());
   const [isLoggingOut, setIsLoggingOut] = useState(false);

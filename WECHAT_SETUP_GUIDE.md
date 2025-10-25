@@ -71,8 +71,8 @@
 1. 进入"开发" → "开发管理" → "开发设置"
 2. 找到"开发者ID"：
    - **AppID**: 配置为 `wechat_miniapp_appid`
-   - **AppSecret**: 点击"生成"或"重置"，配置为 `wechat_miniapp_appsecret`
-     ⚠️ **重要**：AppSecret 生成后只显示一次，请立即保存
+   - **AppSecret**: 点击"生成"或"重置"，配置为 `wechat_miniapp_appsecret` ⚠️
+     **重要**：AppSecret 生成后只显示一次，请立即保存
 
 ### 4. 配置服务器域名
 
@@ -89,11 +89,13 @@
 ### 1. 申请微信支付商户号
 
 **前置条件**：
+
 - 必须已有企业营业执照（个人无法申请）
 - 已有对公银行账户
 - 已完成微信认证
 
 **申请步骤**：
+
 1. 登录微信公众平台或微信开放平台
 2. 进入"微信支付" → "开通"
 3. 选择"申请接入"
@@ -110,15 +112,16 @@
 ### 2. 获取商户号和 API 密钥
 
 审核通过后，你会收到邮件通知，包含：
+
 - **商户号 (mch_id)**: 配置为 `wechat_mch_id`
 
 获取 API 密钥：
+
 1. 登录 [微信支付商户平台](https://pay.weixin.qq.com/)
 2. 进入"账户中心" → "API安全" → "API密钥"
 3. 点击"设置密钥"（首次）或"修改密钥"
 4. 输入 32 位的密钥（建议使用随机生成工具）
-5. 保存密钥，配置为 `wechat_mch_key`
-   ⚠️ **重要**：密钥设置后无法查看，请务必保存
+5. 保存密钥，配置为 `wechat_mch_key` ⚠️ **重要**：密钥设置后无法查看，请务必保存
 
 ### 3. 下载商户证书
 
@@ -132,6 +135,7 @@
 6. 配置证书路径为 `wechat_cert_path`
 
 **推荐存放路径**：
+
 ```
 /path/to/your/project/certs/wechat/
   ├── apiclient_cert.pem
@@ -152,14 +156,17 @@
 为了让应用能够使用微信支付，需要关联：
 
 **网页支付**：
+
 1. 进入"产品中心" → "JSAPI支付"
 2. 添加支付授权目录：`https://your-domain.com/payment/`
 
 **小程序支付**：
+
 1. 进入"产品中心" → "AppID账号管理"
 2. 关联小程序 AppID
 
 **APP 支付**：
+
 1. 进入"产品中心" → "AppID账号管理"
 2. 关联移动应用 AppID
 
@@ -179,11 +186,13 @@ curl ifconfig.me
 ### 2. 配置白名单
 
 **微信支付商户平台**：
+
 1. 登录商户平台
 2. 进入"账户中心" → "API安全" → "IP白名单"
 3. 添加你的服务器 IP
 
 **微信公众平台（小程序）**：
+
 1. 登录小程序后台
 2. 进入"开发" → "开发管理" → "开发设置" → "服务器域名"
 3. 添加服务器 IP
@@ -194,17 +203,17 @@ curl ifconfig.me
 
 申请完成后，将以下信息填入 LyricNote 配置管理系统：
 
-| 配置项 | 说明 | 获取位置 | 是否敏感 |
-|--------|------|----------|----------|
-| `wechat_web_appid` | 网页应用 AppID | 微信开放平台 - 网站应用 | 否 |
-| `wechat_web_appsecret` | 网页应用 AppSecret | 微信开放平台 - 网站应用 | 是 |
-| `wechat_miniapp_appid` | 小程序 AppID | 微信公众平台 - 小程序 | 否 |
-| `wechat_miniapp_appsecret` | 小程序 AppSecret | 微信公众平台 - 小程序 | 是 |
-| `wechat_mobile_appid` | 移动应用 AppID | 微信开放平台 - 移动应用 | 否 |
-| `wechat_mobile_appsecret` | 移动应用 AppSecret | 微信开放平台 - 移动应用 | 是 |
-| `wechat_mch_id` | 微信支付商户号 | 微信支付商户平台 | 否 |
-| `wechat_mch_key` | 商户 API 密钥 | 微信支付商户平台 - API安全 | 是 |
-| `wechat_cert_path` | 商户证书路径 | 微信支付商户平台 - API证书 | 否 |
+| 配置项                     | 说明               | 获取位置                   | 是否敏感 |
+| -------------------------- | ------------------ | -------------------------- | -------- |
+| `wechat_web_appid`         | 网页应用 AppID     | 微信开放平台 - 网站应用    | 否       |
+| `wechat_web_appsecret`     | 网页应用 AppSecret | 微信开放平台 - 网站应用    | 是       |
+| `wechat_miniapp_appid`     | 小程序 AppID       | 微信公众平台 - 小程序      | 否       |
+| `wechat_miniapp_appsecret` | 小程序 AppSecret   | 微信公众平台 - 小程序      | 是       |
+| `wechat_mobile_appid`      | 移动应用 AppID     | 微信开放平台 - 移动应用    | 否       |
+| `wechat_mobile_appsecret`  | 移动应用 AppSecret | 微信开放平台 - 移动应用    | 是       |
+| `wechat_mch_id`            | 微信支付商户号     | 微信支付商户平台           | 否       |
+| `wechat_mch_key`           | 商户 API 密钥      | 微信支付商户平台 - API安全 | 是       |
+| `wechat_cert_path`         | 商户证书路径       | 微信支付商户平台 - API证书 | 否       |
 
 ---
 
@@ -213,16 +222,20 @@ curl ifconfig.me
 ### 1. 开发者工具
 
 **小程序开发**：
-- 下载 [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)
+
+- 下载
+  [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)
 - 使用小程序 AppID 登录调试
 
 **网页开发**：
+
 - 使用测试账号进行调试
 - 微信开放平台提供测试号申请
 
 ### 2. 沙箱环境
 
 微信支付提供沙箱环境用于测试：
+
 1. 登录商户平台
 2. 进入"账户中心" → "API安全" → "沙箱环境"
 3. 获取沙箱商户号和密钥
@@ -233,20 +246,25 @@ curl ifconfig.me
 ## 七、常见问题
 
 ### Q1: 审核需要多久？
+
 - 网站应用/移动应用：1-7 个工作日
 - 微信支付商户：1-5 个工作日
 - 小程序首次发布：1-3 个工作日
 
 ### Q2: 个人可以申请微信支付吗？
+
 不可以。微信支付需要企业资质，个人只能申请小程序，但无法开通支付功能。
 
 ### Q3: 测试环境如何配置？
+
 建议使用微信提供的测试号和沙箱环境进行开发测试。
 
 ### Q4: AppSecret 忘记了怎么办？
+
 AppSecret 忘记后无法找回，只能重置。重置后需要更新系统配置。
 
 ### Q5: 回调 URL 必须使用 HTTPS 吗？
+
 是的，微信支付回调必须使用 HTTPS，建议所有接口都使用 HTTPS。
 
 ---
@@ -275,4 +293,3 @@ AppSecret 忘记后无法找回，只能重置。重置后需要更新系统配�
 ---
 
 完成以上步骤后，你就可以开始在 LyricNote 项目中集成微信登录和支付功能了！
-

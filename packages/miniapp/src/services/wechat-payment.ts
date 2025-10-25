@@ -121,7 +121,11 @@ export async function queryPaymentStatus(orderId: string): Promise<any> {
 /**
  * 获取用户订单列表
  */
-export async function getUserOrders(userId: string, page: number = 1, pageSize: number = 20): Promise<any> {
+export async function getUserOrders(
+  userId: string,
+  page: number = 1,
+  pageSize: number = 20
+): Promise<any> {
   try {
     const response = await Taro.request({
       url: `${process.env.TARO_APP_API_URL}/api/payment/wechat/orders`,
@@ -174,4 +178,3 @@ export async function requestRefund(orderId: string, reason: string): Promise<bo
     return false;
   }
 }
-

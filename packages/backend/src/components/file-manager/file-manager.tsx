@@ -6,7 +6,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import type { FileMetadata, FileQueryOptions, PaginatedResult, ProcessorType } from '@/lib/universalFile';
+import type {
+  FileMetadata,
+  FileQueryOptions,
+  PaginatedResult,
+  ProcessorType,
+} from '@/lib/universalFile';
 
 // 文件管理相关类型定义
 export interface FileManagerProps {
@@ -71,11 +76,15 @@ export interface FileManagerState {
 }
 
 const MIME_TYPE_CATEGORIES = {
-  'image': ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
-  'video': ['video/mp4', 'video/avi', 'video/mov', 'video/webm'],
-  'audio': ['audio/mp3', 'audio/wav', 'audio/ogg', 'audio/aac'],
-  'document': ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-  'archive': ['application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed']
+  image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
+  video: ['video/mp4', 'video/avi', 'video/mov', 'video/webm'],
+  audio: ['audio/mp3', 'audio/wav', 'audio/ogg', 'audio/aac'],
+  document: [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ],
+  archive: ['application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed'],
 };
 
 export const FileManager: React.FC<FileManagerProps> = ({
@@ -92,7 +101,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
   pageSize = 20,
   customActions = [],
   onFileSelect,
-  onUploadComplete
+  onUploadComplete,
 }) => {
   const [state, setState] = useState<FileManagerState>({
     files: [],
@@ -104,7 +113,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
     filters: {
       mimeType: '',
       dateRange: { start: null, end: null },
-      sizeRange: { min: 0, max: Number.MAX_SAFE_INTEGER }
+      sizeRange: { min: 0, max: Number.MAX_SAFE_INTEGER },
     },
     sortBy: 'uploadTime',
     sortOrder: 'desc',
@@ -112,15 +121,15 @@ export const FileManager: React.FC<FileManagerProps> = ({
       page: 1,
       pageSize,
       total: 0,
-      totalPages: 0
+      totalPages: 0,
     },
     previewFile: null,
-    showUploadModal: false
+    showUploadModal: false,
   });
 
   // 加载文件列表
   const loadFiles = useCallback(async () => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
       const queryOptions: FileQueryOptions = {
@@ -129,7 +138,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
         page: state.pagination.page,
         pageSize: state.pagination.pageSize,
         sortBy: state.sortBy,
-        sortOrder: state.sortOrder
+        sortOrder: state.sortOrder,
       };
 
       // 添加搜索查询
@@ -160,30 +169,38 @@ export const FileManager: React.FC<FileManagerProps> = ({
         pageSize: queryOptions.pageSize || 20,
         totalPages: 0,
         hasNext: false,
-        hasPrev: false
+        hasPrev: false,
       };
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         files: mockResult.items,
         pagination: {
           page: mockResult.page,
           pageSize: mockResult.pageSize,
           total: mockResult.total,
-          totalPages: mockResult.totalPages
+          totalPages: mockResult.totalPages,
         },
-        loading: false
+        loading: false,
       }));
-
     } catch (error) {
       console.error('加载文件列表失败:', error);
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         loading: false,
-        error: error instanceof Error ? error.message : '加载文件列表失败'
+        error: error instanceof Error ? error.message : '加载文件列表失败',
       }));
     }
-  }, [moduleId, businessId, state.searchQuery, state.filters, state.sortBy, state.sortOrder, state.pagination.page, state.pagination.pageSize]);
+  }, [
+    moduleId,
+    businessId,
+    state.searchQuery,
+    state.filters,
+    state.sortBy,
+    state.sortOrder,
+    state.pagination.page,
+    state.pagination.pageSize,
+  ]);
 
   // 初始加载
   useEffect(() => {
@@ -191,80 +208,88 @@ export const FileManager: React.FC<FileManagerProps> = ({
   }, [loadFiles]);
 
   // 文件选择处理
-  const handleFileSelect = useCallback((fileId: string, selected: boolean) => {
-    setState(prev => {
-      const newSelectedFiles = new Set(prev.selectedFiles);
-      if (selected) {
-        newSelectedFiles.add(fileId);
-      } else {
-        newSelectedFiles.delete(fileId);
-      }
+  const handleFileSelect = useCallback(
+    (fileId: string, selected: boolean) => {
+      setState((prev) => {
+        const newSelectedFiles = new Set(prev.selectedFiles);
+        if (selected) {
+          newSelectedFiles.add(fileId);
+        } else {
+          newSelectedFiles.delete(fileId);
+        }
 
-      const selectedFileList = prev.files.filter(file => newSelectedFiles.has(file.id));
+        const selectedFileList = prev.files.filter((file) => newSelectedFiles.has(file.id));
 
-      if (onFileSelect) {
-        onFileSelect(selectedFileList);
-      }
+        if (onFileSelect) {
+          onFileSelect(selectedFileList);
+        }
 
-      return {
-        ...prev,
-        selectedFiles: newSelectedFiles
-      };
-    });
-  }, [onFileSelect, state.files]);
+        return {
+          ...prev,
+          selectedFiles: newSelectedFiles,
+        };
+      });
+    },
+    [onFileSelect, state.files]
+  );
 
   // 全选/取消全选
-  const handleSelectAll = useCallback((selected: boolean) => {
-    setState(prev => {
-      const newSelectedFiles = selected
-        ? new Set(prev.files.map(file => file.id))
-        : new Set<string>();
+  const handleSelectAll = useCallback(
+    (selected: boolean) => {
+      setState((prev) => {
+        const newSelectedFiles = selected
+          ? new Set(prev.files.map((file) => file.id))
+          : new Set<string>();
 
-      const selectedFileList = selected ? prev.files : [];
+        const selectedFileList = selected ? prev.files : [];
 
-      if (onFileSelect) {
-        onFileSelect(selectedFileList);
-      }
+        if (onFileSelect) {
+          onFileSelect(selectedFileList);
+        }
 
-      return {
-        ...prev,
-        selectedFiles: newSelectedFiles
-      };
-    });
-  }, [onFileSelect, state.files]);
+        return {
+          ...prev,
+          selectedFiles: newSelectedFiles,
+        };
+      });
+    },
+    [onFileSelect, state.files]
+  );
 
   // 删除文件
-  const handleDeleteFiles = useCallback(async (fileIds: string[]) => {
-    if (!window.confirm(`确定要删除选中的 ${fileIds.length} 个文件吗？`)) {
-      return;
-    }
+  const handleDeleteFiles = useCallback(
+    async (fileIds: string[]) => {
+      if (!window.confirm(`确定要删除选中的 ${fileIds.length} 个文件吗？`)) {
+        return;
+      }
 
-    setState(prev => ({ ...prev, loading: true }));
+      setState((prev) => ({ ...prev, loading: true }));
 
-    try {
-      // 这里应该调用实际的删除API
-      // await fileService.deleteFiles(fileIds);
+      try {
+        // 这里应该调用实际的删除API
+        // await fileService.deleteFiles(fileIds);
 
-      logger.info('删除文件:', fileIds);
+        logger.info('删除文件:', fileIds);
 
-      // 重新加载文件列表
-      await loadFiles();
+        // 重新加载文件列表
+        await loadFiles();
 
-      setState(prev => ({
-        ...prev,
-        selectedFiles: new Set(),
-        loading: false
-      }));
-
-    } catch (error) {
-      console.error('删除文件失败:', error);
-      setState(prev => ({
-        ...prev,
-        loading: false,
-        error: error instanceof Error ? error.message : '删除文件失败'
-      }));
-    }
-  }, [loadFiles]);
+        setState((prev) => ({
+          ...prev,
+          selectedFiles: new Set(),
+          loading: false,
+        }));
+      } catch (error) {
+        console.error('删除文件失败:', error);
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          error: error instanceof Error ? error.message : '删除文件失败',
+        }));
+      }
+    },
+    [loadFiles]
+  );
 
   // 下载文件
   const handleDownloadFile = useCallback(async (file: FileMetadata) => {
@@ -274,68 +299,67 @@ export const FileManager: React.FC<FileManagerProps> = ({
       // window.open(downloadUrl, '_blank');
 
       logger.info('下载文件:', file.originalName);
-
     } catch (error) {
       console.error('下载文件失败:', error);
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        error: error instanceof Error ? error.message : '下载文件失败'
+        error: error instanceof Error ? error.message : '下载文件失败',
       }));
     }
   }, []);
 
   // 预览文件
   const handlePreviewFile = useCallback((file: FileMetadata) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      previewFile: file
+      previewFile: file,
     }));
   }, []);
 
   // 关闭预览
   const handleClosePreview = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      previewFile: null
+      previewFile: null,
     }));
   }, []);
 
   // 搜索处理
   const handleSearch = useCallback((query: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       searchQuery: query,
-      pagination: { ...prev.pagination, page: 1 }
+      pagination: { ...prev.pagination, page: 1 },
     }));
   }, []);
 
   // 筛选处理
   const handleFilterChange = useCallback((filterType: string, value: any) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       filters: {
         ...prev.filters,
-        [filterType]: value
+        [filterType]: value,
       },
-      pagination: { ...prev.pagination, page: 1 }
+      pagination: { ...prev.pagination, page: 1 },
     }));
   }, []);
 
   // 排序处理
   const handleSort = useCallback((field: keyof FileMetadata) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       sortBy: field,
       sortOrder: prev.sortBy === field && prev.sortOrder === 'asc' ? 'desc' : 'asc',
-      pagination: { ...prev.pagination, page: 1 }
+      pagination: { ...prev.pagination, page: 1 },
     }));
   }, []);
 
   // 分页处理
   const handlePageChange = useCallback((page: number) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      pagination: { ...prev.pagination, page }
+      pagination: { ...prev.pagination, page },
     }));
   }, []);
 
@@ -364,7 +388,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
   // 获取文件类型标签
   const getFileTypeLabel = useCallback((mimeType: string): string => {
     for (const [category, types] of Object.entries(MIME_TYPE_CATEGORIES)) {
-      if (types.some(type => mimeType.includes(type))) {
+      if (types.some((type) => mimeType.includes(type))) {
         return category;
       }
     }
@@ -373,121 +397,122 @@ export const FileManager: React.FC<FileManagerProps> = ({
 
   // 判断文件是否可预览
   const isPreviewable = useCallback((file: FileMetadata): boolean => {
-    return file.mimeType.startsWith('image/') ||
-           file.mimeType.startsWith('video/') ||
-           file.mimeType.startsWith('audio/') ||
-           file.mimeType.includes('pdf');
+    return (
+      file.mimeType.startsWith('image/') ||
+      file.mimeType.startsWith('video/') ||
+      file.mimeType.startsWith('audio/') ||
+      file.mimeType.includes('pdf')
+    );
   }, []);
 
   // 渲染文件项
-  const renderFileItem = useCallback((file: FileMetadata) => {
-    const isSelected = state.selectedFiles.has(file.id);
-    const typeIcon = getFileTypeIcon(file.mimeType);
-    const typeLabel = getFileTypeLabel(file.mimeType);
+  const renderFileItem = useCallback(
+    (file: FileMetadata) => {
+      const isSelected = state.selectedFiles.has(file.id);
+      const typeIcon = getFileTypeIcon(file.mimeType);
+      const typeLabel = getFileTypeLabel(file.mimeType);
 
-    return (
-      <div
-        key={file.id}
-        className={`relative border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-md ${
-          isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-        }`}
-        onClick={() => handleFileSelect(file.id, !isSelected)}
-      >
-        {/* 选择复选框 */}
-        {allowBatch && (
-          <div className="absolute top-2 left-2">
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={(e) => {
-                e.stopPropagation();
-                handleFileSelect(file.id, e.target.checked);
-              }}
-              className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-            />
+      return (
+        <div
+          key={file.id}
+          className={`relative border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-md ${
+            isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+          }`}
+          onClick={() => handleFileSelect(file.id, !isSelected)}
+        >
+          {/* 选择复选框 */}
+          {allowBatch && (
+            <div className="absolute top-2 left-2">
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  handleFileSelect(file.id, e.target.checked);
+                }}
+                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+              />
+            </div>
+          )}
+
+          {/* 文件图标和信息 */}
+          <div className="flex flex-col items-center space-y-2">
+            <div className="text-4xl">{typeIcon}</div>
+
+            <div className="text-center w-full">
+              <h3 className="font-medium text-sm text-gray-900 truncate" title={file.originalName}>
+                {file.originalName}
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">{formatFileSize(file.size)}</p>
+              <p className="text-xs text-blue-600 capitalize">{typeLabel}</p>
+              <p className="text-xs text-gray-400">
+                {new Date(file.uploadTime).toLocaleDateString()}
+              </p>
+            </div>
           </div>
-        )}
 
-        {/* 文件图标和信息 */}
-        <div className="flex flex-col items-center space-y-2">
-          <div className="text-4xl">{typeIcon}</div>
+          {/* 操作按钮 */}
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex space-x-1">
+              {showPreview && isPreviewable(file) && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePreviewFile(file);
+                  }}
+                  className="p-1 text-gray-600 hover:text-blue-600 hover:bg-white rounded"
+                  title="预览"
+                >
+                  👁️
+                </button>
+              )}
 
-          <div className="text-center w-full">
-            <h3 className="font-medium text-sm text-gray-900 truncate" title={file.originalName}>
-              {file.originalName}
-            </h3>
-            <p className="text-xs text-gray-500 mt-1">
-              {formatFileSize(file.size)}
-            </p>
-            <p className="text-xs text-blue-600 capitalize">
-              {typeLabel}
-            </p>
-            <p className="text-xs text-gray-400">
-              {new Date(file.uploadTime).toLocaleDateString()}
-            </p>
-          </div>
-        </div>
+              {allowDownload && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownloadFile(file);
+                  }}
+                  className="p-1 text-gray-600 hover:text-green-600 hover:bg-white rounded"
+                  title="下载"
+                >
+                  ⬇️
+                </button>
+              )}
 
-        {/* 操作按钮 */}
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="flex space-x-1">
-            {showPreview && isPreviewable(file) && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePreviewFile(file);
-                }}
-                className="p-1 text-gray-600 hover:text-blue-600 hover:bg-white rounded"
-                title="预览"
-              >
-                👁️
-              </button>
-            )}
-
-            {allowDownload && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDownloadFile(file);
-                }}
-                className="p-1 text-gray-600 hover:text-green-600 hover:bg-white rounded"
-                title="下载"
-              >
-                ⬇️
-              </button>
-            )}
-
-            {allowDelete && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteFiles([file.id]);
-                }}
-                className="p-1 text-gray-600 hover:text-red-600 hover:bg-white rounded"
-                title="删除"
-              >
-                🗑️
-              </button>
-            )}
+              {allowDelete && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteFiles([file.id]);
+                  }}
+                  className="p-1 text-gray-600 hover:text-red-600 hover:bg-white rounded"
+                  title="删除"
+                >
+                  🗑️
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    );
-  }, [
-    state.selectedFiles,
-    allowBatch,
-    allowDownload,
-    allowDelete,
-    showPreview,
-    handleFileSelect,
-    handlePreviewFile,
-    handleDownloadFile,
-    handleDeleteFiles,
-    getFileTypeIcon,
-    getFileTypeLabel,
-    formatFileSize,
-    isPreviewable
-  ]);
+      );
+    },
+    [
+      state.selectedFiles,
+      allowBatch,
+      allowDownload,
+      allowDelete,
+      showPreview,
+      handleFileSelect,
+      handlePreviewFile,
+      handleDownloadFile,
+      handleDeleteFiles,
+      getFileTypeIcon,
+      getFileTypeLabel,
+      formatFileSize,
+      isPreviewable,
+    ]
+  );
 
   // 渲染搜索栏
   const renderSearchBar = () => {
@@ -522,9 +547,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* 文件类型筛选 */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              文件类型
-            </label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">文件类型</label>
             <select
               value={state.filters.mimeType}
               onChange={(e) => handleFilterChange('mimeType', e.target.value)}
@@ -541,26 +564,28 @@ export const FileManager: React.FC<FileManagerProps> = ({
 
           {/* 日期范围筛选 */}
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              上传时间
-            </label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">上传时间</label>
             <div className="flex space-x-2">
               <input
                 type="date"
                 value={state.filters.dateRange.start?.toISOString().split('T')[0] || ''}
-                onChange={(e) => handleFilterChange('dateRange', {
-                  ...state.filters.dateRange,
-                  start: e.target.value ? new Date(e.target.value) : null
-                })}
+                onChange={(e) =>
+                  handleFilterChange('dateRange', {
+                    ...state.filters.dateRange,
+                    start: e.target.value ? new Date(e.target.value) : null,
+                  })
+                }
                 className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
               />
               <input
                 type="date"
                 value={state.filters.dateRange.end?.toISOString().split('T')[0] || ''}
-                onChange={(e) => handleFilterChange('dateRange', {
-                  ...state.filters.dateRange,
-                  end: e.target.value ? new Date(e.target.value) : null
-                })}
+                onChange={(e) =>
+                  handleFilterChange('dateRange', {
+                    ...state.filters.dateRange,
+                    end: e.target.value ? new Date(e.target.value) : null,
+                  })
+                }
                 className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -569,14 +594,16 @@ export const FileManager: React.FC<FileManagerProps> = ({
           {/* 清除筛选器 */}
           <div className="flex items-end">
             <button
-              onClick={() => setState(prev => ({
-                ...prev,
-                filters: {
-                  mimeType: '',
-                  dateRange: { start: null, end: null },
-                  sizeRange: { min: 0, max: Number.MAX_SAFE_INTEGER }
-                }
-              }))}
+              onClick={() =>
+                setState((prev) => ({
+                  ...prev,
+                  filters: {
+                    mimeType: '',
+                    dateRange: { start: null, end: null },
+                    sizeRange: { min: 0, max: Number.MAX_SAFE_INTEGER },
+                  },
+                }))
+              }
               className="px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
             >
               清除筛选
@@ -623,8 +650,10 @@ export const FileManager: React.FC<FileManagerProps> = ({
               )}
 
               {/* 自定义操作 */}
-              {customActions.map(action => {
-                const selectedFileList = state.files.filter(file => state.selectedFiles.has(file.id));
+              {customActions.map((action) => {
+                const selectedFileList = state.files.filter((file) =>
+                  state.selectedFiles.has(file.id)
+                );
                 const isDisabled = action.disabled?.(selectedFileList) || false;
 
                 return (
@@ -652,8 +681,11 @@ export const FileManager: React.FC<FileManagerProps> = ({
           <select
             value={`${state.sortBy}-${state.sortOrder}`}
             onChange={(e) => {
-              const [sortBy, sortOrder] = e.target.value.split('-') as [keyof FileMetadata, 'asc' | 'desc'];
-              setState(prev => ({ ...prev, sortBy, sortOrder }));
+              const [sortBy, sortOrder] = e.target.value.split('-') as [
+                keyof FileMetadata,
+                'asc' | 'desc',
+              ];
+              setState((prev) => ({ ...prev, sortBy, sortOrder }));
             }}
             className="px-3 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
           >
@@ -668,7 +700,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
           {/* 上传按钮 */}
           {allowUpload && (
             <button
-              onClick={() => setState(prev => ({ ...prev, showUploadModal: true }))}
+              onClick={() => setState((prev) => ({ ...prev, showUploadModal: true }))}
               className="px-4 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
             >
               ⬆️ 上传文件
@@ -697,8 +729,9 @@ export const FileManager: React.FC<FileManagerProps> = ({
     return (
       <div className="flex items-center justify-between mt-6">
         <div className="text-sm text-gray-700">
-          显示第 {(page - 1) * state.pagination.pageSize + 1} - {Math.min(page * state.pagination.pageSize, state.pagination.total)} 项，
-          共 {state.pagination.total} 项
+          显示第 {(page - 1) * state.pagination.pageSize + 1} -{' '}
+          {Math.min(page * state.pagination.pageSize, state.pagination.total)} 项， 共{' '}
+          {state.pagination.total} 项
         </div>
 
         <div className="flex items-center space-x-2">
@@ -710,14 +743,12 @@ export const FileManager: React.FC<FileManagerProps> = ({
             上一页
           </button>
 
-          {pages.map(pageNum => (
+          {pages.map((pageNum) => (
             <button
               key={pageNum}
               onClick={() => handlePageChange(pageNum)}
               className={`px-3 py-1 text-sm border rounded ${
-                pageNum === page
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'hover:bg-gray-50'
+                pageNum === page ? 'bg-blue-600 text-white border-blue-600' : 'hover:bg-gray-50'
               }`}
             >
               {pageNum}
@@ -743,7 +774,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-red-800">{state.error}</p>
           <button
-            onClick={() => setState(prev => ({ ...prev, error: null }))}
+            onClick={() => setState((prev) => ({ ...prev, error: null }))}
             className="mt-2 text-red-600 hover:text-red-800"
           >
             关闭
@@ -776,7 +807,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
               <p>暂无文件</p>
               {allowUpload && (
                 <button
-                  onClick={() => setState(prev => ({ ...prev, showUploadModal: true }))}
+                  onClick={() => setState((prev) => ({ ...prev, showUploadModal: true }))}
                   className="mt-2 text-blue-600 hover:text-blue-800"
                 >
                   点击上传第一个文件
@@ -785,11 +816,13 @@ export const FileManager: React.FC<FileManagerProps> = ({
             </div>
           </div>
         ) : (
-          <div className={`grid gap-4 ${
-            mode === 'grid'
-              ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
-              : 'grid-cols-1'
-          }`}>
+          <div
+            className={`grid gap-4 ${
+              mode === 'grid'
+                ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
+                : 'grid-cols-1'
+            }`}
+          >
             {state.files.map(renderFileItem)}
           </div>
         )}
@@ -800,10 +833,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
 
       {/* 文件预览模态框 */}
       {state.previewFile && showPreview && (
-        <FilePreviewModal
-          file={state.previewFile}
-          onClose={handleClosePreview}
-        />
+        <FilePreviewModal file={state.previewFile} onClose={handleClosePreview} />
       )}
 
       {/* 上传模态框 */}
@@ -811,9 +841,9 @@ export const FileManager: React.FC<FileManagerProps> = ({
         <UploadModal
           moduleId={moduleId}
           businessId={businessId}
-          onClose={() => setState(prev => ({ ...prev, showUploadModal: false }))}
+          onClose={() => setState((prev) => ({ ...prev, showUploadModal: false }))}
           onUploadComplete={(files) => {
-            setState(prev => ({ ...prev, showUploadModal: false }));
+            setState((prev) => ({ ...prev, showUploadModal: false }));
             if (onUploadComplete) {
               onUploadComplete(files);
             }
@@ -954,7 +984,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
   moduleId,
   businessId,
   onClose,
-  onUploadComplete
+  onUploadComplete,
 }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -970,9 +1000,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
         </div>
 
         <div className="p-6">
-          <p className="text-gray-600 mb-4">
-            这里将集成FileUploader组件
-          </p>
+          <p className="text-gray-600 mb-4">这里将集成FileUploader组件</p>
 
           {/* 这里应该集成 FileUploader 组件 */}
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500">

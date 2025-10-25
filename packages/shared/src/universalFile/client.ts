@@ -13,7 +13,12 @@ import type {
   PaginatedResult,
   BatchOperationResult,
 } from './types';
-import { API_ENDPOINTS, ERROR_CODES, DEFAULT_REQUEST_TIMEOUT, DEFAULT_UPLOAD_TIMEOUT } from './constants';
+import {
+  API_ENDPOINTS,
+  ERROR_CODES,
+  DEFAULT_REQUEST_TIMEOUT,
+  DEFAULT_UPLOAD_TIMEOUT,
+} from './constants';
 import { createFileError, formatErrorMessage, buildQueryString } from './utils';
 
 // ============= 配置类型 =============
@@ -426,11 +431,10 @@ export class UniversalFileClient {
       return response;
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
-        throw createFileError(
-          ERROR_CODES.TIMEOUT_ERROR,
-          '请求超时',
-          { url, timeout: this.config.timeout }
-        );
+        throw createFileError(ERROR_CODES.TIMEOUT_ERROR, '请求超时', {
+          url,
+          timeout: this.config.timeout,
+        });
       }
       throw error;
     } finally {
@@ -479,4 +483,3 @@ export const universalFileClient = new UniversalFileClient();
 export function createFileClient(config?: UniversalFileClientConfig): UniversalFileClient {
   return new UniversalFileClient(config);
 }
-

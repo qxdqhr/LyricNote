@@ -15,12 +15,7 @@ export class ApiError extends Error {
   public readonly statusCode: number;
   public readonly details?: any;
 
-  constructor(
-    code: ApiErrorCode,
-    message?: string,
-    details?: any,
-    statusCode?: number
-  ) {
+  constructor(code: ApiErrorCode, message?: string, details?: any, statusCode?: number) {
     super(message || ErrorMessages[code]);
     this.name = 'ApiError';
     this.code = code;
@@ -42,11 +37,11 @@ export class ApiError extends Error {
       error: {
         code: this.code,
         message: this.message,
-        details: this.details
+        details: this.details,
       },
       meta: {
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     };
   }
 
@@ -55,7 +50,7 @@ export class ApiError extends Error {
    */
   toNextResponse(): NextResponse {
     return NextResponse.json(this.toApiResponse(), {
-      status: this.statusCode
+      status: this.statusCode,
     });
   }
 }
@@ -69,11 +64,7 @@ export class ApiErrorFactory {
    * 创建文件不存在错误
    */
   static fileNotFound(fileId?: string): ApiError {
-    return new ApiError(
-      ApiErrorCode.FILE_NOT_FOUND,
-      undefined,
-      { fileId }
-    );
+    return new ApiError(ApiErrorCode.FILE_NOT_FOUND, undefined, { fileId });
   }
 
   /**
@@ -91,11 +82,10 @@ export class ApiErrorFactory {
    * 创建不支持的文件类型错误
    */
   static fileTypeNotSupported(mimeType: string, supportedTypes?: string[]): ApiError {
-    return new ApiError(
-      ApiErrorCode.FILE_TYPE_NOT_SUPPORTED,
-      `不支持的文件类型: ${mimeType}`,
-      { mimeType, supportedTypes }
-    );
+    return new ApiError(ApiErrorCode.FILE_TYPE_NOT_SUPPORTED, `不支持的文件类型: ${mimeType}`, {
+      mimeType,
+      supportedTypes,
+    });
   }
 
   /**
@@ -113,11 +103,7 @@ export class ApiErrorFactory {
    * 创建文件夹不存在错误
    */
   static folderNotFound(folderId?: string): ApiError {
-    return new ApiError(
-      ApiErrorCode.FOLDER_NOT_FOUND,
-      undefined,
-      { folderId }
-    );
+    return new ApiError(ApiErrorCode.FOLDER_NOT_FOUND, undefined, { folderId });
   }
 
   /**
@@ -135,11 +121,11 @@ export class ApiErrorFactory {
    * 创建参数验证错误
    */
   static validationError(field: string, value: any, rule: string): ApiError {
-    return new ApiError(
-      ApiErrorCode.VALIDATION_ERROR,
-      `字段 ${field} 验证失败: ${rule}`,
-      { field, value, rule }
-    );
+    return new ApiError(ApiErrorCode.VALIDATION_ERROR, `字段 ${field} 验证失败: ${rule}`, {
+      field,
+      value,
+      rule,
+    });
   }
 
   /**
@@ -212,33 +198,24 @@ export class ApiErrorFactory {
    * 创建分享不存在错误
    */
   static shareNotFound(shareCode?: string): ApiError {
-    return new ApiError(
-      ApiErrorCode.SHARE_NOT_FOUND,
-      undefined,
-      { shareCode }
-    );
+    return new ApiError(ApiErrorCode.SHARE_NOT_FOUND, undefined, { shareCode });
   }
 
   /**
    * 创建分享已过期错误
    */
   static shareExpired(shareCode: string, expiredAt: string): ApiError {
-    return new ApiError(
-      ApiErrorCode.SHARE_EXPIRED,
-      `分享已于 ${expiredAt} 过期`,
-      { shareCode, expiredAt }
-    );
+    return new ApiError(ApiErrorCode.SHARE_EXPIRED, `分享已于 ${expiredAt} 过期`, {
+      shareCode,
+      expiredAt,
+    });
   }
 
   /**
    * 创建分享密码错误
    */
   static sharePasswordIncorrect(shareCode: string): ApiError {
-    return new ApiError(
-      ApiErrorCode.SHARE_PASSWORD_INCORRECT,
-      undefined,
-      { shareCode }
-    );
+    return new ApiError(ApiErrorCode.SHARE_PASSWORD_INCORRECT, undefined, { shareCode });
   }
 
   /**
@@ -276,8 +253,8 @@ export class ApiResponseHelper {
       data,
       meta: {
         ...meta,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     };
   }
 
@@ -290,9 +267,9 @@ export class ApiResponseHelper {
     page: number,
     pageSize: number,
     requestId?: string
-  ): ApiResponse<{ items: T[], pagination: any }> {
+  ): ApiResponse<{ items: T[]; pagination: any }> {
     const totalPages = Math.ceil(total / pageSize);
-    
+
     return {
       success: true,
       data: {
@@ -303,8 +280,8 @@ export class ApiResponseHelper {
           pageSize,
           totalPages,
           hasNext: page < totalPages,
-          hasPrev: page > 1
-        }
+          hasPrev: page > 1,
+        },
       },
       meta: {
         total,
@@ -312,8 +289,8 @@ export class ApiResponseHelper {
         pageSize,
         totalPages,
         requestId,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     };
   }
 
@@ -326,8 +303,8 @@ export class ApiResponseHelper {
       data: null,
       meta: {
         requestId,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     };
   }
 
@@ -358,45 +335,35 @@ export function withErrorHandler<T extends any[], R>(
       if (error instanceof Error) {
         // 数据库连接错误
         if (error.message.includes('connect') || error.message.includes('connection')) {
-          throw new ApiError(
-            ApiErrorCode.STORAGE_UNAVAILABLE,
-            '数据库连接失败',
-            { originalError: error.message }
-          );
+          throw new ApiError(ApiErrorCode.STORAGE_UNAVAILABLE, '数据库连接失败', {
+            originalError: error.message,
+          });
         }
 
         // 文件系统错误
         if (error.message.includes('ENOENT')) {
-          throw new ApiError(
-            ApiErrorCode.FILE_NOT_FOUND,
-            '文件不存在',
-            { originalError: error.message }
-          );
+          throw new ApiError(ApiErrorCode.FILE_NOT_FOUND, '文件不存在', {
+            originalError: error.message,
+          });
         }
 
         if (error.message.includes('EACCES') || error.message.includes('permission')) {
-          throw new ApiError(
-            ApiErrorCode.AUTHORIZATION_ERROR,
-            '文件权限不足',
-            { originalError: error.message }
-          );
+          throw new ApiError(ApiErrorCode.AUTHORIZATION_ERROR, '文件权限不足', {
+            originalError: error.message,
+          });
         }
 
         if (error.message.includes('ENOSPC')) {
-          throw new ApiError(
-            ApiErrorCode.STORAGE_QUOTA_EXCEEDED,
-            '磁盘空间不足',
-            { originalError: error.message }
-          );
+          throw new ApiError(ApiErrorCode.STORAGE_QUOTA_EXCEEDED, '磁盘空间不足', {
+            originalError: error.message,
+          });
         }
       }
 
       // 其他未知错误
-      throw new ApiError(
-        ApiErrorCode.UNKNOWN_ERROR,
-        '服务器内部错误',
-        { originalError: error instanceof Error ? error.message : String(error) }
-      );
+      throw new ApiError(ApiErrorCode.UNKNOWN_ERROR, '服务器内部错误', {
+        originalError: error instanceof Error ? error.message : String(error),
+      });
     }
   };
 }
@@ -418,11 +385,9 @@ export function handleAsyncError(
       }
 
       // 未知错误
-      const apiError = new ApiError(
-        ApiErrorCode.UNKNOWN_ERROR,
-        '服务器内部错误',
-        { originalError: error instanceof Error ? error.message : String(error) }
-      );
+      const apiError = new ApiError(ApiErrorCode.UNKNOWN_ERROR, '服务器内部错误', {
+        originalError: error instanceof Error ? error.message : String(error),
+      });
 
       return apiError.toNextResponse();
     }
@@ -526,4 +491,4 @@ export class ValidationHelper {
       throw ApiErrorFactory.validationError(fieldName, value, '必须是有效的URL格式');
     }
   }
-} 
+}

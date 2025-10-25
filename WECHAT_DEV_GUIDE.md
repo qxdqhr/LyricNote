@@ -61,6 +61,7 @@ pnpm drizzle-kit push
 ```
 
 这将创建以下表：
+
 - `user_wechat_bindings` - 微信绑定表
 - `payment_orders` - 支付订单表
 - `payment_logs` - 支付日志表
@@ -76,6 +77,7 @@ pnpm drizzle-kit push
 **接口**: `POST /api/auth/wechat/login`
 
 **请求参数**:
+
 ```json
 {
   "platform": "web | miniapp | mobile",
@@ -85,6 +87,7 @@ pnpm drizzle-kit push
 ```
 
 **响应示例**:
+
 ```json
 {
   "success": true,
@@ -110,6 +113,7 @@ pnpm drizzle-kit push
 **接口**: `POST /api/auth/wechat/bind`
 
 **请求参数**:
+
 ```json
 {
   "userId": "user_123",
@@ -119,6 +123,7 @@ pnpm drizzle-kit push
 ```
 
 **响应示例**:
+
 ```json
 {
   "success": true,
@@ -136,6 +141,7 @@ pnpm drizzle-kit push
 **接口**: `POST /api/auth/wechat/unbind`
 
 **请求参数**:
+
 ```json
 {
   "userId": "user_123",
@@ -144,6 +150,7 @@ pnpm drizzle-kit push
 ```
 
 **响应示例**:
+
 ```json
 {
   "success": true,
@@ -160,6 +167,7 @@ pnpm drizzle-kit push
 **接口**: `POST /api/payment/wechat/create`
 
 **请求参数**:
+
 ```json
 {
   "userId": "user_123",
@@ -168,13 +176,14 @@ pnpm drizzle-kit push
   "productName": "VIP会员",
   "productId": "product_001",
   "description": "购买VIP会员1个月",
-  "openid": "xxx"  // 小程序支付必需
+  "openid": "xxx" // 小程序支付必需
 }
 ```
 
 **响应示例**:
 
 **网页支付 (Native)**:
+
 ```json
 {
   "success": true,
@@ -185,6 +194,7 @@ pnpm drizzle-kit push
 ```
 
 **小程序/APP 支付**:
+
 ```json
 {
   "success": true,
@@ -212,6 +222,7 @@ pnpm drizzle-kit push
 **接口**: `GET /api/payment/wechat/query/:orderId`
 
 **响应示例**:
+
 ```json
 {
   "success": true,
@@ -235,15 +246,17 @@ pnpm drizzle-kit push
 **接口**: `POST /api/payment/wechat/refund`
 
 **请求参数**:
+
 ```json
 {
   "orderId": "WX1234567890",
-  "refundAmount": 1000,  // 可选，不填则全额退款
+  "refundAmount": 1000, // 可选，不填则全额退款
   "reason": "用户申请退款"
 }
 ```
 
 **响应示例**:
+
 ```json
 {
   "success": true,
@@ -253,9 +266,11 @@ pnpm drizzle-kit push
 
 #### 5. 获取用户订单列表
 
-**接口**: `GET /api/payment/wechat/orders?userId=xxx&page=1&pageSize=20&status=paid`
+**接口**:
+`GET /api/payment/wechat/orders?userId=xxx&page=1&pageSize=20&status=paid`
 
 **响应示例**:
+
 ```json
 {
   "success": true,
@@ -290,11 +305,7 @@ function LoginPage() {
   return (
     <div>
       <h1>微信登录</h1>
-      <WechatLogin
-        onSuccess={handleSuccess}
-        onError={handleError}
-        size={256}
-      />
+      <WechatLogin onSuccess={handleSuccess} onError={handleError} size={256} />
     </div>
   );
 }
@@ -315,7 +326,7 @@ function PaymentPage() {
     <div>
       <WechatPayment
         userId="user_123"
-        amount={9900}  // 99.00 元
+        amount={9900} // 99.00 元
         productName="VIP会员"
         productId="vip_month"
         description="购买VIP会员1个月"
@@ -471,22 +482,23 @@ function PaymentScreen() {
 
 ### user_wechat_bindings 表
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | INTEGER | 主键 |
-| user_id | TEXT | 用户 ID (外键) |
-| platform | ENUM | 平台：web/miniapp/mobile |
-| openid | TEXT | 微信 openid |
-| unionid | TEXT | 微信 unionid |
-| nickname | TEXT | 昵称 |
-| avatar | TEXT | 头像 |
-| access_token | TEXT | 访问令牌 |
-| refresh_token | TEXT | 刷新令牌 |
-| expires_at | TIMESTAMP | 过期时间 |
-| created_at | TIMESTAMP | 创建时间 |
-| updated_at | TIMESTAMP | 更新时间 |
+| 字段          | 类型      | 说明                     |
+| ------------- | --------- | ------------------------ |
+| id            | INTEGER   | 主键                     |
+| user_id       | TEXT      | 用户 ID (外键)           |
+| platform      | ENUM      | 平台：web/miniapp/mobile |
+| openid        | TEXT      | 微信 openid              |
+| unionid       | TEXT      | 微信 unionid             |
+| nickname      | TEXT      | 昵称                     |
+| avatar        | TEXT      | 头像                     |
+| access_token  | TEXT      | 访问令牌                 |
+| refresh_token | TEXT      | 刷新令牌                 |
+| expires_at    | TIMESTAMP | 过期时间                 |
+| created_at    | TIMESTAMP | 创建时间                 |
+| updated_at    | TIMESTAMP | 更新时间                 |
 
 **索引**:
+
 - `user_platform_key` (user_id, platform) - 唯一
 - `platform_openid_key` (platform, openid) - 唯一
 - `user_id_idx` (user_id)
@@ -494,29 +506,30 @@ function PaymentScreen() {
 
 ### payment_orders 表
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | INTEGER | 主键 |
-| order_id | TEXT | 订单号（唯一） |
-| user_id | TEXT | 用户 ID (外键) |
-| platform | TEXT | 支付平台：wechat |
-| trade_type | ENUM | 支付类型：JSAPI/NATIVE/APP/MWEB |
-| amount | INTEGER | 金额（单位：分） |
-| currency | TEXT | 货币类型 |
-| product_id | TEXT | 商品 ID |
-| product_name | TEXT | 商品名称 |
-| description | TEXT | 商品描述 |
-| status | ENUM | 订单状态：pending/paid/cancelled/refunded |
-| transaction_id | TEXT | 微信支付订单号 |
-| prepay_id | TEXT | 预支付 ID |
-| payment_time | TIMESTAMP | 支付完成时间 |
-| callback_data | JSONB | 回调数据 |
-| notify_count | INTEGER | 回调通知次数 |
-| client_ip | TEXT | 客户端 IP |
-| created_at | TIMESTAMP | 创建时间 |
-| updated_at | TIMESTAMP | 更新时间 |
+| 字段           | 类型      | 说明                                      |
+| -------------- | --------- | ----------------------------------------- |
+| id             | INTEGER   | 主键                                      |
+| order_id       | TEXT      | 订单号（唯一）                            |
+| user_id        | TEXT      | 用户 ID (外键)                            |
+| platform       | TEXT      | 支付平台：wechat                          |
+| trade_type     | ENUM      | 支付类型：JSAPI/NATIVE/APP/MWEB           |
+| amount         | INTEGER   | 金额（单位：分）                          |
+| currency       | TEXT      | 货币类型                                  |
+| product_id     | TEXT      | 商品 ID                                   |
+| product_name   | TEXT      | 商品名称                                  |
+| description    | TEXT      | 商品描述                                  |
+| status         | ENUM      | 订单状态：pending/paid/cancelled/refunded |
+| transaction_id | TEXT      | 微信支付订单号                            |
+| prepay_id      | TEXT      | 预支付 ID                                 |
+| payment_time   | TIMESTAMP | 支付完成时间                              |
+| callback_data  | JSONB     | 回调数据                                  |
+| notify_count   | INTEGER   | 回调通知次数                              |
+| client_ip      | TEXT      | 客户端 IP                                 |
+| created_at     | TIMESTAMP | 创建时间                                  |
+| updated_at     | TIMESTAMP | 更新时间                                  |
 
 **索引**:
+
 - `order_id` - 唯一
 - `user_id_idx` (user_id)
 - `status_idx` (status)
@@ -525,18 +538,19 @@ function PaymentScreen() {
 
 ### payment_logs 表
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | INTEGER | 主键 |
-| order_id | TEXT | 订单号 |
-| action | TEXT | 操作类型：create/notify/query/refund |
-| request_data | JSONB | 请求数据 |
-| response_data | JSONB | 响应数据 |
-| status | TEXT | 状态：success/failed |
-| error_message | TEXT | 错误信息 |
-| created_at | TIMESTAMP | 创建时间 |
+| 字段          | 类型      | 说明                                 |
+| ------------- | --------- | ------------------------------------ |
+| id            | INTEGER   | 主键                                 |
+| order_id      | TEXT      | 订单号                               |
+| action        | TEXT      | 操作类型：create/notify/query/refund |
+| request_data  | JSONB     | 请求数据                             |
+| response_data | JSONB     | 响应数据                             |
+| status        | TEXT      | 状态：success/failed                 |
+| error_message | TEXT      | 错误信息                             |
+| created_at    | TIMESTAMP | 创建时间                             |
 
 **索引**:
+
 - `order_id_idx` (order_id)
 - `action_idx` (action)
 - `created_at_idx` (created_at DESC)
@@ -546,10 +560,12 @@ function PaymentScreen() {
 ## 类型定义
 
 详细类型定义请参考：
+
 - `packages/shared/src/wechat/types.ts` - 微信相关类型
 - `packages/shared/src/wechat/utils.ts` - 微信工具函数
 
 主要类型包括：
+
 - `WechatLoginParams` - 登录参数
 - `WechatUserInfo` - 用户信息
 - `PaymentCreateParams` - 创建支付参数
@@ -618,6 +634,7 @@ SELECT * FROM payment_logs WHERE order_id = 'WX1234567890' ORDER BY created_at D
 **原因**: 商户密钥配置错误或参数拼接不正确。
 
 **解决方案**:
+
 - 检查 `wechat_mch_key` 配置是否正确（32位）
 - 确保参数按字典序排列
 - 检查是否过滤了空值和 sign 字段
@@ -627,6 +644,7 @@ SELECT * FROM payment_logs WHERE order_id = 'WX1234567890' ORDER BY created_at D
 **原因**: AppID 配置错误或未在微信平台注册。
 
 **解决方案**:
+
 - 检查对应平台的 AppID 配置
 - 确认 AppID 已通过审核
 
@@ -635,6 +653,7 @@ SELECT * FROM payment_logs WHERE order_id = 'WX1234567890' ORDER BY created_at D
 **原因**: 订单号重复使用。
 
 **解决方案**:
+
 - 使用 `generateOrderId()` 生成唯一订单号
 - 检查数据库是否有重复订单号
 
@@ -643,6 +662,7 @@ SELECT * FROM payment_logs WHERE order_id = 'WX1234567890' ORDER BY created_at D
 **原因**: 回调 URL 配置错误、签名验证失败或服务器不可达。
 
 **解决方案**:
+
 - 确保 `wechat_notify_url` 配置正确且使用 HTTPS
 - 检查签名验证逻辑
 - 确保服务器 IP 在白名单中
@@ -653,6 +673,7 @@ SELECT * FROM payment_logs WHERE order_id = 'WX1234567890' ORDER BY created_at D
 **原因**: code 已使用或过期、AppID/AppSecret 配置错误。
 
 **解决方案**:
+
 - 每次登录重新调用 `wx.login()` 获取新 code
 - code 只能使用一次，5分钟内有效
 - 检查小程序 AppID 和 AppSecret 配置
@@ -693,4 +714,3 @@ SELECT * FROM payment_logs WHERE order_id = 'WX1234567890' ORDER BY created_at D
 ---
 
 如有问题，请联系开发团队或查看项目 Issues。
-

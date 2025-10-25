@@ -9,7 +9,9 @@ import { sql, relations } from 'drizzle-orm';
  * 导出配置表
  */
 export const exportConfigs = pgTable('ExportConfig', {
-  id: text('id').primaryKey().$defaultFn(() => `export_config_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`),
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => `export_config_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`),
   name: text('name').notNull(),
   description: text('description'),
   format: text('format').notNull(), // 'csv' | 'excel' | 'json'
@@ -36,7 +38,9 @@ export const exportConfigs = pgTable('ExportConfig', {
  * 导出历史记录表
  */
 export const exportHistory = pgTable('ExportHistory', {
-  id: text('id').primaryKey().$defaultFn(() => `export_history_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`),
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => `export_history_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`),
   configId: text('configId').notNull(),
   fileName: text('fileName').notNull(),
   fileSize: integer('fileSize').notNull(),

@@ -4,12 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
-import type {
-  IFileProcessor,
-  ProcessingOptions,
-  ProcessingResult,
-  ProcessorType
-} from '../types';
+import type { IFileProcessor, ProcessingOptions, ProcessingResult, ProcessorType } from '../types';
 
 // 队列任务相关类型定义
 export interface QueueTask {
@@ -73,7 +68,7 @@ export class ProcessingQueue extends EventEmitter {
       maxRetries: options.maxRetries || 2,
       retryDelay: options.retryDelay || 5000,
       taskTimeout: options.taskTimeout || 300000, // 5分钟
-      autoStart: options.autoStart !== false
+      autoStart: options.autoStart !== false,
     };
 
     logger.info('📋 [ProcessingQueue] 队列管理器已创建');
@@ -98,7 +93,9 @@ export class ProcessingQueue extends EventEmitter {
     inputPath: string,
     outputPath: string,
     options: ProcessingOptions,
-    taskOptions: Partial<Pick<QueueTask, 'priority' | 'maxRetries' | 'onProgress' | 'onComplete' | 'onError'>> = {}
+    taskOptions: Partial<
+      Pick<QueueTask, 'priority' | 'maxRetries' | 'onProgress' | 'onComplete' | 'onError'>
+    > = {}
   ): string {
     const taskId = this.generateTaskId();
 
@@ -113,7 +110,7 @@ export class ProcessingQueue extends EventEmitter {
       maxRetries: taskOptions.maxRetries || this.options.maxRetries,
       onProgress: taskOptions.onProgress,
       onComplete: taskOptions.onComplete,
-      onError: taskOptions.onError
+      onError: taskOptions.onError,
     };
 
     // 获取对应的处理器
@@ -242,14 +239,14 @@ export class ProcessingQueue extends EventEmitter {
    * 获取待处理任务
    */
   getPendingTasks(): QueueTask[] {
-    return Array.from(this.tasks.values()).filter(task => task.status === 'pending');
+    return Array.from(this.tasks.values()).filter((task) => task.status === 'pending');
   }
 
   /**
    * 获取正在运行的任务
    */
   getRunningTasks(): QueueTask[] {
-    return Array.from(this.tasks.values()).filter(task => task.status === 'running');
+    return Array.from(this.tasks.values()).filter((task) => task.status === 'running');
   }
 
   /**
@@ -257,7 +254,7 @@ export class ProcessingQueue extends EventEmitter {
    */
   getStats(): QueueStats {
     const allTasks = Array.from(this.tasks.values());
-    const completedTasks = allTasks.filter(task => task.status === 'completed');
+    const completedTasks = allTasks.filter((task) => task.status === 'completed');
 
     const totalProcessingTime = completedTasks.reduce((sum, task) => {
       if (task.startTime && task.endTime) {
@@ -268,13 +265,14 @@ export class ProcessingQueue extends EventEmitter {
 
     return {
       totalTasks: allTasks.length,
-      pendingTasks: allTasks.filter(task => task.status === 'pending').length,
-      runningTasks: allTasks.filter(task => task.status === 'running').length,
-      completedTasks: allTasks.filter(task => task.status === 'completed').length,
-      failedTasks: allTasks.filter(task => task.status === 'failed').length,
-      cancelledTasks: allTasks.filter(task => task.status === 'cancelled').length,
-      averageProcessingTime: completedTasks.length > 0 ? totalProcessingTime / completedTasks.length : 0,
-      successRate: allTasks.length > 0 ? completedTasks.length / allTasks.length : 0
+      pendingTasks: allTasks.filter((task) => task.status === 'pending').length,
+      runningTasks: allTasks.filter((task) => task.status === 'running').length,
+      completedTasks: allTasks.filter((task) => task.status === 'completed').length,
+      failedTasks: allTasks.filter((task) => task.status === 'failed').length,
+      cancelledTasks: allTasks.filter((task) => task.status === 'cancelled').length,
+      averageProcessingTime:
+        completedTasks.length > 0 ? totalProcessingTime / completedTasks.length : 0,
+      successRate: allTasks.length > 0 ? completedTasks.length / allTasks.length : 0,
     };
   }
 
@@ -336,7 +334,7 @@ export class ProcessingQueue extends EventEmitter {
       urgent: 4,
       high: 3,
       normal: 2,
-      low: 1
+      low: 1,
     };
 
     pendingTasks.sort((a, b) => {
@@ -378,11 +376,7 @@ export class ProcessingQueue extends EventEmitter {
 
     try {
       // 执行处理
-      const result = await task.processor.process(
-        task.inputPath,
-        task.outputPath,
-        task.options
-      );
+      const result = await task.processor.process(task.inputPath, task.outputPath, task.options);
 
       clearTimeout(timeoutId);
 
@@ -391,7 +385,6 @@ export class ProcessingQueue extends EventEmitter {
       } else {
         this.retryOrFailTask(task, result.error || '处理失败');
       }
-
     } catch (error) {
       clearTimeout(timeoutId);
       const errorMessage = error instanceof Error ? error.message : '未知错误';
@@ -447,7 +440,6 @@ export class ProcessingQueue extends EventEmitter {
           this.processNext();
         }
       }, this.options.retryDelay);
-
     } else {
       // 任务失败
       this.failTask(task, error);
@@ -507,38 +499,33 @@ export class ProcessingQueue extends EventEmitter {
     logger.info(`📦 [ProcessingQueue] 批量添加 ${tasks.length} 个任务`);
 
     for (const taskSpec of tasks) {
-      const taskId = this.addTask(
-        taskSpec.inputPath,
-        taskSpec.outputPath,
-        taskSpec.options,
-        {
-          priority: taskSpec.priority,
-          onComplete: (task, result) => {
-            results.set(task.id, result);
-            completedCount++;
+      const taskId = this.addTask(taskSpec.inputPath, taskSpec.outputPath, taskSpec.options, {
+        priority: taskSpec.priority,
+        onComplete: (task, result) => {
+          results.set(task.id, result);
+          completedCount++;
 
-            if (onBatchProgress) {
-              onBatchProgress(completedCount, tasks.length);
-            }
-
-            if (completedCount === tasks.length && onBatchComplete) {
-              onBatchComplete(results);
-            }
-          },
-          onError: (task, error) => {
-            results.set(task.id, { success: false, error });
-            completedCount++;
-
-            if (onBatchProgress) {
-              onBatchProgress(completedCount, tasks.length);
-            }
-
-            if (completedCount === tasks.length && onBatchComplete) {
-              onBatchComplete(results);
-            }
+          if (onBatchProgress) {
+            onBatchProgress(completedCount, tasks.length);
           }
-        }
-      );
+
+          if (completedCount === tasks.length && onBatchComplete) {
+            onBatchComplete(results);
+          }
+        },
+        onError: (task, error) => {
+          results.set(task.id, { success: false, error });
+          completedCount++;
+
+          if (onBatchProgress) {
+            onBatchProgress(completedCount, tasks.length);
+          }
+
+          if (completedCount === tasks.length && onBatchComplete) {
+            onBatchComplete(results);
+          }
+        },
+      });
 
       taskIds.push(taskId);
     }
@@ -571,7 +558,8 @@ export class ProcessingQueue extends EventEmitter {
     }
 
     // 检查平均处理时间
-    if (stats.averageProcessingTime > 60000) { // 超过1分钟
+    if (stats.averageProcessingTime > 60000) {
+      // 超过1分钟
       issues.push(`平均处理时间过长: ${(stats.averageProcessingTime / 1000).toFixed(1)}秒`);
       recommendations.push('优化文件处理逻辑或减少处理复杂度');
     }
@@ -579,7 +567,7 @@ export class ProcessingQueue extends EventEmitter {
     return {
       isHealthy: issues.length === 0,
       issues,
-      recommendations
+      recommendations,
     };
   }
 }

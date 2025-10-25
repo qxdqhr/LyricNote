@@ -194,9 +194,7 @@ export function WechatPayment({
         <CheckCircle className="w-16 h-16 text-green-600 mb-4" />
         <h3 className="text-xl font-semibold text-gray-800 mb-2">支付成功</h3>
         <p className="text-gray-600">订单号：{orderId}</p>
-        <p className="text-lg font-semibold text-gray-800 mt-2">
-          {formatAmount(amount)}
-        </p>
+        <p className="text-lg font-semibold text-gray-800 mt-2">{formatAmount(amount)}</p>
       </div>
     );
   }
@@ -224,9 +222,7 @@ export function WechatPayment({
 
       <div className="bg-blue-50 px-4 py-2 rounded-lg mb-4">
         <p className="text-sm text-gray-600">商品：{productName}</p>
-        <p className="text-lg font-semibold text-gray-800">
-          金额：{formatAmount(amount)}
-        </p>
+        <p className="text-lg font-semibold text-gray-800">金额：{formatAmount(amount)}</p>
       </div>
 
       {codeUrl ? (
@@ -268,9 +264,7 @@ export function WechatPayment({
         </div>
       ) : null}
 
-      <p className="text-sm text-gray-600 text-center mb-2">
-        请使用微信扫描二维码完成支付
-      </p>
+      <p className="text-sm text-gray-600 text-center mb-2">请使用微信扫描二维码完成支付</p>
 
       <p className="text-xs text-gray-500 mb-4">订单号：{orderId}</p>
 
@@ -283,4 +277,3 @@ export function WechatPayment({
     </div>
   );
 }
-

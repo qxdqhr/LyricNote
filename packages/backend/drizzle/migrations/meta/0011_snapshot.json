@@ -118,12 +118,8 @@
           "name": "Account_userId_fkey",
           "tableFrom": "Account",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1107,12 +1103,8 @@
           "name": "file_access_logs_file_id_file_metadata_id_fk",
           "tableFrom": "file_access_logs",
           "tableTo": "file_metadata",
-          "columnsFrom": [
-            "file_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["file_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1120,12 +1112,8 @@
           "name": "file_access_logs_share_id_file_shares_id_fk",
           "tableFrom": "file_access_logs",
           "tableTo": "file_shares",
-          "columnsFrom": [
-            "share_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["share_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1701,12 +1689,8 @@
           "name": "file_metadata_storage_provider_id_file_storage_providers_id_fk",
           "tableFrom": "file_metadata",
           "tableTo": "file_storage_providers",
-          "columnsFrom": [
-            "storage_provider_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["storage_provider_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1714,12 +1698,8 @@
           "name": "file_metadata_folder_id_file_folders_id_fk",
           "tableFrom": "file_metadata",
           "tableTo": "file_folders",
-          "columnsFrom": [
-            "folder_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["folder_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1931,12 +1911,8 @@
           "name": "file_processing_records_file_id_file_metadata_id_fk",
           "tableFrom": "file_processing_records",
           "tableTo": "file_metadata",
-          "columnsFrom": [
-            "file_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["file_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2123,9 +2099,7 @@
         "file_shares_share_code_unique": {
           "name": "file_shares_share_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "share_code"
-          ]
+          "columns": ["share_code"]
         }
       },
       "policies": {},
@@ -2261,9 +2235,7 @@
         "file_storage_providers_name_unique": {
           "name": "file_storage_providers_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -2442,12 +2414,8 @@
           "name": "file_thumbnails_file_id_file_metadata_id_fk",
           "tableFrom": "file_thumbnails",
           "tableTo": "file_metadata",
-          "columnsFrom": [
-            "file_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["file_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2590,12 +2558,8 @@
           "name": "file_versions_file_id_file_metadata_id_fk",
           "tableFrom": "file_versions",
           "tableTo": "file_metadata",
-          "columnsFrom": [
-            "file_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["file_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2684,12 +2648,8 @@
           "name": "Session_userId_fkey",
           "tableFrom": "Session",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -2975,11 +2935,7 @@
     "public.UserRole": {
       "name": "UserRole",
       "schema": "public",
-      "values": [
-        "USER",
-        "ADMIN",
-        "SUPER_ADMIN"
-      ]
+      "values": ["USER", "ADMIN", "SUPER_ADMIN"]
     }
   },
   "schemas": {},

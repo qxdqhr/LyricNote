@@ -49,13 +49,7 @@ export const VIDEO_MIME_TYPES = [
 ];
 
 /** 音频MIME类型 */
-export const AUDIO_MIME_TYPES = [
-  'audio/mpeg',
-  'audio/mp3',
-  'audio/wav',
-  'audio/ogg',
-  'audio/aac',
-];
+export const AUDIO_MIME_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/aac'];
 
 /** 文档MIME类型 */
 export const DOCUMENT_MIME_TYPES = [
@@ -89,7 +83,16 @@ export const VIDEO_EXTENSIONS = ['.mp4', '.mpeg', '.mov', '.avi', '.webm'];
 export const AUDIO_EXTENSIONS = ['.mp3', '.wav', '.ogg', '.aac'];
 
 /** 文档扩展名 */
-export const DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt'];
+export const DOCUMENT_EXTENSIONS = [
+  '.pdf',
+  '.doc',
+  '.docx',
+  '.xls',
+  '.xlsx',
+  '.ppt',
+  '.pptx',
+  '.txt',
+];
 
 // ============= API端点 =============
 
@@ -157,4 +160,3 @@ export const DEFAULT_UPLOAD_TIMEOUT = 300000;
 
 /** 默认分片上传大小(字节) - 5MB */
 export const DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024;
-

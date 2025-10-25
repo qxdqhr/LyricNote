@@ -12,7 +12,7 @@ import type {
   ProcessorType,
   ProcessingOptions,
   ImageProcessingOptions,
-  ProcessingResult
+  ProcessingResult,
 } from '../types';
 
 // 图片处理相关类型定义
@@ -60,7 +60,6 @@ export class ImageProcessor implements IFileProcessor {
 
       this.isInitialized = true;
       logger.info('✅ [ImageProcessor] 图片处理器初始化完成');
-
     } catch (error) {
       console.error('❌ [ImageProcessor] 图片处理器初始化失败:', error);
       throw error;
@@ -98,7 +97,9 @@ export class ImageProcessor implements IFileProcessor {
 
       // 获取图片元数据
       const metadata = await this.getImageMetadata(inputPath);
-      logger.info(`📊 [ImageProcessor] 图片信息: ${metadata.width}x${metadata.height}, 格式: ${metadata.format}`);
+      logger.info(
+        `📊 [ImageProcessor] 图片信息: ${metadata.width}x${metadata.height}, 格式: ${metadata.format}`
+      );
 
       // 创建Sharp处理实例
       let sharpInstance = this.sharp(inputPath);
@@ -133,25 +134,25 @@ export class ImageProcessor implements IFileProcessor {
         data: {
           originalSize: (await fs.stat(inputPath)).size,
           processedSize: info.size,
-          compressionRatio: ((await fs.stat(inputPath)).size - info.size) / (await fs.stat(inputPath)).size,
+          compressionRatio:
+            ((await fs.stat(inputPath)).size - info.size) / (await fs.stat(inputPath)).size,
           dimensions: {
             original: { width: metadata.width, height: metadata.height },
-            processed: { width: info.width, height: info.height }
+            processed: { width: info.width, height: info.height },
           },
           format: {
             original: metadata.format,
-            processed: outputFormat
-          }
-        }
+            processed: outputFormat,
+          },
+        },
       };
-
     } catch (error) {
       console.error(`❌ [ImageProcessor] 图片处理失败: ${inputPath}:`, error);
 
       return {
         success: false,
         error: `图片处理失败: ${error instanceof Error ? error.message : '未知错误'}`,
-        processingTime: Date.now() - startTime
+        processingTime: Date.now() - startTime,
       };
     }
   }
@@ -168,7 +169,7 @@ export class ImageProcessor implements IFileProcessor {
       'image/avif',
       'image/gif',
       'image/tiff',
-      'image/bmp'
+      'image/bmp',
     ];
 
     return supportedTypes.includes(mimeType.toLowerCase());
@@ -187,7 +188,7 @@ export class ImageProcessor implements IFileProcessor {
       return {
         dimensions: {
           width: metadata.width,
-          height: metadata.height
+          height: metadata.height,
         },
         format: metadata.format,
         channels: metadata.channels,
@@ -196,9 +197,8 @@ export class ImageProcessor implements IFileProcessor {
         orientation: metadata.orientation,
         fileSize: stats.size,
         aspectRatio: metadata.width / metadata.height,
-        megapixels: (metadata.width * metadata.height) / 1000000
+        megapixels: (metadata.width * metadata.height) / 1000000,
       };
-
     } catch (error) {
       console.error(`❌ [ImageProcessor] 获取图片信息失败: ${filePath}:`, error);
       throw error;
@@ -230,9 +230,8 @@ export class ImageProcessor implements IFileProcessor {
         channels: metadata.channels || 3,
         density: metadata.density || 72,
         hasAlpha: metadata.hasAlpha || false,
-        orientation: metadata.orientation
+        orientation: metadata.orientation,
       };
-
     } catch (error) {
       console.error(`❌ [ImageProcessor] 获取图片元数据失败: ${filePath}:`, error);
       throw new Error(`无法读取图片元数据: ${error instanceof Error ? error.message : '未知错误'}`);
@@ -246,18 +245,19 @@ export class ImageProcessor implements IFileProcessor {
     sharpInstance: any,
     options: ImageProcessingOptions
   ): Promise<any> {
-
     // 调整尺寸
     if (options.width || options.height) {
       const resizeOptions: any = {
         width: options.width,
         height: options.height,
         fit: 'inside', // 保持纵横比
-        withoutEnlargement: true // 不放大小图片
+        withoutEnlargement: true, // 不放大小图片
       };
 
       sharpInstance = sharpInstance.resize(resizeOptions);
-      logger.info(`🔧 [ImageProcessor] 应用尺寸调整: ${options.width || 'auto'}x${options.height || 'auto'}`);
+      logger.info(
+        `🔧 [ImageProcessor] 应用尺寸调整: ${options.width || 'auto'}x${options.height || 'auto'}`
+      );
     }
 
     // 旋转和翻转（基于EXIF方向信息）
@@ -291,11 +291,12 @@ export class ImageProcessor implements IFileProcessor {
 
         const textBuffer = Buffer.from(textSvg);
 
-        sharpInstance = sharpInstance.composite([{
-          input: textBuffer,
-          gravity: this.getWatermarkGravity(watermarkOptions.position || 'bottom-right')
-        }]);
-
+        sharpInstance = sharpInstance.composite([
+          {
+            input: textBuffer,
+            gravity: this.getWatermarkGravity(watermarkOptions.position || 'bottom-right'),
+          },
+        ]);
       } else if (watermarkOptions.image && existsSync(watermarkOptions.image)) {
         // 图片水印
         logger.info(`💧 [ImageProcessor] 应用图片水印: ${watermarkOptions.image}`);
@@ -310,14 +311,15 @@ export class ImageProcessor implements IFileProcessor {
           watermarkBuffer = await watermarkSharp.toBuffer();
         }
 
-        sharpInstance = sharpInstance.composite([{
-          input: watermarkBuffer,
-          gravity: this.getWatermarkGravity(watermarkOptions.position || 'bottom-right')
-        }]);
+        sharpInstance = sharpInstance.composite([
+          {
+            input: watermarkBuffer,
+            gravity: this.getWatermarkGravity(watermarkOptions.position || 'bottom-right'),
+          },
+        ]);
       }
 
       return sharpInstance;
-
     } catch (error) {
       console.warn(`⚠️ [ImageProcessor] 水印应用失败，跳过水印:`, error);
       return sharpInstance;
@@ -359,7 +361,7 @@ export class ImageProcessor implements IFileProcessor {
       'top-right': 'northeast',
       'bottom-left': 'southwest',
       'bottom-right': 'southeast',
-      'center': 'center'
+      center: 'center',
     };
 
     return gravityMap[position] || 'southeast';
@@ -382,7 +384,7 @@ export class ImageProcessor implements IFileProcessor {
       '.jpeg': 'jpeg',
       '.png': 'png',
       '.webp': 'webp',
-      '.avif': 'avif'
+      '.avif': 'avif',
     };
 
     return formatMap[ext] || 'jpeg';
@@ -391,11 +393,7 @@ export class ImageProcessor implements IFileProcessor {
   /**
    * 应用输出设置
    */
-  private applyOutputSettings(
-    sharpInstance: any,
-    format: string,
-    quality?: number
-  ): any {
+  private applyOutputSettings(sharpInstance: any, format: string, quality?: number): any {
     const defaultQuality = 80;
     const finalQuality = quality || defaultQuality;
 
@@ -404,26 +402,26 @@ export class ImageProcessor implements IFileProcessor {
         return sharpInstance.jpeg({
           quality: finalQuality,
           progressive: true,
-          mozjpeg: true
+          mozjpeg: true,
         });
 
       case 'png':
         return sharpInstance.png({
           quality: finalQuality,
           progressive: true,
-          compressionLevel: 6
+          compressionLevel: 6,
         });
 
       case 'webp':
         return sharpInstance.webp({
           quality: finalQuality,
-          effort: 4
+          effort: 4,
         });
 
       case 'avif':
         return sharpInstance.avif({
           quality: finalQuality,
-          effort: 4
+          effort: 4,
         });
 
       default:
@@ -436,8 +434,8 @@ export class ImageProcessor implements IFileProcessor {
    */
   private shouldGenerateThumbnail(options: ImageProcessingOptions): boolean {
     // 如果明确设置了尺寸且尺寸较小，可能不需要缩略图
-    const isSmallImage = (options.width && options.width <= 300) ||
-                         (options.height && options.height <= 300);
+    const isSmallImage =
+      (options.width && options.width <= 300) || (options.height && options.height <= 300);
 
     return !isSmallImage;
   }
@@ -459,7 +457,7 @@ export class ImageProcessor implements IFileProcessor {
           width: thumbnailSize,
           height: thumbnailSize,
           fit: 'cover',
-          position: 'center'
+          position: 'center',
         })
         .jpeg({ quality: 70 })
         .toFile(thumbnailPath);
@@ -467,7 +465,6 @@ export class ImageProcessor implements IFileProcessor {
       logger.info(`🖼️ [ImageProcessor] 缩略图生成完成: ${thumbnailPath}`);
 
       return thumbnailPath;
-
     } catch (error) {
       console.warn(`⚠️ [ImageProcessor] 缩略图生成失败:`, error);
       throw error;
@@ -499,7 +496,7 @@ export class ImageProcessor implements IFileProcessor {
           height: 1080,
           channels: 3,
           density: 72,
-          hasAlpha: false
+          hasAlpha: false,
         }),
 
         resize: (options: any) => {
@@ -551,14 +548,14 @@ export class ImageProcessor implements IFileProcessor {
             height: 600,
             channels: 3,
             premultiplied: false,
-            size: 1024 * 50 // 50KB
+            size: 1024 * 50, // 50KB
           };
         },
 
         toBuffer: async () => {
           logger.info(`🧪 [MockSharp] 转换为Buffer`);
           return Buffer.from('Mock image buffer');
-        }
+        },
       };
     };
 
@@ -592,17 +589,16 @@ export class ImageProcessor implements IFileProcessor {
         if (onProgress) {
           onProgress(i + 1, inputPaths.length);
         }
-
       } catch (error) {
         console.error(`❌ [ImageProcessor] 批量处理失败: ${inputPath}:`, error);
         results.push({
           success: false,
-          error: `处理失败: ${error instanceof Error ? error.message : '未知错误'}`
+          error: `处理失败: ${error instanceof Error ? error.message : '未知错误'}`,
         });
       }
     }
 
-    const successCount = results.filter(r => r.success).length;
+    const successCount = results.filter((r) => r.success).length;
     logger.info(`✅ [ImageProcessor] 批量处理完成，成功: ${successCount}/${inputPaths.length}`);
 
     return results;

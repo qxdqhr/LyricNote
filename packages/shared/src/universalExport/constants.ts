@@ -102,4 +102,3 @@ export const ERROR_CODES = {
   /** 服务器错误 */
   SERVER_ERROR: 'SERVER_ERROR',
 } as const;
-

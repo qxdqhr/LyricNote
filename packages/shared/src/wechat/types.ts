@@ -316,4 +316,3 @@ export interface WechatPaymentNotifyResponse {
   return_code: 'SUCCESS' | 'FAIL';
   return_msg?: string;
 }
-

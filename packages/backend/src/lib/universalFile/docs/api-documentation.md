@@ -38,11 +38,13 @@
 ```
 
 ### 成功响应
+
 - `success`: 固定为 `true`
 - `data`: 实际数据内容
 - `meta`: 元数据信息（可选）
 
 ### 错误响应
+
 - `success`: 固定为 `false`
 - `error`: 错误详情
   - `code`: 错误代码
@@ -59,25 +61,25 @@
 
 **请求参数**:
 
-| 参数名 | 类型 | 必填 | 默认值 | 说明 |
-|--------|------|------|--------|------|
-| page | number | 否 | 1 | 页码，从1开始 |
-| pageSize | number | 否 | 20 | 每页大小，最大100 |
-| orderBy | string | 否 | uploadTime | 排序字段 |
-| orderDirection | string | 否 | desc | 排序方向：asc/desc |
-| moduleId | string | 否 | - | 模块ID过滤 |
-| businessId | string | 否 | - | 业务ID过滤 |
-| folderId | string | 否 | - | 文件夹ID过滤 |
-| mimeType | string | 否 | - | MIME类型过滤 |
-| search | string | 否 | - | 文件名搜索关键词 |
-| tags | string | 否 | - | 标签过滤，多个用逗号分隔 |
-| sizeMin | number | 否 | - | 最小文件大小（字节） |
-| sizeMax | number | 否 | - | 最大文件大小（字节） |
-| uploadTimeStart | string | 否 | - | 上传开始时间（ISO 8601） |
-| uploadTimeEnd | string | 否 | - | 上传结束时间（ISO 8601） |
-| isDeleted | boolean | 否 | false | 是否查询已删除文件 |
-| isTemporary | boolean | 否 | - | 是否查询临时文件 |
-| uploaderId | string | 否 | - | 上传者ID过滤 |
+| 参数名          | 类型    | 必填 | 默认值     | 说明                     |
+| --------------- | ------- | ---- | ---------- | ------------------------ |
+| page            | number  | 否   | 1          | 页码，从1开始            |
+| pageSize        | number  | 否   | 20         | 每页大小，最大100        |
+| orderBy         | string  | 否   | uploadTime | 排序字段                 |
+| orderDirection  | string  | 否   | desc       | 排序方向：asc/desc       |
+| moduleId        | string  | 否   | -          | 模块ID过滤               |
+| businessId      | string  | 否   | -          | 业务ID过滤               |
+| folderId        | string  | 否   | -          | 文件夹ID过滤             |
+| mimeType        | string  | 否   | -          | MIME类型过滤             |
+| search          | string  | 否   | -          | 文件名搜索关键词         |
+| tags            | string  | 否   | -          | 标签过滤，多个用逗号分隔 |
+| sizeMin         | number  | 否   | -          | 最小文件大小（字节）     |
+| sizeMax         | number  | 否   | -          | 最大文件大小（字节）     |
+| uploadTimeStart | string  | 否   | -          | 上传开始时间（ISO 8601） |
+| uploadTimeEnd   | string  | 否   | -          | 上传结束时间（ISO 8601） |
+| isDeleted       | boolean | 否   | false      | 是否查询已删除文件       |
+| isTemporary     | boolean | 否   | -          | 是否查询临时文件         |
+| uploaderId      | string  | 否   | -          | 上传者ID过滤             |
 
 **响应示例**:
 
@@ -101,7 +103,7 @@
         "moduleId": "gallery",
         "businessId": "business_123",
         "tags": ["tag1", "tag2"],
-        "metadata": {"key": "value"},
+        "metadata": { "key": "value" },
         "isTemporary": false,
         "isDeleted": false,
         "accessCount": 10,
@@ -134,16 +136,16 @@
 
 **请求参数**:
 
-| 参数名 | 类型 | 必填 | 说明 |
-|--------|------|------|------|
-| file | File | 是 | 要上传的文件 |
-| folderId | string | 否 | 目标文件夹ID |
-| moduleId | string | 否 | 模块ID |
-| businessId | string | 否 | 业务ID |
-| tags | string | 否 | 标签JSON数组字符串 |
-| isTemporary | boolean | 否 | 是否为临时文件 |
-| expiresAt | string | 否 | 过期时间（ISO 8601） |
-| metadata | string | 否 | 元数据JSON字符串 |
+| 参数名      | 类型    | 必填 | 说明                 |
+| ----------- | ------- | ---- | -------------------- |
+| file        | File    | 是   | 要上传的文件         |
+| folderId    | string  | 否   | 目标文件夹ID         |
+| moduleId    | string  | 否   | 模块ID               |
+| businessId  | string  | 否   | 业务ID               |
+| tags        | string  | 否   | 标签JSON数组字符串   |
+| isTemporary | boolean | 否   | 是否为临时文件       |
+| expiresAt   | string  | 否   | 过期时间（ISO 8601） |
+| metadata    | string  | 否   | 元数据JSON字符串     |
 
 **响应示例**:
 
@@ -178,7 +180,7 @@
     "originalName": "new_name.jpg",
     "folderId": "new_folder_uuid",
     "tags": ["new_tag"],
-    "metadata": {"key": "new_value"},
+    "metadata": { "key": "new_value" },
     "expiresAt": "2024-12-31T23:59:59.000Z"
   }
 }
@@ -216,10 +218,10 @@
 
 **请求参数**:
 
-| 参数名 | 类型 | 必填 | 说明 |
-|--------|------|------|------|
-| fileIds | string | 是 | 文件ID列表，逗号分隔 |
-| permanent | boolean | 否 | 是否物理删除 |
+| 参数名    | 类型    | 必填 | 说明                 |
+| --------- | ------- | ---- | -------------------- |
+| fileIds   | string  | 是   | 文件ID列表，逗号分隔 |
+| permanent | boolean | 否   | 是否物理删除         |
 
 **响应示例**:
 
@@ -252,12 +254,12 @@
 
 **请求参数**:
 
-| 参数名 | 类型 | 必填 | 说明 |
-|--------|------|------|------|
-| parentId | string | 否 | 父文件夹ID，空表示根目录 |
-| moduleId | string | 否 | 模块ID过滤 |
-| businessId | string | 否 | 业务ID过滤 |
-| includeChildren | boolean | 否 | 是否包含子文件夹 |
+| 参数名          | 类型    | 必填 | 说明                     |
+| --------------- | ------- | ---- | ------------------------ |
+| parentId        | string  | 否   | 父文件夹ID，空表示根目录 |
+| moduleId        | string  | 否   | 模块ID过滤               |
+| businessId      | string  | 否   | 业务ID过滤               |
+| includeChildren | boolean | 否   | 是否包含子文件夹         |
 
 **响应示例**:
 
@@ -356,53 +358,53 @@
 
 **请求参数**:
 
-| 参数名 | 类型 | 必填 | 说明 |
-|--------|------|------|------|
-| folderId | string | 是 | 文件夹ID |
-| recursive | boolean | 否 | 是否递归删除子文件夹和文件 |
+| 参数名    | 类型    | 必填 | 说明                       |
+| --------- | ------- | ---- | -------------------------- |
+| folderId  | string  | 是   | 文件夹ID                   |
+| recursive | boolean | 否   | 是否递归删除子文件夹和文件 |
 
 ## 错误代码
 
 ### 通用错误代码
 
-| 代码 | 说明 | HTTP状态码 |
-|------|------|-----------|
-| UNKNOWN_ERROR | 未知错误 | 500 |
-| VALIDATION_ERROR | 参数验证失败 | 400 |
-| AUTHENTICATION_ERROR | 身份验证失败 | 401 |
-| AUTHORIZATION_ERROR | 权限不足 | 403 |
-| NOT_FOUND | 资源不存在 | 404 |
-| CONFLICT | 资源冲突 | 409 |
-| RATE_LIMIT_EXCEEDED | 请求频率超限 | 429 |
+| 代码                 | 说明         | HTTP状态码 |
+| -------------------- | ------------ | ---------- |
+| UNKNOWN_ERROR        | 未知错误     | 500        |
+| VALIDATION_ERROR     | 参数验证失败 | 400        |
+| AUTHENTICATION_ERROR | 身份验证失败 | 401        |
+| AUTHORIZATION_ERROR  | 权限不足     | 403        |
+| NOT_FOUND            | 资源不存在   | 404        |
+| CONFLICT             | 资源冲突     | 409        |
+| RATE_LIMIT_EXCEEDED  | 请求频率超限 | 429        |
 
 ### 文件相关错误代码
 
-| 代码 | 说明 | HTTP状态码 |
-|------|------|-----------|
-| FILE_NOT_FOUND | 文件不存在 | 404 |
-| FILE_TOO_LARGE | 文件过大 | 413 |
-| FILE_TYPE_NOT_SUPPORTED | 不支持的文件类型 | 415 |
-| FILE_UPLOAD_FAILED | 文件上传失败 | 500 |
-| FILE_PROCESSING_FAILED | 文件处理失败 | 500 |
-| FILE_ALREADY_EXISTS | 文件已存在 | 409 |
-| FILE_CORRUPTED | 文件已损坏 | 422 |
+| 代码                    | 说明             | HTTP状态码 |
+| ----------------------- | ---------------- | ---------- |
+| FILE_NOT_FOUND          | 文件不存在       | 404        |
+| FILE_TOO_LARGE          | 文件过大         | 413        |
+| FILE_TYPE_NOT_SUPPORTED | 不支持的文件类型 | 415        |
+| FILE_UPLOAD_FAILED      | 文件上传失败     | 500        |
+| FILE_PROCESSING_FAILED  | 文件处理失败     | 500        |
+| FILE_ALREADY_EXISTS     | 文件已存在       | 409        |
+| FILE_CORRUPTED          | 文件已损坏       | 422        |
 
 ### 文件夹相关错误代码
 
-| 代码 | 说明 | HTTP状态码 |
-|------|------|-----------|
-| FOLDER_NOT_FOUND | 文件夹不存在 | 404 |
-| FOLDER_NOT_EMPTY | 文件夹不为空 | 409 |
-| FOLDER_NAME_CONFLICT | 文件夹名称冲突 | 409 |
-| FOLDER_DEPTH_EXCEEDED | 文件夹层级过深 | 400 |
+| 代码                  | 说明           | HTTP状态码 |
+| --------------------- | -------------- | ---------- |
+| FOLDER_NOT_FOUND      | 文件夹不存在   | 404        |
+| FOLDER_NOT_EMPTY      | 文件夹不为空   | 409        |
+| FOLDER_NAME_CONFLICT  | 文件夹名称冲突 | 409        |
+| FOLDER_DEPTH_EXCEEDED | 文件夹层级过深 | 400        |
 
 ### 存储相关错误代码
 
-| 代码 | 说明 | HTTP状态码 |
-|------|------|-----------|
-| STORAGE_PROVIDER_ERROR | 存储服务错误 | 502 |
-| STORAGE_QUOTA_EXCEEDED | 存储配额已满 | 507 |
-| STORAGE_UNAVAILABLE | 存储服务不可用 | 503 |
+| 代码                   | 说明           | HTTP状态码 |
+| ---------------------- | -------------- | ---------- |
+| STORAGE_PROVIDER_ERROR | 存储服务错误   | 502        |
+| STORAGE_QUOTA_EXCEEDED | 存储配额已满   | 507        |
+| STORAGE_UNAVAILABLE    | 存储服务不可用 | 503        |
 
 ## 使用示例
 
@@ -417,7 +419,7 @@ async function getFiles(params: {
   folderId?: string;
 }) {
   const searchParams = new URLSearchParams();
-  
+
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined) {
       searchParams.append(key, String(value));
@@ -426,46 +428,49 @@ async function getFiles(params: {
 
   const response = await fetch(`/api/universal-file/files?${searchParams}`);
   const result = await response.json();
-  
+
   if (!result.success) {
     throw new Error(result.error.message);
   }
-  
+
   return result.data;
 }
 
 // 上传文件
-async function uploadFile(file: File, options: {
-  folderId?: string;
-  moduleId?: string;
-  tags?: string[];
-}) {
+async function uploadFile(
+  file: File,
+  options: {
+    folderId?: string;
+    moduleId?: string;
+    tags?: string[];
+  }
+) {
   const formData = new FormData();
   formData.append('file', file);
-  
+
   if (options.folderId) {
     formData.append('folderId', options.folderId);
   }
-  
+
   if (options.moduleId) {
     formData.append('moduleId', options.moduleId);
   }
-  
+
   if (options.tags) {
     formData.append('tags', JSON.stringify(options.tags));
   }
 
   const response = await fetch('/api/universal-file/files', {
     method: 'POST',
-    body: formData
+    body: formData,
   });
-  
+
   const result = await response.json();
-  
+
   if (!result.success) {
     throw new Error(result.error.message);
   }
-  
+
   return result.data;
 }
 
@@ -479,17 +484,17 @@ async function createFolder(data: {
   const response = await fetch('/api/universal-file/folders', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
-  
+
   const result = await response.json();
-  
+
   if (!result.success) {
     throw new Error(result.error.message);
   }
-  
+
   return result.data;
 }
 ```
@@ -512,13 +517,13 @@ export function useFileList(params: {
     total: 0,
     page: 1,
     pageSize: 20,
-    totalPages: 0
+    totalPages: 0,
   });
 
   const fetchFiles = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const data = await getFiles(params);
       setFiles(data.files);
@@ -539,7 +544,7 @@ export function useFileList(params: {
     loading,
     error,
     pagination,
-    refetch: fetchFiles
+    refetch: fetchFiles,
   };
 }
 ```
@@ -577,7 +582,8 @@ export function useFileList(params: {
 ## 更新日志
 
 ### v1.0.0 (2024-01-01)
+
 - 初始版本发布
 - 支持文件的基础CRUD操作
 - 支持文件夹管理
-- 提供完整的错误处理机制 
+- 提供完整的错误处理机制

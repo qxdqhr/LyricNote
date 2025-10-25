@@ -161,13 +161,9 @@ export class WechatPaymentService {
       const xmlData = buildXML(params);
 
       // 发起统一下单请求
-      const response = await axios.post(
-        'https://api.mch.weixin.qq.com/pay/unifiedorder',
-        xmlData,
-        {
-          headers: { 'Content-Type': 'text/xml' },
-        }
-      );
+      const response = await axios.post('https://api.mch.weixin.qq.com/pay/unifiedorder', xmlData, {
+        headers: { 'Content-Type': 'text/xml' },
+      });
 
       // 解析响应
       const result = parseXML(response.data);
@@ -252,13 +248,9 @@ export class WechatPaymentService {
       const xmlData = buildXML(params);
 
       // 发起统一下单请求
-      const response = await axios.post(
-        'https://api.mch.weixin.qq.com/pay/unifiedorder',
-        xmlData,
-        {
-          headers: { 'Content-Type': 'text/xml' },
-        }
-      );
+      const response = await axios.post('https://api.mch.weixin.qq.com/pay/unifiedorder', xmlData, {
+        headers: { 'Content-Type': 'text/xml' },
+      });
 
       // 解析响应
       const result = parseXML(response.data);
@@ -361,13 +353,9 @@ export class WechatPaymentService {
       const xmlData = buildXML(params);
 
       // 发起统一下单请求
-      const response = await axios.post(
-        'https://api.mch.weixin.qq.com/pay/unifiedorder',
-        xmlData,
-        {
-          headers: { 'Content-Type': 'text/xml' },
-        }
-      );
+      const response = await axios.post('https://api.mch.weixin.qq.com/pay/unifiedorder', xmlData, {
+        headers: { 'Content-Type': 'text/xml' },
+      });
 
       // 解析响应
       const result = parseXML(response.data);
@@ -591,13 +579,9 @@ export class WechatPaymentService {
       params.sign = generateWechatSignature(params, mchKey);
       const xmlData = buildXML(params);
 
-      const response = await axios.post(
-        'https://api.mch.weixin.qq.com/pay/orderquery',
-        xmlData,
-        {
-          headers: { 'Content-Type': 'text/xml' },
-        }
-      );
+      const response = await axios.post('https://api.mch.weixin.qq.com/pay/orderquery', xmlData, {
+        headers: { 'Content-Type': 'text/xml' },
+      });
 
       const result = parseXML(response.data);
 
@@ -699,10 +683,7 @@ export class WechatPaymentService {
           .select()
           .from(paymentOrders)
           .where(
-            and(
-              eq(paymentOrders.userId, params.userId),
-              eq(paymentOrders.status, params.status)
-            )
+            and(eq(paymentOrders.userId, params.userId), eq(paymentOrders.status, params.status))
           )
           .orderBy(desc(paymentOrders.createdAt))
           .limit(pageSize)
@@ -741,7 +722,9 @@ export class WechatPaymentService {
   /**
    * 根据订单号查询订单
    */
-  private async getOrderByOrderId(orderId: string): Promise<typeof paymentOrders.$inferSelect | undefined> {
+  private async getOrderByOrderId(
+    orderId: string
+  ): Promise<typeof paymentOrders.$inferSelect | undefined> {
     const orders = await db
       .select()
       .from(paymentOrders)
@@ -790,4 +773,3 @@ export class WechatPaymentService {
     }
   }
 }
-

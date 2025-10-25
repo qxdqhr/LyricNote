@@ -9,10 +9,7 @@ import { logger as baseLogger } from '@/lib/logger';
 
 const logger = baseLogger.createChild('WechatPaymentQueryAPI');
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { orderId: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { orderId: string } }) {
   try {
     const { orderId } = params;
 
@@ -51,4 +48,3 @@ export async function GET(
     );
   }
 }
-

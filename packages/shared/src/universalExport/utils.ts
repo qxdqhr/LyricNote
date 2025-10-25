@@ -16,11 +16,12 @@ export function generateExportFileName(template: string, format: ExportFormat): 
   const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
   const extension = EXPORT_FORMAT_EXTENSIONS[format];
 
-  return template
-    .replace('{date}', dateStr)
-    .replace('{time}', timeStr)
-    .replace('{timestamp}', now.getTime().toString())
-    + `.${extension}`;
+  return (
+    template
+      .replace('{date}', dateStr)
+      .replace('{time}', timeStr)
+      .replace('{timestamp}', now.getTime().toString()) + `.${extension}`
+  );
 }
 
 /**
@@ -45,9 +46,7 @@ export function validateFileName(fileName: string): boolean {
  * 清理文件名，移除非法字符
  */
 export function sanitizeFileName(fileName: string): string {
-  return fileName
-    .replace(/[<>:"|?*\/\\]/g, '_')
-    .substring(0, 255);
+  return fileName.replace(/[<>:"|?*\/\\]/g, '_').substring(0, 255);
 }
 
 // ============= CSV处理 =============
@@ -247,17 +246,13 @@ export function formatDuration(milliseconds: number): string {
   const remainingSeconds = seconds % 60;
 
   if (minutes < 60) {
-    return remainingSeconds > 0
-      ? `${minutes}分${remainingSeconds}秒`
-      : `${minutes}分钟`;
+    return remainingSeconds > 0 ? `${minutes}分${remainingSeconds}秒` : `${minutes}分钟`;
   }
 
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
 
-  return remainingMinutes > 0
-    ? `${hours}小时${remainingMinutes}分钟`
-    : `${hours}小时`;
+  return remainingMinutes > 0 ? `${hours}小时${remainingMinutes}分钟` : `${hours}小时`;
 }
 
 /**
@@ -342,4 +337,3 @@ export function formatErrorMessage(error: unknown): string {
 
   return '未知错误';
 }
-

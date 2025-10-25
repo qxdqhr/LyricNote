@@ -1,6 +1,6 @@
 /**
  * 通用CSV导出服务类型定义
- * 
+ *
  * 定义了CSV导出功能的核心接口和类型
  */
 
@@ -158,7 +158,18 @@ export interface ExportFilter {
   /** 字段名 */
   field: string;
   /** 操作符 */
-  operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'startsWith' | 'endsWith' | 'in' | 'notIn';
+  operator:
+    | 'eq'
+    | 'ne'
+    | 'gt'
+    | 'gte'
+    | 'lt'
+    | 'lte'
+    | 'contains'
+    | 'startsWith'
+    | 'endsWith'
+    | 'in'
+    | 'notIn';
   /** 值 */
   value: any;
 }
@@ -304,7 +315,7 @@ export class ExportFileError extends ExportServiceError {
 // ============= 事件类型定义 =============
 
 /** 导出事件类型 */
-export type ExportEventType = 
+export type ExportEventType =
   | 'export:start'
   | 'export:progress'
   | 'export:complete'
@@ -342,4 +353,4 @@ export type DataTransformer<T = any, R = any> = (data: T[]) => R[];
 export type Validator<T = any> = (data: T) => boolean | string;
 
 /** 格式化函数 */
-export type Formatter<T = any> = (value: T) => string; 
+export type Formatter<T = any> = (value: T) => string;

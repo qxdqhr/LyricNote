@@ -150,7 +150,7 @@ function HomepageConfig() {
     },
 
     moveItemUp: async (id: number) => {
-      const index = sections.findIndex(s => s.id === id);
+      const index = sections.findIndex((s) => s.id === id);
       if (index <= 0) return;
 
       const newSections = [...sections];
@@ -161,7 +161,7 @@ function HomepageConfig() {
     },
 
     moveItemDown: async (id: number) => {
-      const index = sections.findIndex(s => s.id === id);
+      const index = sections.findIndex((s) => s.id === id);
       if (index >= sections.length - 1 || index === -1) return;
 
       const newSections = [...sections];
@@ -230,7 +230,11 @@ function HomepageConfig() {
       <div className="flex items-center gap-4 w-full">
         <div className="w-24 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
           {item.backgroundImage ? (
-            <img src={item.backgroundImage} alt={item.title} className="w-full h-full object-cover" />
+            <img
+              src={item.backgroundImage}
+              alt={item.title}
+              className="w-full h-full object-cover"
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
               <ImageIcon className="w-8 h-8 text-white" />
@@ -242,10 +246,20 @@ function HomepageConfig() {
           <p className="text-sm text-gray-500 truncate">{item.description}</p>
         </div>
         <div className="flex gap-2 flex-shrink-0">
-          <Button variant="ghost" size="sm" onClick={() => handleEdit(item)} className="h-8 w-8 p-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEdit(item)}
+            className="h-8 w-8 p-0"
+          >
             <Edit2 className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)} className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDelete(item.id)}
+            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+          >
             <Trash2 className="w-4 h-4" />
           </Button>
         </div>
@@ -282,7 +296,11 @@ function HomepageConfig() {
         <CardContent>
           <Alert className="mb-6">
             <AlertDescription>
-              💡 调整配置顺序后，访问<a href="/" target="_blank" className="text-blue-600 hover:underline mx-1">首页</a>即可看到效果。首页支持纵向滚动浏览。
+              💡 调整配置顺序后，访问
+              <a href="/" target="_blank" className="text-blue-600 hover:underline mx-1">
+                首页
+              </a>
+              即可看到效果。首页支持纵向滚动浏览。
             </AlertDescription>
           </Alert>
 
@@ -374,7 +392,7 @@ function HomepageEditorModal({
       const result = await response.json();
 
       if (result.success) {
-        setFormData(prev => ({ ...prev, backgroundImage: result.data.url }));
+        setFormData((prev) => ({ ...prev, backgroundImage: result.data.url }));
         setUploadProgress(100);
       } else {
         throw new Error(result.error || '上传失败');
@@ -430,9 +448,7 @@ function HomepageEditorModal({
         <CardContent className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                标题 *
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">标题 *</label>
               <input
                 type="text"
                 value={formData.title}
@@ -444,9 +460,7 @@ function HomepageEditorModal({
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                描述 *
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">描述 *</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -458,13 +472,15 @@ function HomepageEditorModal({
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                背景图片
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">背景图片</label>
               <div className="space-y-4">
                 {formData.backgroundImage && (
                   <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100">
-                    <img src={formData.backgroundImage} alt="预览" className="w-full h-full object-cover" />
+                    <img
+                      src={formData.backgroundImage}
+                      alt="预览"
+                      className="w-full h-full object-cover"
+                    />
                     <Button
                       type="button"
                       onClick={() => setFormData({ ...formData, backgroundImage: null })}
@@ -514,10 +530,20 @@ function HomepageEditorModal({
             </div>
 
             <div className="flex gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={onClose} disabled={saving} className="flex-1">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={saving}
+                className="flex-1"
+              >
                 取消
               </Button>
-              <Button type="submit" disabled={saving || uploading} className="flex-1 bg-blue-600 hover:bg-blue-700">
+              <Button
+                type="submit"
+                disabled={saving || uploading}
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+              >
                 {saving ? (
                   <>
                     <RefreshCw className="w-5 h-5 mr-2 animate-spin" />

@@ -48,11 +48,7 @@ export class QueryOptimizer {
   /**
    * 监控查询执行
    */
-  async monitorQuery<T>(
-    queryFn: () => Promise<T>,
-    sql: string,
-    params?: any[]
-  ): Promise<T> {
+  async monitorQuery<T>(queryFn: () => Promise<T>, sql: string, params?: any[]): Promise<T> {
     const startTime = Date.now();
     let result: T;
     let error: Error | null = null;
@@ -74,7 +70,7 @@ export class QueryOptimizer {
         params,
         timestamp: Date.now(),
         type: queryType,
-        isSlow
+        isSlow,
       };
 
       this.addQueryToHistory(queryPerf);
@@ -87,7 +83,7 @@ export class QueryOptimizer {
         console.warn(`慢查询检测 (${duration}ms):`, {
           sql: sql.substring(0, 100) + (sql.length > 100 ? '...' : ''),
           duration,
-          params: params?.slice(0, 3) // 只记录前3个参数
+          params: params?.slice(0, 3), // 只记录前3个参数
         });
       }
     }
@@ -100,12 +96,12 @@ export class QueryOptimizer {
    */
   private getQueryType(sql: string): QueryPerformance['type'] {
     const upperSql = sql.trim().toUpperCase();
-    
+
     if (upperSql.startsWith('SELECT')) return 'SELECT';
     if (upperSql.startsWith('INSERT')) return 'INSERT';
     if (upperSql.startsWith('UPDATE')) return 'UPDATE';
     if (upperSql.startsWith('DELETE')) return 'DELETE';
-    
+
     return 'UNKNOWN';
   }
 
@@ -127,25 +123,25 @@ export class QueryOptimizer {
   getQueryStats() {
     const now = Date.now();
     const oneHourAgo = now - 3600000; // 1小时前
-    const recentQueries = this.queryHistory.filter(q => q.timestamp > oneHourAgo);
+    const recentQueries = this.queryHistory.filter((q) => q.timestamp > oneHourAgo);
 
     const stats = {
       total: recentQueries.length,
       byType: {} as Record<string, number>,
-      slowQueries: recentQueries.filter(q => q.isSlow).length,
+      slowQueries: recentQueries.filter((q) => q.isSlow).length,
       averageDuration: 0,
       maxDuration: 0,
-      minDuration: Infinity
+      minDuration: Infinity,
     };
 
     if (recentQueries.length > 0) {
       // 按类型统计
-      recentQueries.forEach(q => {
+      recentQueries.forEach((q) => {
         stats.byType[q.type] = (stats.byType[q.type] || 0) + 1;
       });
 
       // 计算时间统计
-      const durations = recentQueries.map(q => q.duration);
+      const durations = recentQueries.map((q) => q.duration);
       stats.averageDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
       stats.maxDuration = Math.max(...durations);
       stats.minDuration = Math.min(...durations);
@@ -159,7 +155,7 @@ export class QueryOptimizer {
    */
   getSlowQueries(limit: number = 20): QueryPerformance[] {
     return this.queryHistory
-      .filter(q => q.isSlow)
+      .filter((q) => q.isSlow)
       .sort((a, b) => b.duration - a.duration)
       .slice(0, limit);
   }
@@ -176,7 +172,7 @@ export class QueryOptimizer {
     const queryMap = new Map<string, QueryPerformance[]>();
 
     // 按SQL分组
-    this.queryHistory.forEach(q => {
+    this.queryHistory.forEach((q) => {
       const normalizedSql = this.normalizeSql(q.sql);
       if (!queryMap.has(normalizedSql)) {
         queryMap.set(normalizedSql, []);
@@ -191,14 +187,12 @@ export class QueryOptimizer {
         sql,
         count: queries.length,
         averageDuration: totalDuration / queries.length,
-        totalDuration
+        totalDuration,
       };
     });
 
     // 按总执行时间排序
-    return result
-      .sort((a, b) => b.totalDuration - a.totalDuration)
-      .slice(0, limit);
+    return result.sort((a, b) => b.totalDuration - a.totalDuration).slice(0, limit);
   }
 
   /**
@@ -220,53 +214,56 @@ export class QueryOptimizer {
     const slowQueries = this.getSlowQueries(10);
 
     // 分析频繁查询
-    frequentQueries.forEach(fq => {
-      if (fq.count > 50) { // 执行次数过多
+    frequentQueries.forEach((fq) => {
+      if (fq.count > 50) {
+        // 执行次数过多
         suggestions.push({
           originalQuery: fq.sql,
           issue: `查询执行频率过高 (${fq.count}次)`,
           suggestion: '考虑添加缓存或合并查询',
-          severity: fq.count > 100 ? 'high' : 'medium'
+          severity: fq.count > 100 ? 'high' : 'medium',
         });
       }
 
-      if (fq.averageDuration > 500) { // 平均耗时过长
+      if (fq.averageDuration > 500) {
+        // 平均耗时过长
         suggestions.push({
           originalQuery: fq.sql,
           issue: `平均查询时间过长 (${fq.averageDuration.toFixed(2)}ms)`,
           suggestion: '检查索引优化或查询逻辑',
-          severity: fq.averageDuration > 1000 ? 'high' : 'medium'
+          severity: fq.averageDuration > 1000 ? 'high' : 'medium',
         });
       }
     });
 
     // 分析慢查询
-    slowQueries.forEach(sq => {
+    slowQueries.forEach((sq) => {
       suggestions.push({
         originalQuery: sq.sql,
         issue: `慢查询检测 (${sq.duration}ms)`,
         suggestion: '优化SQL语句，添加合适的索引',
-        severity: sq.duration > 3000 ? 'high' : 'medium'
+        severity: sq.duration > 3000 ? 'high' : 'medium',
       });
     });
 
     // 查找N+1查询问题
-    const selectQueries = this.queryHistory.filter(q => q.type === 'SELECT');
+    const selectQueries = this.queryHistory.filter((q) => q.type === 'SELECT');
     const recentSelects = selectQueries.slice(-100); // 检查最近100次SELECT查询
-    
+
     const patternMap = new Map<string, number>();
-    recentSelects.forEach(q => {
+    recentSelects.forEach((q) => {
       const pattern = this.extractQueryPattern(q.sql);
       patternMap.set(pattern, (patternMap.get(pattern) || 0) + 1);
     });
 
     patternMap.forEach((count, pattern) => {
-      if (count > 20) { // 相同模式查询过多
+      if (count > 20) {
+        // 相同模式查询过多
         suggestions.push({
           originalQuery: pattern,
           issue: `可能存在N+1查询问题 (${count}次相似查询)`,
           suggestion: '使用JOIN查询或预加载相关数据',
-          severity: count > 50 ? 'high' : 'medium'
+          severity: count > 50 ? 'high' : 'medium',
         });
       }
     });
@@ -301,16 +298,16 @@ export class QueryOptimizer {
         slowQueries: stats.slowQueries,
         averageDuration: stats.averageDuration,
         maxDuration: stats.maxDuration,
-        queryTypes: stats.byType
+        queryTypes: stats.byType,
       },
-      topSlowQueries: slowQueries.map(q => ({
+      topSlowQueries: slowQueries.map((q) => ({
         sql: q.sql.substring(0, 100) + (q.sql.length > 100 ? '...' : ''),
         duration: q.duration,
-        timestamp: q.timestamp
+        timestamp: q.timestamp,
       })),
       mostFrequentQueries: frequentQueries,
       optimizationSuggestions: suggestions.slice(0, 10), // 最多显示10个建议
-      healthScore: this.calculateHealthScore()
+      healthScore: this.calculateHealthScore(),
     };
   }
 
@@ -345,7 +342,7 @@ export class QueryOptimizer {
    */
   cleanup(): void {
     const oneWeekAgo = Date.now() - 7 * 24 * 3600000; // 一周前
-    this.queryHistory = this.queryHistory.filter(q => q.timestamp > oneWeekAgo);
+    this.queryHistory = this.queryHistory.filter((q) => q.timestamp > oneWeekAgo);
   }
 
   /**
@@ -370,14 +367,10 @@ export function monitorQuery(sql?: string) {
 
     descriptor.value = async function (...args: any[]) {
       const queryName = sql || `${target.constructor.name}.${propertyName}`;
-      
-      return queryOptimizer.monitorQuery(
-        () => method.apply(this, args),
-        queryName,
-        args
-      );
+
+      return queryOptimizer.monitorQuery(() => method.apply(this, args), queryName, args);
     };
 
     return descriptor;
   };
-} 
+}

@@ -40,11 +40,11 @@ export function parseFileSize(sizeStr: string): number {
   const unit = match[2].toUpperCase();
 
   const units: Record<string, number> = {
-    'B': 1,
-    'KB': 1024,
-    'MB': 1024 * 1024,
-    'GB': 1024 * 1024 * 1024,
-    'TB': 1024 * 1024 * 1024 * 1024,
+    B: 1,
+    KB: 1024,
+    MB: 1024 * 1024,
+    GB: 1024 * 1024 * 1024,
+    TB: 1024 * 1024 * 1024 * 1024,
   };
 
   return value * (units[unit] || 1);
@@ -99,10 +99,12 @@ export function isMimeTypeSupported(mimeType: string, allowedTypes?: string[]): 
     return allowedTypes.includes(mimeType);
   }
 
-  return IMAGE_MIME_TYPES.includes(mimeType) ||
-         VIDEO_MIME_TYPES.includes(mimeType) ||
-         AUDIO_MIME_TYPES.includes(mimeType) ||
-         DOCUMENT_MIME_TYPES.includes(mimeType);
+  return (
+    IMAGE_MIME_TYPES.includes(mimeType) ||
+    VIDEO_MIME_TYPES.includes(mimeType) ||
+    AUDIO_MIME_TYPES.includes(mimeType) ||
+    DOCUMENT_MIME_TYPES.includes(mimeType)
+  );
 }
 
 /**
@@ -136,7 +138,9 @@ export function isDocumentFile(mimeType: string): boolean {
 /**
  * 获取文件类型类别
  */
-export function getFileCategory(mimeType: string): 'image' | 'video' | 'audio' | 'document' | 'other' {
+export function getFileCategory(
+  mimeType: string
+): 'image' | 'video' | 'audio' | 'document' | 'other' {
   if (isImageFile(mimeType)) return 'image';
   if (isVideoFile(mimeType)) return 'video';
   if (isAudioFile(mimeType)) return 'audio';
@@ -340,7 +344,7 @@ export function buildQueryString(params: Record<string, any>): string {
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       if (Array.isArray(value)) {
-        value.forEach(v => searchParams.append(key, String(v)));
+        value.forEach((v) => searchParams.append(key, String(v)));
       } else {
         searchParams.append(key, String(value));
       }
@@ -494,4 +498,3 @@ export function readFileAsText(file: File, encoding: string = 'UTF-8'): Promise<
     reader.readAsText(file, encoding);
   });
 }
-

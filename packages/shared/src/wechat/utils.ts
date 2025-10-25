@@ -257,21 +257,21 @@ export function isValidOpenid(openid: string): boolean {
  * 微信错误码映射
  */
 export const WECHAT_ERROR_MESSAGES: Record<string, string> = {
-  'NOAUTH': '商户无此接口权限',
-  'NOTENOUGH': '余额不足',
-  'ORDERPAID': '商户订单已支付',
-  'ORDERCLOSED': '订单已关闭',
-  'SYSTEMERROR': '系统错误',
-  'APPID_NOT_EXIST': 'APPID不存在',
-  'MCHID_NOT_EXIST': '商户号不存在',
-  'APPID_MCHID_NOT_MATCH': 'appid和mch_id不匹配',
-  'LACK_PARAMS': '缺少参数',
-  'OUT_TRADE_NO_USED': '商户订单号重复',
-  'SIGNERROR': '签名错误',
-  'XML_FORMAT_ERROR': 'XML格式错误',
-  'REQUIRE_POST_METHOD': '请使用POST方法',
-  'POST_DATA_EMPTY': 'POST数据为空',
-  'NOT_UTF8': '编码格式错误',
+  NOAUTH: '商户无此接口权限',
+  NOTENOUGH: '余额不足',
+  ORDERPAID: '商户订单已支付',
+  ORDERCLOSED: '订单已关闭',
+  SYSTEMERROR: '系统错误',
+  APPID_NOT_EXIST: 'APPID不存在',
+  MCHID_NOT_EXIST: '商户号不存在',
+  APPID_MCHID_NOT_MATCH: 'appid和mch_id不匹配',
+  LACK_PARAMS: '缺少参数',
+  OUT_TRADE_NO_USED: '商户订单号重复',
+  SIGNERROR: '签名错误',
+  XML_FORMAT_ERROR: 'XML格式错误',
+  REQUIRE_POST_METHOD: '请使用POST方法',
+  POST_DATA_EMPTY: 'POST数据为空',
+  NOT_UTF8: '编码格式错误',
 };
 
 /**
@@ -327,4 +327,3 @@ export function parseUrlParams(url: string): Record<string, string> {
 
   return params;
 }
-

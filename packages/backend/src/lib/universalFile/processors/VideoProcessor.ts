@@ -12,7 +12,7 @@ import type {
   ProcessorType,
   ProcessingOptions,
   VideoProcessingOptions,
-  ProcessingResult
+  ProcessingResult,
 } from '../types';
 
 // 视频处理相关类型定义
@@ -57,7 +57,6 @@ export class VideoProcessor implements IFileProcessor {
 
       this.isInitialized = true;
       logger.info('✅ [VideoProcessor] 视频处理器初始化完成');
-
     } catch (error) {
       console.error('❌ [VideoProcessor] 视频处理器初始化失败:', error);
       throw error;
@@ -95,7 +94,9 @@ export class VideoProcessor implements IFileProcessor {
 
       // 获取视频元数据
       const metadata = await this.getVideoMetadata(inputPath);
-      logger.info(`📊 [VideoProcessor] 视频信息: ${metadata.width}x${metadata.height}, ${this.formatDuration(metadata.duration)}, ${metadata.fps}fps`);
+      logger.info(
+        `📊 [VideoProcessor] 视频信息: ${metadata.width}x${metadata.height}, ${this.formatDuration(metadata.duration)}, ${metadata.fps}fps`
+      );
 
       // 确定输出格式
       const outputFormat = this.determineOutputFormat(outputPath, videoOptions.format);
@@ -134,20 +135,19 @@ export class VideoProcessor implements IFileProcessor {
           processedFormat: outputFormat,
           dimensions: {
             original: { width: metadata.width, height: metadata.height },
-            processed: { width: metadata.width, height: metadata.height } // 处理后可能会变化
+            processed: { width: metadata.width, height: metadata.height }, // 处理后可能会变化
           },
           fps: metadata.fps,
-          bitrate: metadata.bitrate
-        }
+          bitrate: metadata.bitrate,
+        },
       };
-
     } catch (error) {
       console.error(`❌ [VideoProcessor] 视频处理失败: ${inputPath}:`, error);
 
       return {
         success: false,
         error: `视频处理失败: ${error instanceof Error ? error.message : '未知错误'}`,
-        processingTime: Date.now() - startTime
+        processingTime: Date.now() - startTime,
       };
     }
   }
@@ -165,7 +165,7 @@ export class VideoProcessor implements IFileProcessor {
       'video/ogg',
       'video/3gpp', // 3gp
       'video/x-flv', // flv
-      'video/x-matroska' // mkv
+      'video/x-matroska', // mkv
     ];
 
     return supportedTypes.includes(mimeType.toLowerCase());
@@ -185,7 +185,7 @@ export class VideoProcessor implements IFileProcessor {
         durationFormatted: this.formatDuration(metadata.duration),
         dimensions: {
           width: metadata.width,
-          height: metadata.height
+          height: metadata.height,
         },
         resolution: this.getResolutionDescription(metadata.width, metadata.height),
         aspectRatio: metadata.aspectRatio,
@@ -194,9 +194,8 @@ export class VideoProcessor implements IFileProcessor {
         format: metadata.format,
         codec: metadata.codec,
         fileSize: metadata.size,
-        quality: this.getQualityDescription(metadata.width, metadata.height, metadata.bitrate)
+        quality: this.getQualityDescription(metadata.width, metadata.height, metadata.bitrate),
       };
-
     } catch (error) {
       console.error(`❌ [VideoProcessor] 获取视频信息失败: ${filePath}:`, error);
       throw error;
@@ -227,7 +226,9 @@ export class VideoProcessor implements IFileProcessor {
             return;
           }
 
-          const videoStream = metadata.streams?.find((stream: any) => stream.codec_type === 'video');
+          const videoStream = metadata.streams?.find(
+            (stream: any) => stream.codec_type === 'video'
+          );
           if (!videoStream) {
             reject(new Error('文件中未找到视频流'));
             return;
@@ -245,7 +246,7 @@ export class VideoProcessor implements IFileProcessor {
             fps: this.parseFPS(videoStream.r_frame_rate || '0/1'),
             codec: videoStream.codec_name || 'unknown',
             size: parseInt(metadata.format?.size || '0'),
-            aspectRatio: width > 0 && height > 0 ? width / height : 16/9
+            aspectRatio: width > 0 && height > 0 ? width / height : 16 / 9,
           };
 
           resolve(result);
@@ -310,7 +311,6 @@ export class VideoProcessor implements IFileProcessor {
 
         // 开始处理
         command.save(outputPath);
-
       } catch (error) {
         reject(error);
       }
@@ -360,7 +360,7 @@ export class VideoProcessor implements IFileProcessor {
       '.mp4': 'mp4',
       '.avi': 'avi',
       '.mov': 'mov',
-      '.webm': 'webm'
+      '.webm': 'webm',
     };
 
     return formatMap[ext] || 'mp4';
@@ -391,7 +391,6 @@ export class VideoProcessor implements IFileProcessor {
             resolve(thumbnailPath);
           })
           .save(thumbnailPath);
-
       } catch (error) {
         console.warn(`⚠️ [VideoProcessor] 缩略图生成异常:`, error);
         reject(error);
@@ -445,7 +444,7 @@ export class VideoProcessor implements IFileProcessor {
    */
   private getQualityDescription(width: number, height: number, bitrate: number): string {
     const pixels = width * height;
-    const bitratePerPixel = bitrate / pixels * 1000; // 每像素比特率
+    const bitratePerPixel = (bitrate / pixels) * 1000; // 每像素比特率
 
     if (pixels >= 1920 * 1080 && bitratePerPixel >= 0.1) {
       return '高清';
@@ -527,7 +526,7 @@ export class VideoProcessor implements IFileProcessor {
           const outputDir = path.dirname(outputPath);
           await fs.mkdir(outputDir, { recursive: true });
           await fs.writeFile(outputPath, `Mock processed video from ${input}`);
-        }
+        },
       };
     };
 
@@ -537,19 +536,21 @@ export class VideoProcessor implements IFileProcessor {
 
       setTimeout(() => {
         const mockMetadata = {
-          streams: [{
-            codec_type: 'video',
-            codec_name: 'h264',
-            width: '1920',
-            height: '1080',
-            r_frame_rate: '30/1'
-          }],
+          streams: [
+            {
+              codec_type: 'video',
+              codec_name: 'h264',
+              width: '1920',
+              height: '1080',
+              r_frame_rate: '30/1',
+            },
+          ],
           format: {
             format_name: 'mp4',
             duration: '300.0',
             size: '50000000',
-            bit_rate: '1000000'
-          }
+            bit_rate: '1000000',
+          },
         };
 
         callback(null, mockMetadata);
@@ -588,17 +589,16 @@ export class VideoProcessor implements IFileProcessor {
         if (onProgress) {
           onProgress(i + 1, inputPaths.length);
         }
-
       } catch (error) {
         console.error(`❌ [VideoProcessor] 批量处理失败: ${inputPath}:`, error);
         results.push({
           success: false,
-          error: `处理失败: ${error instanceof Error ? error.message : '未知错误'}`
+          error: `处理失败: ${error instanceof Error ? error.message : '未知错误'}`,
         });
       }
     }
 
-    const successCount = results.filter(r => r.success).length;
+    const successCount = results.filter((r) => r.success).length;
     logger.info(`✅ [VideoProcessor] 批量处理完成，成功: ${successCount}/${inputPaths.length}`);
 
     return results;
@@ -648,9 +648,9 @@ export class VideoProcessor implements IFileProcessor {
             try {
               const files = await fs.readdir(outputDir);
               const frameFiles = files
-                .filter(file => file.startsWith('frame_') && file.endsWith(`.${format}`))
+                .filter((file) => file.startsWith('frame_') && file.endsWith(`.${format}`))
                 .sort()
-                .map(file => path.join(outputDir, file));
+                .map((file) => path.join(outputDir, file));
 
               logger.info(`✅ [VideoProcessor] 帧提取完成，共 ${frameFiles.length} 帧`);
               resolve(frameFiles);
@@ -659,7 +659,6 @@ export class VideoProcessor implements IFileProcessor {
             }
           })
           .save(outputPattern);
-
       } catch (error) {
         reject(error);
       }
@@ -682,7 +681,7 @@ export class VideoProcessor implements IFileProcessor {
     const options: VideoProcessingOptions = {
       type: 'video',
       quality: this.getCompressionQuality(compressionLevel),
-      format: 'mp4'
+      format: 'mp4',
     };
 
     return this.process(inputPath, outputPath, options);
@@ -693,10 +692,14 @@ export class VideoProcessor implements IFileProcessor {
    */
   private getCompressionQuality(level: 'low' | 'medium' | 'high'): number {
     switch (level) {
-      case 'low': return 30;
-      case 'medium': return 60;
-      case 'high': return 85;
-      default: return 60;
+      case 'low':
+        return 30;
+      case 'medium':
+        return 60;
+      case 'high':
+        return 85;
+      default:
+        return 60;
     }
   }
 }
