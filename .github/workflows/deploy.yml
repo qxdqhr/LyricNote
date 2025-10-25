@@ -157,22 +157,25 @@ jobs:
           key: ${{ secrets.DEPLOY_SERVER_SSH_KEY }}
           script: |
             NEW_TAG=${{ github.run_number }}
-            
-            # 停止并移除所有使用 3001 端口的容器
+
+            # 设置端口（默认 3000）
+            BACKEND_PORT=${BACKEND_PORT:-3000}
+            echo "📍 目标端口: ${BACKEND_PORT}"
+
+            # 停止并移除所有 lyricnote-backend 容器
             echo "🔄 清理旧容器..."
-            docker ps -a | grep 3001 | awk '{print $1}' | xargs -r docker stop || true
-            docker ps -a | grep 3001 | awk '{print $1}' | xargs -r docker rm -f || true
             docker ps -a | grep lyricnote-backend | awk '{print $1}' | xargs -r docker stop || true
             docker ps -a | grep lyricnote-backend | awk '{print $1}' | xargs -r docker rm -f || true
-            
-            # 检查并清理占用 3001 端口的进程
-            echo "🔍 检查端口占用..."
-            PORT_PID=$(lsof -ti:3001 || true)
+
+            # 检查并清理占用端口的进程
+            echo "🔍 检查端口 ${BACKEND_PORT} 占用情况..."
+            PORT_PID=$(lsof -ti:${BACKEND_PORT} 2>/dev/null || true)
             if [ ! -z "$PORT_PID" ]; then
-              echo "⚠️  发现进程 $PORT_PID 占用端口 3001，正在清理..."
-              kill -9 $PORT_PID || true
+              echo "⚠️  发现进程 $PORT_PID 占用端口 ${BACKEND_PORT}"
+            else
+              echo "✅ 端口 ${BACKEND_PORT} 未被占用"
             fi
-            
+
             # 等待端口完全释放
             echo "⏳ 等待端口释放..."
             sleep 10
@@ -187,15 +190,19 @@ jobs:
 
             # 启动新容器
             echo "🚀 启动新容器..."
+            # 如果环境变量 BACKEND_PORT 不存在，使用默认值 3000（容器内部端口）
+            BACKEND_PORT=${BACKEND_PORT:-3000}
+            echo "📍 使用端口: ${BACKEND_PORT}"
+
             if [ -f ".env.production" ]; then
               echo "📄 使用 .env.production 配置"
-              docker run -d -p 3001:3000 --name lyricnote-backend \
+              docker run -d -p ${BACKEND_PORT}:3000 --name lyricnote-backend \
                 --restart unless-stopped \
                 --env-file .env.production \
                 crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/lyricnote/lyricnote:${NEW_TAG}
             else
               echo "⚠️  未找到 .env.production，使用默认配置"
-              docker run -d -p 3001:3000 --name lyricnote-backend \
+              docker run -d -p ${BACKEND_PORT}:3000 --name lyricnote-backend \
                 --restart unless-stopped \
                 crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/lyricnote/lyricnote:${NEW_TAG}
             fi
@@ -206,7 +213,8 @@ jobs:
 
             if docker ps | grep lyricnote-backend; then
               echo "✅ 容器启动成功！"
-              echo "🌐 应用访问地址: http://qhr062.top:3001"
+              echo "🌐 应用访问地址: http://qhr062.top:${BACKEND_PORT}"
+              echo "📍 容器端口映射: ${BACKEND_PORT}:3000"
               echo "📊 容器状态:"
               docker ps | grep lyricnote-backend
               echo "📝 最新日志:"
