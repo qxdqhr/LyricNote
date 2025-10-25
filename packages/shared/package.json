@@ -19,6 +19,16 @@
       "types": "./dist/analytics/components/index.d.ts",
       "import": "./dist/analytics/components/index.js",
       "default": "./dist/analytics/components/index.js"
+    },
+    "./universalExport": {
+      "types": "./dist/universalExport/index.d.ts",
+      "import": "./dist/universalExport/index.js",
+      "default": "./dist/universalExport/index.js"
+    },
+    "./universalFile": {
+      "types": "./dist/universalFile/index.d.ts",
+      "import": "./dist/universalFile/index.js",
+      "default": "./dist/universalFile/index.js"
     }
   },
   "scripts": {
