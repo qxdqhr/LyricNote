@@ -19,9 +19,8 @@ export * from './logger';
 // 导出埋点系统
 export * from './analytics';
 
-// 导出微信登录和支付
+// 导出微信登录和支付（仅类型，工具函数在backend中实现）
 export * from './wechat/types';
-export * from './wechat/utils';
 
 // 导出平台适配器（显式导出以避免冲突）
 export {
