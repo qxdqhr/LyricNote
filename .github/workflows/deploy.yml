@@ -158,23 +158,33 @@ jobs:
           script: |
             NEW_TAG=${{ github.run_number }}
             
-            # 停止并移除旧容器（强制）
+            # 停止并移除所有使用 3001 端口的容器
             echo "🔄 清理旧容器..."
-            docker stop lyricnote-backend || true
-            docker rm -f lyricnote-backend || true
+            docker ps -a | grep 3001 | awk '{print $1}' | xargs -r docker stop || true
+            docker ps -a | grep 3001 | awk '{print $1}' | xargs -r docker rm -f || true
+            docker ps -a | grep lyricnote-backend | awk '{print $1}' | xargs -r docker stop || true
+            docker ps -a | grep lyricnote-backend | awk '{print $1}' | xargs -r docker rm -f || true
             
-            # 等待端口释放
+            # 检查并清理占用 3001 端口的进程
+            echo "🔍 检查端口占用..."
+            PORT_PID=$(lsof -ti:3001 || true)
+            if [ ! -z "$PORT_PID" ]; then
+              echo "⚠️  发现进程 $PORT_PID 占用端口 3001，正在清理..."
+              kill -9 $PORT_PID || true
+            fi
+            
+            # 等待端口完全释放
             echo "⏳ 等待端口释放..."
-            sleep 5
-            
+            sleep 10
+
             # 拉取新镜像
             echo "📥 拉取新镜像 tag:${NEW_TAG}..."
             docker pull crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/lyricnote/lyricnote:${NEW_TAG}
-            
+
             # 清理旧镜像（保留最新的2个版本）
             echo "🧹 清理旧镜像..."
             docker images | grep lyricnote/lyricnote | awk '{print $3}' | tail -n +3 | xargs -r docker rmi || true
-            
+
             # 启动新容器
             echo "🚀 启动新容器..."
             if [ -f ".env.production" ]; then
@@ -193,7 +203,7 @@ jobs:
             # 健康检查
             echo "🏥 等待容器启动并进行健康检查..."
             sleep 10
-            
+
             if docker ps | grep lyricnote-backend; then
               echo "✅ 容器启动成功！"
               echo "🌐 应用访问地址: http://qhr062.top:3001"
