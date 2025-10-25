@@ -14,6 +14,9 @@ import {
 import { sql } from 'drizzle-orm';
 
 export const userRole = pgEnum('UserRole', ['USER', 'ADMIN', 'SUPER_ADMIN']);
+export const wechatPlatform = pgEnum('WechatPlatform', ['web', 'miniapp', 'mobile']);
+export const paymentStatus = pgEnum('PaymentStatus', ['pending', 'paid', 'cancelled', 'refunded']);
+export const tradeType = pgEnum('TradeType', ['JSAPI', 'NATIVE', 'APP', 'MWEB']);
 
 export const user = pgTable(
   'User',
@@ -341,4 +344,102 @@ export const homepageSections = pgTable('homepage_sections', {
 }, (table) => [
   index('homepage_sections_order_idx').using('btree', table.order.asc().nullsLast().op('int4_ops')),
   index('homepage_sections_is_active_idx').using('btree', table.isActive.asc().nullsLast().op('bool_ops')),
+]);
+
+// ============================================================================
+// 微信登录和支付相关表
+// ============================================================================
+
+/**
+ * 用户微信绑定表
+ * 记录用户在不同平台（网页、小程序、APP）的微信账号绑定信息
+ */
+export const userWechatBindings = pgTable('user_wechat_bindings', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  platform: wechatPlatform().notNull(), // 平台类型：web/miniapp/mobile
+  openid: text().notNull(), // 微信 openid（特定于某个平台的唯一标识）
+  unionid: text(), // 微信 unionid（跨平台的唯一标识，用于识别同一用户）
+  nickname: text(), // 微信昵称
+  avatar: text(), // 微信头像
+  accessToken: text('access_token'), // 访问令牌
+  refreshToken: text('refresh_token'), // 刷新令牌
+  expiresAt: timestamp('expires_at', { precision: 3, mode: 'string' }), // 令牌过期时间
+  createdAt: timestamp('created_at', { precision: 3, mode: 'string' })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp('updated_at', { precision: 3, mode: 'string' })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+}, (table) => [
+  // 同一用户在同一平台只能绑定一个微信账号
+  uniqueIndex('user_wechat_bindings_user_platform_key').using(
+    'btree',
+    table.userId.asc().nullsLast().op('text_ops'),
+    table.platform.asc().nullsLast()
+  ),
+  // openid 在同一平台下唯一
+  uniqueIndex('user_wechat_bindings_platform_openid_key').using(
+    'btree',
+    table.platform.asc().nullsLast(),
+    table.openid.asc().nullsLast().op('text_ops')
+  ),
+  index('user_wechat_bindings_user_id_idx').using('btree', table.userId.asc().nullsLast().op('text_ops')),
+  index('user_wechat_bindings_unionid_idx').using('btree', table.unionid.asc().nullsLast().op('text_ops')),
+]);
+
+/**
+ * 支付订单表
+ * 记录所有支付订单信息，包括微信支付
+ */
+export const paymentOrders = pgTable('payment_orders', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  orderId: text('order_id').notNull().unique(), // 系统订单号（唯一）
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  platform: text().notNull().default('wechat'), // 支付平台：wechat/alipay/stripe
+  tradeType: tradeType('trade_type').notNull(), // 支付类型：JSAPI/NATIVE/APP/MWEB
+  amount: integer().notNull(), // 金额（单位：分）
+  currency: text().notNull().default('CNY'), // 货币类型
+  productId: text('product_id'), // 商品 ID
+  productName: text('product_name').notNull(), // 商品名称
+  description: text(), // 商品描述
+  status: paymentStatus().notNull().default('pending'), // 订单状态
+  transactionId: text('transaction_id'), // 微信支付订单号
+  prepayId: text('prepay_id'), // 预支付 ID
+  paymentTime: timestamp('payment_time', { precision: 3, mode: 'string' }), // 支付完成时间
+  callbackData: jsonb('callback_data'), // 回调数据（JSON 格式）
+  notifyCount: integer('notify_count').default(0).notNull(), // 接收到的回调通知次数
+  clientIp: text('client_ip'), // 客户端 IP
+  createdAt: timestamp('created_at', { precision: 3, mode: 'string' })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp('updated_at', { precision: 3, mode: 'string' })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+}, (table) => [
+  index('payment_orders_user_id_idx').using('btree', table.userId.asc().nullsLast().op('text_ops')),
+  index('payment_orders_status_idx').using('btree', table.status.asc().nullsLast()),
+  index('payment_orders_transaction_id_idx').using('btree', table.transactionId.asc().nullsLast().op('text_ops')),
+  index('payment_orders_created_at_idx').using('btree', table.createdAt.desc().nullsLast()),
+]);
+
+/**
+ * 支付日志表
+ * 记录所有支付相关操作的日志，用于调试和审计
+ */
+export const paymentLogs = pgTable('payment_logs', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  orderId: text('order_id').notNull(), // 关联订单号
+  action: text().notNull(), // 操作类型：create/notify/query/refund
+  requestData: jsonb('request_data'), // 请求数据
+  responseData: jsonb('response_data'), // 响应数据
+  status: text().notNull(), // 状态：success/failed
+  errorMessage: text('error_message'), // 错误信息
+  createdAt: timestamp('created_at', { precision: 3, mode: 'string' })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+}, (table) => [
+  index('payment_logs_order_id_idx').using('btree', table.orderId.asc().nullsLast().op('text_ops')),
+  index('payment_logs_action_idx').using('btree', table.action.asc().nullsLast().op('text_ops')),
+  index('payment_logs_created_at_idx').using('btree', table.createdAt.desc().nullsLast()),
 ]);
