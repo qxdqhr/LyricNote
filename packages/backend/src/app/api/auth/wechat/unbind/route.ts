@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+
 import { WechatAuthService } from '@/lib/wechat/auth-service';
 import { logger as baseLogger } from '@/lib/logger';
 
