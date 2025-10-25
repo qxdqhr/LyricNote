@@ -32,7 +32,6 @@
       "default": "./dist/universalFile/index.js"
     }
   },
-
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
