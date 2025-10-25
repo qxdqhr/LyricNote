@@ -12,6 +12,7 @@
     "ios:dev": "expo run:ios",
     "android:dev": "expo run:android",
     "web": "expo start --web",
+    "prebuild": "cd ../shared && pnpm build",
     "build": "tsc --noEmit",
     "build:app": "expo build",
     "dev:build:ios": "eas build --profile development --platform ios --local",
