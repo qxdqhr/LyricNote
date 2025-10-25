@@ -159,7 +159,7 @@ jobs:
             NEW_TAG=${{ github.run_number }}
 
             # 设置端口（默认 3000）
-            BACKEND_PORT=${BACKEND_PORT:-3000}
+            BACKEND_PORT=${BACKEND_PORT:-3002}
             echo "📍 目标端口: ${BACKEND_PORT}"
 
             # 停止并移除所有 lyricnote-backend 容器
