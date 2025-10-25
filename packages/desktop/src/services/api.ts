@@ -4,7 +4,7 @@
  * (Desktop 基于 Electron，使用与 Web 相同的 localStorage 和 fetch)
  */
 
-import { BaseApiClient, ApiWebStorageAdapter, WebRequestAdapter } from '@lyricnote/shared';
+import { BaseApiClient, ElectronStorageAdapter, WebRequestAdapter } from '@lyricnote/shared';
 
 // API 配置
 const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000/api';
@@ -13,7 +13,7 @@ const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost
  * 创建 Desktop 端 API 客户端实例
  */
 const apiClient = new BaseApiClient(
-  new ApiWebStorageAdapter(),
+  new ElectronStorageAdapter(),
   new WebRequestAdapter(),
   API_BASE_URL
 );
