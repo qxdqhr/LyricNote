@@ -157,29 +157,53 @@ jobs:
           key: ${{ secrets.DEPLOY_SERVER_SSH_KEY }}
           script: |
             NEW_TAG=${{ github.run_number }}
-            docker pull crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/lyricnote/lyricnote:${NEW_TAG}
+            
+            # 停止并移除旧容器（强制）
+            echo "🔄 清理旧容器..."
             docker stop lyricnote-backend || true
-            docker rm lyricnote-backend || true
-            # 确保环境文件存在
+            docker rm -f lyricnote-backend || true
+            
+            # 等待端口释放
+            echo "⏳ 等待端口释放..."
+            sleep 5
+            
+            # 拉取新镜像
+            echo "📥 拉取新镜像 tag:${NEW_TAG}..."
+            docker pull crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/lyricnote/lyricnote:${NEW_TAG}
+            
+            # 清理旧镜像（保留最新的2个版本）
+            echo "🧹 清理旧镜像..."
+            docker images | grep lyricnote/lyricnote | awk '{print $3}' | tail -n +3 | xargs -r docker rmi || true
+            
+            # 启动新容器
+            echo "🚀 启动新容器..."
             if [ -f ".env.production" ]; then
-              echo "找到 .env.production 文件"
+              echo "📄 使用 .env.production 配置"
               docker run -d -p 3001:3000 --name lyricnote-backend \
+                --restart unless-stopped \
                 --env-file .env.production \
                 crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/lyricnote/lyricnote:${NEW_TAG}
             else
-              echo "未找到 .env.production 文件，使用默认配置"
+              echo "⚠️  未找到 .env.production，使用默认配置"
               docker run -d -p 3001:3000 --name lyricnote-backend \
+                --restart unless-stopped \
                 crpi-pnnot5dqi45utyya.cn-beijing.personal.cr.aliyuncs.com/lyricnote/lyricnote:${NEW_TAG}
             fi
 
-            # 等待容器启动并进行健康检查
-            echo "等待容器启动..."
+            # 健康检查
+            echo "🏥 等待容器启动并进行健康检查..."
             sleep 10
+            
             if docker ps | grep lyricnote-backend; then
               echo "✅ 容器启动成功！"
               echo "🌐 应用访问地址: http://qhr062.top:3001"
+              echo "📊 容器状态:"
+              docker ps | grep lyricnote-backend
+              echo "📝 最新日志:"
+              docker logs --tail 20 lyricnote-backend
             else
               echo "❌ 容器启动失败！"
+              echo "📝 完整日志:"
               docker logs lyricnote-backend
               exit 1
             fi
