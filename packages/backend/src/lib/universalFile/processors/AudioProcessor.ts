@@ -32,7 +32,7 @@ interface AudioMetadata {
  */
 export class AudioProcessor implements IFileProcessor {
   readonly type: ProcessorType = 'audio';
-  
+
   private ffmpeg: any = null;
   private isInitialized = false;
 
@@ -40,13 +40,13 @@ export class AudioProcessor implements IFileProcessor {
    * 初始化音频处理器
    */
   async initialize(): Promise<void> {
-    console.log('🎵 [AudioProcessor] 初始化音频处理器...');
+    logger.info('🎵 [AudioProcessor] 初始化音频处理器...');
 
     try {
       // 尝试加载FFmpeg库
       try {
         this.ffmpeg = require('fluent-ffmpeg');
-        console.log('✅ [AudioProcessor] FFmpeg库加载成功');
+        logger.info('✅ [AudioProcessor] FFmpeg库加载成功');
       } catch (error) {
         console.warn('⚠️ [AudioProcessor] FFmpeg库未安装，使用模拟模式');
         // 创建模拟FFmpeg对象
@@ -54,7 +54,7 @@ export class AudioProcessor implements IFileProcessor {
       }
 
       this.isInitialized = true;
-      console.log('✅ [AudioProcessor] 音频处理器初始化完成');
+      logger.info('✅ [AudioProcessor] 音频处理器初始化完成');
 
     } catch (error) {
       console.error('❌ [AudioProcessor] 音频处理器初始化失败:', error);
@@ -79,7 +79,7 @@ export class AudioProcessor implements IFileProcessor {
     const audioOptions = options as AudioProcessingOptions;
     const startTime = Date.now();
 
-    console.log(`🎵 [AudioProcessor] 开始处理音频: ${inputPath}`);
+    logger.info(`🎵 [AudioProcessor] 开始处理音频: ${inputPath}`);
 
     try {
       // 检查输入文件是否存在
@@ -93,11 +93,11 @@ export class AudioProcessor implements IFileProcessor {
 
       // 获取音频元数据
       const metadata = await this.getAudioMetadata(inputPath);
-      console.log(`📊 [AudioProcessor] 音频信息: ${this.formatDuration(metadata.duration)}, ${metadata.bitrate}kbps, ${metadata.sampleRate}Hz`);
+      logger.info(`📊 [AudioProcessor] 音频信息: ${this.formatDuration(metadata.duration)}, ${metadata.bitrate}kbps, ${metadata.sampleRate}Hz`);
 
       // 确定输出格式
       const outputFormat = this.determineOutputFormat(outputPath, audioOptions.format);
-      
+
       // 执行音频处理
       await this.processAudio(inputPath, outputPath, audioOptions, outputFormat);
 
@@ -105,7 +105,7 @@ export class AudioProcessor implements IFileProcessor {
       const processedStats = await fs.stat(outputPath);
       const processingTime = Date.now() - startTime;
 
-      console.log(`✅ [AudioProcessor] 音频处理完成: ${outputPath}, 耗时: ${processingTime}ms`);
+      logger.info(`✅ [AudioProcessor] 音频处理完成: ${outputPath}, 耗时: ${processingTime}ms`);
 
       return {
         success: true,
@@ -128,7 +128,7 @@ export class AudioProcessor implements IFileProcessor {
 
     } catch (error) {
       console.error(`❌ [AudioProcessor] 音频处理失败: ${inputPath}:`, error);
-      
+
       return {
         success: false,
         error: `音频处理失败: ${error instanceof Error ? error.message : '未知错误'}`,
@@ -158,7 +158,7 @@ export class AudioProcessor implements IFileProcessor {
       'audio/webm',
       'audio/opus'
     ];
-    
+
     return supportedTypes.includes(mimeType.toLowerCase());
   }
 
@@ -257,19 +257,19 @@ export class AudioProcessor implements IFileProcessor {
         // 设置比特率
         if (options.bitrate) {
           command = command.audioBitrate(options.bitrate);
-          console.log(`🔧 [AudioProcessor] 设置比特率: ${options.bitrate}kbps`);
+          logger.info(`🔧 [AudioProcessor] 设置比特率: ${options.bitrate}kbps`);
         }
 
         // 设置采样率
         if (options.sampleRate) {
           command = command.audioFrequency(options.sampleRate);
-          console.log(`🔧 [AudioProcessor] 设置采样率: ${options.sampleRate}Hz`);
+          logger.info(`🔧 [AudioProcessor] 设置采样率: ${options.sampleRate}Hz`);
         }
 
         // 设置声道数
         if (options.channels) {
           command = command.audioChannels(options.channels);
-          console.log(`🔧 [AudioProcessor] 设置声道数: ${options.channels}`);
+          logger.info(`🔧 [AudioProcessor] 设置声道数: ${options.channels}`);
         }
 
         // 设置输出格式
@@ -278,7 +278,7 @@ export class AudioProcessor implements IFileProcessor {
         // 添加进度监听
         command.on('progress', (progress: any) => {
           if (progress.percent) {
-            console.log(`🎵 [AudioProcessor] 处理进度: ${Math.round(progress.percent)}%`);
+            logger.info(`🎵 [AudioProcessor] 处理进度: ${Math.round(progress.percent)}%`);
           }
         });
 
@@ -290,7 +290,7 @@ export class AudioProcessor implements IFileProcessor {
 
         // 添加完成监听
         command.on('end', () => {
-          console.log(`✅ [AudioProcessor] FFmpeg处理完成: ${outputPath}`);
+          logger.info(`✅ [AudioProcessor] FFmpeg处理完成: ${outputPath}`);
           resolve();
         });
 
@@ -385,40 +385,40 @@ export class AudioProcessor implements IFileProcessor {
    * 创建模拟FFmpeg对象（开发测试用）
    */
   private createMockFFmpeg(): any {
-    console.log('🧪 [AudioProcessor] 创建模拟FFmpeg处理器');
+    logger.info('🧪 [AudioProcessor] 创建模拟FFmpeg处理器');
 
     const mockFFmpeg = (input: string) => {
-      console.log(`🧪 [MockFFmpeg] 处理音频: ${input}`);
+      logger.info(`🧪 [MockFFmpeg] 处理音频: ${input}`);
 
       return {
         audioBitrate: (bitrate: number) => {
-          console.log(`🧪 [MockFFmpeg] 设置比特率: ${bitrate}kbps`);
+          logger.info(`🧪 [MockFFmpeg] 设置比特率: ${bitrate}kbps`);
           return mockFFmpeg(input);
         },
 
         audioFrequency: (sampleRate: number) => {
-          console.log(`🧪 [MockFFmpeg] 设置采样率: ${sampleRate}Hz`);
+          logger.info(`🧪 [MockFFmpeg] 设置采样率: ${sampleRate}Hz`);
           return mockFFmpeg(input);
         },
 
         audioChannels: (channels: number) => {
-          console.log(`🧪 [MockFFmpeg] 设置声道数: ${channels}`);
+          logger.info(`🧪 [MockFFmpeg] 设置声道数: ${channels}`);
           return mockFFmpeg(input);
         },
 
         audioCodec: (codec: string) => {
-          console.log(`🧪 [MockFFmpeg] 设置编解码器: ${codec}`);
+          logger.info(`🧪 [MockFFmpeg] 设置编解码器: ${codec}`);
           return mockFFmpeg(input);
         },
 
         format: (format: string) => {
-          console.log(`🧪 [MockFFmpeg] 设置输出格式: ${format}`);
+          logger.info(`🧪 [MockFFmpeg] 设置输出格式: ${format}`);
           return mockFFmpeg(input);
         },
 
         on: (event: string, callback: Function) => {
-          console.log(`🧪 [MockFFmpeg] 注册事件监听: ${event}`);
-          
+          logger.info(`🧪 [MockFFmpeg] 注册事件监听: ${event}`);
+
           if (event === 'progress') {
             // 模拟进度更新
             setTimeout(() => callback({ percent: 50 }), 100);
@@ -427,13 +427,13 @@ export class AudioProcessor implements IFileProcessor {
             // 模拟处理完成
             setTimeout(() => callback(), 300);
           }
-          
+
           return mockFFmpeg(input);
         },
 
         save: async (outputPath: string) => {
-          console.log(`🧪 [MockFFmpeg] 保存音频文件: ${outputPath}`);
-          
+          logger.info(`🧪 [MockFFmpeg] 保存音频文件: ${outputPath}`);
+
           // 创建模拟输出文件
           const outputDir = path.dirname(outputPath);
           await fs.mkdir(outputDir, { recursive: true });
@@ -444,8 +444,8 @@ export class AudioProcessor implements IFileProcessor {
 
     // 添加ffprobe方法
     mockFFmpeg.ffprobe = (filePath: string, callback: Function) => {
-      console.log(`🧪 [MockFFmpeg] 获取音频元数据: ${filePath}`);
-      
+      logger.info(`🧪 [MockFFmpeg] 获取音频元数据: ${filePath}`);
+
       setTimeout(() => {
         const mockMetadata = {
           streams: [{
@@ -461,7 +461,7 @@ export class AudioProcessor implements IFileProcessor {
             size: '1024000'
           }
         };
-        
+
         callback(null, mockMetadata);
       }, 100);
     };
@@ -480,7 +480,7 @@ export class AudioProcessor implements IFileProcessor {
   ): Promise<ProcessingResult[]> {
     this.ensureInitialized();
 
-    console.log(`🎵 [AudioProcessor] 开始批量处理 ${inputPaths.length} 个音频文件`);
+    logger.info(`🎵 [AudioProcessor] 开始批量处理 ${inputPaths.length} 个音频文件`);
 
     const results: ProcessingResult[] = [];
 
@@ -509,7 +509,7 @@ export class AudioProcessor implements IFileProcessor {
     }
 
     const successCount = results.filter(r => r.success).length;
-    console.log(`✅ [AudioProcessor] 批量处理完成，成功: ${successCount}/${inputPaths.length}`);
+    logger.info(`✅ [AudioProcessor] 批量处理完成，成功: ${successCount}/${inputPaths.length}`);
 
     return results;
   }
@@ -529,7 +529,7 @@ export class AudioProcessor implements IFileProcessor {
             resolve(false);
           })
           .on('end', () => {
-            console.log(`🖼️ [AudioProcessor] 音频封面提取完成: ${outputPath}`);
+            logger.info(`🖼️ [AudioProcessor] 音频封面提取完成: ${outputPath}`);
             resolve(true);
           })
           .save(outputPath);
@@ -547,7 +547,7 @@ export class AudioProcessor implements IFileProcessor {
     this.ensureInitialized();
 
     const startTime = Date.now();
-    console.log(`🔇 [AudioProcessor] 开始音频降噪: ${inputPath}`);
+    logger.info(`🔇 [AudioProcessor] 开始音频降噪: ${inputPath}`);
 
     return new Promise((resolve) => {
       try {
@@ -562,7 +562,7 @@ export class AudioProcessor implements IFileProcessor {
           })
           .on('end', async () => {
             const processedStats = await fs.stat(outputPath);
-            
+
             resolve({
               success: true,
               processedPath: outputPath,
@@ -584,4 +584,4 @@ export class AudioProcessor implements IFileProcessor {
       }
     });
   }
-} 
+}

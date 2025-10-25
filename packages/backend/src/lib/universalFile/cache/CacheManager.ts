@@ -114,8 +114,8 @@ export class CacheManager {
       // 这里可以集成实际的Redis客户端，如ioredis
       // const Redis = require('ioredis');
       // this.redisClient = new Redis(this.options.redisConfig);
-      
-      console.log('Redis缓存已禁用 - 请安装并配置Redis客户端');
+
+      logger.info('Redis缓存已禁用 - 请安装并配置Redis客户端');
       this.stats.redisConnected = false;
     } catch (error) {
       console.error('Redis连接失败:', error);
@@ -153,7 +153,7 @@ export class CacheManager {
         const redisData = await this.redisClient.get(cacheKey);
         if (redisData) {
           const parsedData = JSON.parse(redisData);
-          
+
           // 将数据放回内存缓存
           const cacheItem: CacheItem<T> = {
             data: parsedData.data,
@@ -162,7 +162,7 @@ export class CacheManager {
             accessCount: parsedData.accessCount + 1,
             lastAccessAt: Date.now()
           };
-          
+
           this.memoryCache.set(cacheKey, cacheItem);
           this.stats.hits++;
           this.updateHitRate();
@@ -189,7 +189,7 @@ export class CacheManager {
     const cacheKey = this.generateKey(key);
     const expireTime = ttl || this.options.defaultTTL;
     const now = Date.now();
-    
+
     const cacheItem: CacheItem<T> = {
       data,
       createdAt: now,
@@ -314,15 +314,15 @@ export class CacheManager {
    * 预热缓存
    */
   async warmup<T>(items: Array<{ key: string; data: T; ttl?: number }>): Promise<void> {
-    console.log(`开始预热缓存，共 ${items.length} 项...`);
-    
-    const promises = items.map(item => 
+    logger.info(`开始预热缓存，共 ${items.length} 项...`);
+
+    const promises = items.map(item =>
       this.set(item.key, item.data, item.ttl)
     );
 
     try {
       await Promise.all(promises);
-      console.log('缓存预热完成');
+      logger.info('缓存预热完成');
     } catch (error) {
       console.error('缓存预热失败:', error);
     }
@@ -332,8 +332,8 @@ export class CacheManager {
    * 更新命中率
    */
   private updateHitRate(): void {
-    this.stats.hitRate = this.stats.totalRequests > 0 
-      ? (this.stats.hits / this.stats.totalRequests) * 100 
+    this.stats.hitRate = this.stats.totalRequests > 0
+      ? (this.stats.hits / this.stats.totalRequests) * 100
       : 0;
   }
 
@@ -352,7 +352,7 @@ export class CacheManager {
     const regexPattern = pattern
       .replace(/\*/g, '.*')
       .replace(/\?/g, '.');
-    
+
     const regex = new RegExp(`^${regexPattern}$`);
     return regex.test(key);
   }
@@ -361,8 +361,8 @@ export class CacheManager {
    * 获取或设置缓存（如果不存在则调用生成函数）
    */
   async getOrSet<T>(
-    key: string, 
-    generator: () => Promise<T>, 
+    key: string,
+    generator: () => Promise<T>,
     ttl?: number
   ): Promise<T> {
     // 尝试获取缓存
@@ -408,4 +408,4 @@ export const cacheManager = new CacheManager({
   maxMemoryItems: 2000,
   enableRedis: false, // 开发环境暂时禁用Redis
   keyPrefix: 'universal-file:'
-}); 
+});

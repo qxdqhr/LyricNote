@@ -97,8 +97,11 @@ export class ConfigService {
         if (this.isSensitiveConfig(config.key)) {
           try {
             value = this.decrypt(config.value as string);
+            configLogger.info(`✅ 成功解密配置: ${config.key}`);
           } catch (error) {
-            configLogger.warn(`Failed to decrypt config ${config.key}`, error);
+            configLogger.error(`❌ 解密配置失败: ${config.key}`, error);
+            // 跳过该配置，不加入缓存
+            return;
           }
         }
 
@@ -140,7 +143,13 @@ export class ConfigService {
         let value = config.value;
 
         if (this.isSensitiveConfig(key)) {
-          value = this.decrypt(config.value as string);
+          try {
+            value = this.decrypt(config.value as string);
+            configLogger.info(`✅ 成功解密配置: ${key}, 长度: ${value?.length}`);
+          } catch (error) {
+            configLogger.error(`❌ 解密配置失败: ${key}`, error);
+            throw new Error(`配置 ${key} 解密失败`);
+          }
         }
 
         this.configCache.set(key, value);

@@ -48,7 +48,7 @@ export class ProcessorFactory {
     if (!processorFactory) {
       throw new Error(`不支持的处理器类型: ${type}`);
     }
-    
+
     return processorFactory();
   }
 
@@ -71,7 +71,7 @@ export class ProcessorFactory {
    */
   static registerProcessor(type: ProcessorType, factory: () => IFileProcessor): void {
     this.processors.set(type, factory);
-    console.log(`🔧 [ProcessorFactory] 注册处理器类型: ${type}`);
+    logger.info(`🔧 [ProcessorFactory] 注册处理器类型: ${type}`);
   }
 
   /**
@@ -79,22 +79,22 @@ export class ProcessorFactory {
    */
   static async createAllProcessors(): Promise<Map<ProcessorType, IFileProcessor>> {
     const processors = new Map<ProcessorType, IFileProcessor>();
-    
-    console.log('🏭 [ProcessorFactory] 创建并初始化所有处理器...');
-    
+
+    logger.info('🏭 [ProcessorFactory] 创建并初始化所有处理器...');
+
     for (const type of this.getSupportedTypes()) {
       try {
         const processor = this.createProcessor(type);
         await processor.initialize();
         processors.set(type, processor);
-        console.log(`✅ [ProcessorFactory] ${type} 处理器初始化完成`);
+        logger.info(`✅ [ProcessorFactory] ${type} 处理器初始化完成`);
       } catch (error) {
         console.error(`❌ [ProcessorFactory] ${type} 处理器初始化失败:`, error);
       }
     }
-    
-    console.log(`🎉 [ProcessorFactory] 成功初始化 ${processors.size} 个处理器`);
-    
+
+    logger.info(`🎉 [ProcessorFactory] 成功初始化 ${processors.size} 个处理器`);
+
     return processors;
   }
 }
@@ -110,7 +110,7 @@ export class ProcessorManager {
 
   constructor(queueOptions?: QueueOptions) {
     this.queue = new ProcessingQueue(queueOptions);
-    console.log('🎛️ [ProcessorManager] 处理器管理器已创建');
+    logger.info('🎛️ [ProcessorManager] 处理器管理器已创建');
   }
 
   /**
@@ -122,7 +122,7 @@ export class ProcessorManager {
       return;
     }
 
-    console.log('🚀 [ProcessorManager] 初始化处理器管理器...');
+    logger.info('🚀 [ProcessorManager] 初始化处理器管理器...');
 
     try {
       // 创建并初始化所有处理器
@@ -134,7 +134,7 @@ export class ProcessorManager {
       }
 
       this.isInitialized = true;
-      console.log('✅ [ProcessorManager] 处理器管理器初始化完成');
+      logger.info('✅ [ProcessorManager] 处理器管理器初始化完成');
 
     } catch (error) {
       console.error('❌ [ProcessorManager] 初始化失败:', error);
@@ -291,7 +291,7 @@ export class ProcessorManager {
    * 清理资源
    */
   async cleanup(): Promise<void> {
-    console.log('🧹 [ProcessorManager] 清理处理器资源...');
+    logger.info('🧹 [ProcessorManager] 清理处理器资源...');
 
     // 停止队列
     this.queue.stop();
@@ -299,7 +299,7 @@ export class ProcessorManager {
     // 清理队列中的任务
     this.queue.cleanup();
 
-    console.log('✅ [ProcessorManager] 资源清理完成');
+    logger.info('✅ [ProcessorManager] 资源清理完成');
   }
 
   // ============= 私有方法 =============
@@ -346,4 +346,4 @@ export function queueFile(
   }
 
   return defaultProcessorManager.queueFile(inputPath, outputPath, options, taskOptions);
-} 
+}

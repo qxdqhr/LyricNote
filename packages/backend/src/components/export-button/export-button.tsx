@@ -26,7 +26,7 @@ import type {
   ExportProgress
 } from '@/lib/universalExport';
 
-import { ExportConfigEditor } from '../export-config-editor';
+import { ExportConfigEditor } from '../export-config-editor/export-config-editor';
 
 // ============= 类型定义 =============
 
@@ -127,7 +127,7 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
   // ============= 导出处理 =============
 
   const handleExport = useCallback(async (config: ExportConfig) => {
-    console.log('🚀 [ExportButton] 开始导出:', {
+    logger.info('🚀 [ExportButton] 开始导出:', {
       configId: config.id,
       configName: config.name,
       format: config.format,
@@ -149,11 +149,11 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
         dataSource,
         callbacks: {
           onProgress: (progress) => {
-            console.log('📊 [ExportButton] 导出进度:', progress);
+            logger.info('📊 [ExportButton] 导出进度:', progress);
             setExportProgress(progress);
           },
           onSuccess: (result) => {
-            console.log('✅ [ExportButton] 导出成功:', {
+            logger.info('✅ [ExportButton] 导出成功:', {
               fileName: result.fileName,
               fileSize: result.fileSize,
               exportedRows: result.exportedRows,
@@ -163,7 +163,7 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
 
             // 下载文件
             if (result.fileBlob) {
-              console.log('📥 [ExportButton] 开始下载文件...');
+              logger.info('📥 [ExportButton] 开始下载文件...');
               const url = window.URL.createObjectURL(result.fileBlob);
               const link = document.createElement('a');
               link.href = url;
@@ -172,7 +172,7 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
               link.click();
               document.body.removeChild(link);
               window.URL.revokeObjectURL(url);
-              console.log('✅ [ExportButton] 文件下载完成');
+              logger.info('✅ [ExportButton] 文件下载完成');
             }
 
             onExportSuccess?.(result);
@@ -186,7 +186,7 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
         },
       };
 
-      console.log('📞 [ExportButton] 调用导出服务...');
+      logger.info('📞 [ExportButton] 调用导出服务...');
       await exportService.export(request);
     } catch (error) {
       console.error('❌ [ExportButton] 导出异常:', error);

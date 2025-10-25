@@ -110,6 +110,17 @@ export const NEW_CONFIG_TEMPLATES: Record<string, ConfigItem[]> = {
   // 存储配置
   [ConfigCategory.STORAGE]: [
     {
+      key: 'oss_path_prefix',
+      value: 'commonApp',
+      category: ConfigCategory.STORAGE,
+      type: ConfigType.STRING,
+      isRequired: false,
+      isSensitive: false,
+      description: '存储路径前缀（用于区分不同项目）',
+      defaultValue: 'commonApp',
+      group: '基础配置',
+    },
+    {
       key: 'oss_endpoint',
       value: '',
       category: ConfigCategory.STORAGE,

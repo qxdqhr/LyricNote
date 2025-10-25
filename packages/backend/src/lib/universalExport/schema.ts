@@ -3,7 +3,7 @@
  */
 
 import { pgTable, text, boolean, jsonb, timestamp, integer } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
+import { sql, relations } from 'drizzle-orm';
 
 /**
  * 导出配置表
@@ -58,3 +58,25 @@ export type NewExportConfig = typeof exportConfigs.$inferInsert;
 export type ExportHistory = typeof exportHistory.$inferSelect;
 export type NewExportHistory = typeof exportHistory.$inferInsert;
 
+// ============================================================================
+// Relations 定义
+// ============================================================================
+
+/**
+ * 导出配置表关系
+ * 一个配置可以有多个导出历史记录
+ */
+export const exportConfigsRelations = relations(exportConfigs, ({ many }) => ({
+  history: many(exportHistory),
+}));
+
+/**
+ * 导出历史表关系
+ * 每个历史记录关联一个配置
+ */
+export const exportHistoryRelations = relations(exportHistory, ({ one }) => ({
+  config: one(exportConfigs, {
+    fields: [exportHistory.configId],
+    references: [exportConfigs.id],
+  }),
+}));

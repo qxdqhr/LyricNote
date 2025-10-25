@@ -237,7 +237,7 @@ ENABLE_MOCK=false
    openssl rand -base64 32
 
    # 或使用 Node.js
-   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+   node -e "logger.info(require('crypto').randomBytes(32).toString('base64'))"
    ```
 
 3. **不同环境使用不同的密钥**
@@ -307,7 +307,7 @@ const envSchema = z.object({
 
 try {
   envSchema.parse(process.env);
-  console.log('✅ 环境变量验证通过');
+  logger.info('✅ 环境变量验证通过');
 } catch (error) {
   console.error('❌ 环境变量验证失败:', error);
   process.exit(1);

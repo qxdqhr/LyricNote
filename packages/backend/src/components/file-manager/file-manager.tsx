@@ -245,7 +245,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
       // 这里应该调用实际的删除API
       // await fileService.deleteFiles(fileIds);
 
-      console.log('删除文件:', fileIds);
+      logger.info('删除文件:', fileIds);
 
       // 重新加载文件列表
       await loadFiles();
@@ -273,7 +273,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
       // const downloadUrl = await fileService.getDownloadUrl(file.id);
       // window.open(downloadUrl, '_blank');
 
-      console.log('下载文件:', file.originalName);
+      logger.info('下载文件:', file.originalName);
 
     } catch (error) {
       console.error('下载文件失败:', error);
@@ -984,7 +984,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
               className="hidden"
               onChange={(e) => {
                 // 模拟上传完成
-                console.log('选择文件:', e.target.files);
+                logger.info('选择文件:', e.target.files);
                 onUploadComplete([]);
               }}
             />

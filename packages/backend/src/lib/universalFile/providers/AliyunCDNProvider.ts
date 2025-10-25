@@ -29,7 +29,7 @@ interface AliyunCDNClient {
  */
 export class AliyunCDNProvider implements ICDNProvider {
   readonly type: CDNType = 'aliyun-cdn';
-  
+
   private config: AliyunCDNConfig | null = null;
   private client: AliyunCDNClient | null = null;
   private isInitialized = false;
@@ -43,8 +43,8 @@ export class AliyunCDNProvider implements ICDNProvider {
     }
 
     this.config = config as AliyunCDNConfig;
-    
-    console.log(`🌐 [AliyunCDNProvider] 初始化阿里云CDN，域名: ${this.config.domain}`);
+
+    logger.info(`🌐 [AliyunCDNProvider] 初始化阿里云CDN，域名: ${this.config.domain}`);
 
     try {
       // 验证必需的配置项
@@ -55,15 +55,15 @@ export class AliyunCDNProvider implements ICDNProvider {
       try {
         const CDN = require('@alicloud/cdn20180510');
         const OpenApi = require('@alicloud/openapi-client');
-        
+
         const cdnConfig = new OpenApi.Config({
           accessKeyId: this.config.accessKeyId,
           accessKeySecret: this.config.accessKeySecret,
           endpoint: 'cdn.aliyuncs.com'
         });
-        
+
         this.client = new CDN.default(cdnConfig);
-        
+
       } catch (sdkError) {
         console.warn('⚠️ [AliyunCDNProvider] 阿里云CDN SDK未安装，使用模拟模式');
         // 创建模拟客户端用于开发测试
@@ -72,10 +72,10 @@ export class AliyunCDNProvider implements ICDNProvider {
 
       // 测试连接
       await this.testConnection();
-      
+
       this.isInitialized = true;
-      console.log('✅ [AliyunCDNProvider] 阿里云CDN初始化完成');
-      
+      logger.info('✅ [AliyunCDNProvider] 阿里云CDN初始化完成');
+
     } catch (error) {
       console.error('❌ [AliyunCDNProvider] 阿里云CDN初始化失败:', error);
       throw new CDNProviderError(
@@ -89,18 +89,18 @@ export class AliyunCDNProvider implements ICDNProvider {
    */
   async generateUrl(originalUrl: string): Promise<string> {
     this.ensureInitialized();
-    
-    console.log(`🔗 [AliyunCDNProvider] 生成CDN URL: ${originalUrl}`);
+
+    logger.info(`🔗 [AliyunCDNProvider] 生成CDN URL: ${originalUrl}`);
 
     try {
       // 解析原始URL
       const url = new URL(originalUrl);
-      
+
       // 替换域名为CDN域名
       const cdnUrl = `${url.protocol}//${this.config!.domain}${url.pathname}${url.search}${url.hash}`;
-      
-      console.log(`✅ [AliyunCDNProvider] CDN URL生成完成: ${cdnUrl}`);
-      
+
+      logger.info(`✅ [AliyunCDNProvider] CDN URL生成完成: ${cdnUrl}`);
+
       return cdnUrl;
 
     } catch (error) {
@@ -116,22 +116,22 @@ export class AliyunCDNProvider implements ICDNProvider {
    */
   async refreshCache(urls: string[]): Promise<CDNResult> {
     this.ensureInitialized();
-    
-    console.log(`🔄 [AliyunCDNProvider] 开始刷新CDN缓存，URL数量: ${urls.length}`);
+
+    logger.info(`🔄 [AliyunCDNProvider] 开始刷新CDN缓存，URL数量: ${urls.length}`);
 
     try {
       // 将URL转换为CDN URL
       const cdnUrls = await Promise.all(urls.map(url => this.generateUrl(url)));
-      
+
       // 调用阿里云CDN API刷新缓存
       const result = await this.client!.refreshObjectCaches({
         domainName: this.config!.domain,
         objectPath: cdnUrls.join('\n'),
         objectType: 'File' // File 或 Directory
       });
-      
-      console.log(`✅ [AliyunCDNProvider] CDN缓存刷新完成，任务ID: ${result.RefreshTaskId || 'unknown'}`);
-      
+
+      logger.info(`✅ [AliyunCDNProvider] CDN缓存刷新完成，任务ID: ${result.RefreshTaskId || 'unknown'}`);
+
       return {
         success: true,
         data: {
@@ -143,7 +143,7 @@ export class AliyunCDNProvider implements ICDNProvider {
 
     } catch (error) {
       console.error(`❌ [AliyunCDNProvider] CDN缓存刷新失败:`, error);
-      
+
       return {
         success: false,
         error: `CDN缓存刷新失败: ${error instanceof Error ? error.message : '未知错误'}`
@@ -156,22 +156,22 @@ export class AliyunCDNProvider implements ICDNProvider {
    */
   async preheatCache(urls: string[]): Promise<CDNResult> {
     this.ensureInitialized();
-    
-    console.log(`🔥 [AliyunCDNProvider] 开始预热CDN缓存，URL数量: ${urls.length}`);
+
+    logger.info(`🔥 [AliyunCDNProvider] 开始预热CDN缓存，URL数量: ${urls.length}`);
 
     try {
       // 将URL转换为CDN URL
       const cdnUrls = await Promise.all(urls.map(url => this.generateUrl(url)));
-      
+
       // 调用阿里云CDN API预热缓存
       const result = await this.client!.pushObjectCache({
         domainName: this.config!.domain,
         objectPath: cdnUrls.join('\n'),
         area: 'domestic' // domestic, overseas, global
       });
-      
-      console.log(`✅ [AliyunCDNProvider] CDN缓存预热完成，任务ID: ${result.PushTaskId || 'unknown'}`);
-      
+
+      logger.info(`✅ [AliyunCDNProvider] CDN缓存预热完成，任务ID: ${result.PushTaskId || 'unknown'}`);
+
       return {
         success: true,
         data: {
@@ -183,7 +183,7 @@ export class AliyunCDNProvider implements ICDNProvider {
 
     } catch (error) {
       console.error(`❌ [AliyunCDNProvider] CDN缓存预热失败:`, error);
-      
+
       return {
         success: false,
         error: `CDN缓存预热失败: ${error instanceof Error ? error.message : '未知错误'}`
@@ -196,13 +196,13 @@ export class AliyunCDNProvider implements ICDNProvider {
    */
   async getAccessStats(startTime: Date, endTime: Date): Promise<CDNResult> {
     this.ensureInitialized();
-    
-    console.log(`📊 [AliyunCDNProvider] 获取CDN访问统计: ${startTime.toISOString()} - ${endTime.toISOString()}`);
+
+    logger.info(`📊 [AliyunCDNProvider] 获取CDN访问统计: ${startTime.toISOString()} - ${endTime.toISOString()}`);
 
     try {
       // 格式化时间
       const formatTime = (date: Date) => date.toISOString().slice(0, 19).replace('T', ' ') + 'Z';
-      
+
       // 调用阿里云CDN API获取实时数据
       const result = await this.client!.describeDomainRealTimeData({
         domainName: this.config!.domain,
@@ -210,9 +210,9 @@ export class AliyunCDNProvider implements ICDNProvider {
         endTime: formatTime(endTime),
         field: 'bps,qps' // 带宽和QPS
       });
-      
-      console.log(`✅ [AliyunCDNProvider] CDN访问统计获取完成`);
-      
+
+      logger.info(`✅ [AliyunCDNProvider] CDN访问统计获取完成`);
+
       return {
         success: true,
         data: {
@@ -227,7 +227,7 @@ export class AliyunCDNProvider implements ICDNProvider {
 
     } catch (error) {
       console.error(`❌ [AliyunCDNProvider] CDN访问统计获取失败:`, error);
-      
+
       return {
         success: false,
         error: `CDN访问统计获取失败: ${error instanceof Error ? error.message : '未知错误'}`
@@ -241,37 +241,37 @@ export class AliyunCDNProvider implements ICDNProvider {
    * 生成防盗链签名URL
    */
   async generateSignedUrl(
-    originalUrl: string, 
+    originalUrl: string,
     expiresIn: number = 3600,
     authKey?: string
   ): Promise<string> {
     this.ensureInitialized();
-    
-    console.log(`🔐 [AliyunCDNProvider] 生成防盗链签名URL: ${originalUrl}`);
+
+    logger.info(`🔐 [AliyunCDNProvider] 生成防盗链签名URL: ${originalUrl}`);
 
     try {
       const cdnUrl = await this.generateUrl(originalUrl);
-      
+
       // 如果没有提供authKey，直接返回CDN URL
       if (!authKey) {
-        console.log(`⚠️ [AliyunCDNProvider] 未提供authKey，返回普通CDN URL`);
+        logger.info(`⚠️ [AliyunCDNProvider] 未提供authKey，返回普通CDN URL`);
         return cdnUrl;
       }
 
       // 生成防盗链签名
       const parsedUrl = new URL(cdnUrl);
       const timestamp = Math.floor(Date.now() / 1000) + expiresIn;
-      
+
       // 阿里云CDN防盗链签名算法
       // signString = "path-timestamp-rand-uid-authKey"
       const signString = `${parsedUrl.pathname}-${timestamp}-0-0-${authKey}`;
       const authValue = createHash('md5').update(signString).digest('hex');
-      
+
       // 构建签名URL
       const signedUrl = `${cdnUrl}?auth_key=${timestamp}-0-0-${authValue}`;
-      
-      console.log(`✅ [AliyunCDNProvider] 防盗链签名URL生成完成`);
-      
+
+      logger.info(`✅ [AliyunCDNProvider] 防盗链签名URL生成完成`);
+
       return signedUrl;
 
     } catch (error) {
@@ -287,12 +287,12 @@ export class AliyunCDNProvider implements ICDNProvider {
    */
   async getRefreshTaskStatus(taskId: string): Promise<CDNResult> {
     this.ensureInitialized();
-    
+
     try {
       const result = await this.client!.describeRefreshTasks({
         taskId
       });
-      
+
       return {
         success: true,
         data: {
@@ -314,12 +314,12 @@ export class AliyunCDNProvider implements ICDNProvider {
    */
   async getPreheatTaskStatus(taskId: string): Promise<CDNResult> {
     this.ensureInitialized();
-    
+
     try {
       const result = await this.client!.describePushTasks({
         taskId
       });
-      
+
       return {
         success: true,
         data: {
@@ -341,12 +341,12 @@ export class AliyunCDNProvider implements ICDNProvider {
    */
   async getDomainConfig(): Promise<CDNResult> {
     this.ensureInitialized();
-    
+
     try {
       const result = await this.client!.describeDomainConfigs({
         domainName: this.config!.domain
       });
-      
+
       return {
         success: true,
         data: {
@@ -376,23 +376,23 @@ export class AliyunCDNProvider implements ICDNProvider {
     } = {}
   ): Promise<string> {
     this.ensureInitialized();
-    
+
     try {
       const cdnUrl = await this.generateUrl(originalUrl);
       const url = new URL(cdnUrl);
-      
+
       // 添加阿里云CDN图像处理参数
       const params = new URLSearchParams(url.search);
-      
+
       if (options.imageQuality) {
         params.set('x-oss-process', `image/quality,q_${options.imageQuality}`);
       }
-      
+
       if (options.imageFormat) {
         const formatParam = params.get('x-oss-process') || 'image';
         params.set('x-oss-process', `${formatParam}/format,${options.imageFormat}`);
       }
-      
+
       if (options.imageResize) {
         const resizeParam = params.get('x-oss-process') || 'image';
         let resize = 'resize';
@@ -400,9 +400,9 @@ export class AliyunCDNProvider implements ICDNProvider {
         if (options.imageResize.height) resize += `,h_${options.imageResize.height}`;
         params.set('x-oss-process', `${resizeParam}/${resize}`);
       }
-      
+
       url.search = params.toString();
-      
+
       return url.toString();
 
     } catch (error) {
@@ -433,7 +433,7 @@ export class AliyunCDNProvider implements ICDNProvider {
 
     const required = ['domain', 'accessKeyId', 'accessKeySecret'];
     const missing = required.filter(key => !this.config![key as keyof AliyunCDNConfig]);
-    
+
     if (missing.length > 0) {
       throw new CDNProviderError(`CDN配置缺少必需项: ${missing.join(', ')}`);
     }
@@ -460,7 +460,7 @@ export class AliyunCDNProvider implements ICDNProvider {
     try {
       // 尝试获取域名配置来测试连接
       await this.getDomainConfig();
-      console.log(`✅ [AliyunCDNProvider] CDN连接测试成功`);
+      logger.info(`✅ [AliyunCDNProvider] CDN连接测试成功`);
     } catch (error) {
       console.warn(`⚠️ [AliyunCDNProvider] CDN连接测试失败，可能是权限问题:`, error);
       // 不抛出错误，因为可能是权限限制
@@ -471,27 +471,27 @@ export class AliyunCDNProvider implements ICDNProvider {
    * 创建模拟客户端（用于开发测试）
    */
   private createMockClient(): AliyunCDNClient {
-    console.log('🧪 [AliyunCDNProvider] 创建模拟CDN客户端');
-    
+    logger.info('🧪 [AliyunCDNProvider] 创建模拟CDN客户端');
+
     return {
       async refreshObjectCaches(params: any) {
-        console.log('🔄 [MockCDN] 模拟刷新缓存:', params);
+        logger.info('🔄 [MockCDN] 模拟刷新缓存:', params);
         return {
           RefreshTaskId: `mock-refresh-${Date.now()}`,
           RequestId: `mock-request-${Date.now()}`
         };
       },
-      
+
       async pushObjectCache(params: any) {
-        console.log('🔥 [MockCDN] 模拟预热缓存:', params);
+        logger.info('🔥 [MockCDN] 模拟预热缓存:', params);
         return {
           PushTaskId: `mock-push-${Date.now()}`,
           RequestId: `mock-request-${Date.now()}`
         };
       },
-      
+
       async describeRefreshTasks(params: any) {
-        console.log('📋 [MockCDN] 模拟查询刷新任务:', params);
+        logger.info('📋 [MockCDN] 模拟查询刷新任务:', params);
         return {
           Tasks: {
             Task: [{
@@ -504,9 +504,9 @@ export class AliyunCDNProvider implements ICDNProvider {
           RequestId: `mock-request-${Date.now()}`
         };
       },
-      
+
       async describePushTasks(params: any) {
-        console.log('📋 [MockCDN] 模拟查询预热任务:', params);
+        logger.info('📋 [MockCDN] 模拟查询预热任务:', params);
         return {
           Tasks: {
             Task: [{
@@ -519,9 +519,9 @@ export class AliyunCDNProvider implements ICDNProvider {
           RequestId: `mock-request-${Date.now()}`
         };
       },
-      
+
       async describeDomainConfigs(params: any) {
-        console.log('⚙️ [MockCDN] 模拟获取域名配置:', params);
+        logger.info('⚙️ [MockCDN] 模拟获取域名配置:', params);
         return {
           DomainConfigs: {
             DomainConfig: [{
@@ -533,9 +533,9 @@ export class AliyunCDNProvider implements ICDNProvider {
           RequestId: `mock-request-${Date.now()}`
         };
       },
-      
+
       async describeCdnDomainLogs(params: any) {
-        console.log('📊 [MockCDN] 模拟获取日志:', params);
+        logger.info('📊 [MockCDN] 模拟获取日志:', params);
         return {
           DomainLogDetails: {
             DomainLogDetail: []
@@ -543,9 +543,9 @@ export class AliyunCDNProvider implements ICDNProvider {
           RequestId: `mock-request-${Date.now()}`
         };
       },
-      
+
       async describeDomainRealTimeData(params: any) {
-        console.log('📈 [MockCDN] 模拟获取实时数据:', params);
+        logger.info('📈 [MockCDN] 模拟获取实时数据:', params);
         return {
           RealTimeData: {
             UsageData: [{
@@ -578,33 +578,33 @@ export class AliyunCDNProvider implements ICDNProvider {
     onProgress?: (completed: number, total: number) => void
   ): Promise<CDNResult> {
     this.ensureInitialized();
-    
-    console.log(`🔄 [AliyunCDNProvider] 开始批量刷新缓存，总URL数: ${urls.length}，批次大小: ${batchSize}`);
+
+    logger.info(`🔄 [AliyunCDNProvider] 开始批量刷新缓存，总URL数: ${urls.length}，批次大小: ${batchSize}`);
 
     try {
       const results = [];
       let completed = 0;
-      
+
       // 分批处理
       for (let i = 0; i < urls.length; i += batchSize) {
         const batch = urls.slice(i, i + batchSize);
         const batchResult = await this.refreshCache(batch);
         results.push(batchResult);
-        
+
         completed += batch.length;
         if (onProgress) {
           onProgress(completed, urls.length);
         }
-        
+
         // 避免API限流，每批次间隔1秒
         if (i + batchSize < urls.length) {
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
-      
+
       const successCount = results.filter(r => r.success).length;
-      console.log(`✅ [AliyunCDNProvider] 批量刷新完成，成功: ${successCount}/${results.length}`);
-      
+      logger.info(`✅ [AliyunCDNProvider] 批量刷新完成，成功: ${successCount}/${results.length}`);
+
       return {
         success: successCount === results.length,
         data: {
@@ -616,11 +616,11 @@ export class AliyunCDNProvider implements ICDNProvider {
 
     } catch (error) {
       console.error(`❌ [AliyunCDNProvider] 批量刷新失败:`, error);
-      
+
       return {
         success: false,
         error: `批量刷新失败: ${error instanceof Error ? error.message : '未知错误'}`
       };
     }
   }
-} 
+}

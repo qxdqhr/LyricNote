@@ -27,8 +27,13 @@ import {
   Plus,
   X,
   Trash2,
+  Edit2,
+  Image as ImageIcon,
+  Home,
 } from 'lucide-react';
 import { AnalyticsDashboard } from '@lyricnote/shared/analytics/components';
+import { OrderManager } from '@/components/order-manager';
+import type { OrderableItem, OrderManagerOperations } from '@/components/order-manager';
 
 interface ConfigItem {
   key: string;
@@ -50,6 +55,12 @@ interface AllConfigs {
 }
 
 const CONFIG_CATEGORIES = {
+  homepage: {
+    name: '首页配置',
+    icon: Home,
+    description: '管理首页展示内容、背景图片和显示顺序',
+    color: 'text-pink-600 bg-pink-100',
+  },
   database: {
     name: '数据库配置',
     icon: Database,
@@ -95,6 +106,437 @@ const CONFIG_CATEGORIES = {
 } as const;
 
 type ConfigCategoryKey = keyof typeof CONFIG_CATEGORIES;
+
+// 首页配置接口
+interface HomepageSection extends OrderableItem {
+  id: number;
+  title: string;
+  description: string;
+  backgroundImage: string | null;
+  order: number;
+  isActive: boolean;
+}
+
+// 首页配置组件
+function HomepageConfig() {
+  const [sections, setSections] = useState<HomepageSection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingSection, setEditingSection] = useState<HomepageSection | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
+
+  useEffect(() => {
+    fetchSections();
+  }, []);
+
+  const fetchSections = async () => {
+    try {
+      const response = await fetch('/api/homepage-sections');
+      const result = await response.json();
+      if (result.success) {
+        setSections(result.data);
+      }
+    } catch (error) {
+      console.error('获取首页配置失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const operations: OrderManagerOperations<HomepageSection> = {
+    loadItems: async () => {
+      const response = await fetch('/api/homepage-sections');
+      const result = await response.json();
+      return result.success ? result.data : [];
+    },
+
+    moveItemUp: async (id: number) => {
+      const index = sections.findIndex(s => s.id === id);
+      if (index <= 0) return;
+
+      const newSections = [...sections];
+      [newSections[index], newSections[index - 1]] = [newSections[index - 1], newSections[index]];
+
+      const updates = newSections.map((s, idx) => ({ id: s.id, order: idx + 1 }));
+      await updateOrder(updates);
+    },
+
+    moveItemDown: async (id: number) => {
+      const index = sections.findIndex(s => s.id === id);
+      if (index >= sections.length - 1 || index === -1) return;
+
+      const newSections = [...sections];
+      [newSections[index], newSections[index + 1]] = [newSections[index + 1], newSections[index]];
+
+      const updates = newSections.map((s, idx) => ({ id: s.id, order: idx + 1 }));
+      await updateOrder(updates);
+    },
+
+    updateItemOrder: async (orders: { id: number; order: number }[]) => {
+      await updateOrder(orders);
+    },
+  };
+
+  const updateOrder = async (orders: { id: number; order: number }[]) => {
+    try {
+      const response = await fetch('/api/homepage-sections', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sections: orders }),
+      });
+
+      if (response.ok) {
+        await fetchSections();
+      }
+    } catch (error) {
+      console.error('更新顺序失败:', error);
+    }
+  };
+
+  const handleEdit = (section: HomepageSection) => {
+    setEditingSection(section);
+    setShowEditor(true);
+  };
+
+  const handleCreate = () => {
+    setEditingSection({
+      id: 0,
+      title: '',
+      description: '',
+      backgroundImage: null,
+      order: sections.length + 1,
+      isActive: true,
+    });
+    setShowEditor(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('确定要删除这个配置吗？')) return;
+
+    try {
+      const response = await fetch(`/api/homepage-sections/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        await fetchSections();
+      }
+    } catch (error) {
+      console.error('删除失败:', error);
+    }
+  };
+
+  const renderItem = (item: HomepageSection) => {
+    return (
+      <div className="flex items-center gap-4 w-full">
+        <div className="w-24 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+          {item.backgroundImage ? (
+            <img src={item.backgroundImage} alt={item.title} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+              <ImageIcon className="w-8 h-8 text-white" />
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="font-semibold text-gray-900 truncate">{item.title}</h4>
+          <p className="text-sm text-gray-500 truncate">{item.description}</p>
+        </div>
+        <div className="flex gap-2 flex-shrink-0">
+          <Button variant="ghost" size="sm" onClick={() => handleEdit(item)} className="h-8 w-8 p-0">
+            <Edit2 className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)} className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="p-12 text-center">
+          <RefreshCw className="h-8 w-8 text-gray-400 mx-auto mb-4 animate-spin" />
+          <p className="text-gray-600">加载中...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>首页配置管理</CardTitle>
+              <CardDescription>管理首页展示的内容和顺序</CardDescription>
+            </div>
+            <Button onClick={handleCreate} className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="h-4 w-4 mr-2" />
+              添加配置
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Alert className="mb-6">
+            <AlertDescription>
+              💡 调整配置顺序后，访问<a href="/" target="_blank" className="text-blue-600 hover:underline mx-1">首页</a>即可看到效果。首页支持纵向滚动浏览。
+            </AlertDescription>
+          </Alert>
+
+          {sections.length === 0 ? (
+            <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+              <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">暂无配置</h3>
+              <p className="text-gray-500 mb-4">点击"添加配置"按钮创建首页内容</p>
+              <Button onClick={handleCreate} className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="h-4 w-4 mr-2" />
+                添加配置
+              </Button>
+            </div>
+          ) : (
+            <OrderManager
+              operations={operations}
+              renderItem={renderItem}
+              title="首页配置列表"
+              description="拖拽或使用按钮调整配置显示顺序"
+              emptyMessage="暂无配置"
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      {showEditor && editingSection && (
+        <HomepageEditorModal
+          section={editingSection}
+          onClose={() => {
+            setShowEditor(false);
+            setEditingSection(null);
+          }}
+          onSave={async () => {
+            await fetchSections();
+            setShowEditor(false);
+            setEditingSection(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// 首页编辑器弹窗
+function HomepageEditorModal({
+  section,
+  onClose,
+  onSave,
+}: {
+  section: HomepageSection;
+  onClose: () => void;
+  onSave: () => void;
+}) {
+  const [formData, setFormData] = useState(section);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 验证文件类型
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('只支持 JPG、PNG、WebP、GIF 格式的图片');
+      return;
+    }
+
+    // 验证文件大小
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      alert('文件大小不能超过 10MB');
+      return;
+    }
+
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setFormData(prev => ({ ...prev, backgroundImage: result.data.url }));
+        setUploadProgress(100);
+      } else {
+        throw new Error(result.error || '上传失败');
+      }
+    } catch (error) {
+      console.error('上传失败:', error);
+      alert(`图片上传失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    } finally {
+      setUploading(false);
+      setTimeout(() => setUploadProgress(0), 1000);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      const isCreate = formData.id === 0;
+      const url = isCreate ? '/api/homepage-sections' : `/api/homepage-sections/${formData.id}`;
+      const method = isCreate ? 'POST' : 'PATCH';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        onSave();
+      } else {
+        alert('保存失败');
+      }
+    } catch (error) {
+      console.error('保存失败:', error);
+      alert('保存失败');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-2xl max-h-[90vh] bg-amber-50 overflow-y-auto">
+        <CardHeader className="border-b">
+          <div className="flex items-center justify-between">
+            <CardTitle>{formData.id === 0 ? '添加首页配置' : '编辑首页配置'}</CardTitle>
+            <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                标题 *
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="输入首页标题"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                描述 *
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                placeholder="输入首页描述"
+                rows={4}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                背景图片
+              </label>
+              <div className="space-y-4">
+                {formData.backgroundImage && (
+                  <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100">
+                    <img src={formData.backgroundImage} alt="预览" className="w-full h-full object-cover" />
+                    <Button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, backgroundImage: null })}
+                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600"
+                      size="sm"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+
+                <div>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={uploading}
+                    id="image-upload-input"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => document.getElementById('image-upload-input')?.click()}
+                    disabled={uploading}
+                    variant="outline"
+                    className="w-full"
+                    asChild={false}
+                  >
+                    {uploading ? (
+                      <>
+                        <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                        上传中 {uploadProgress > 0 ? `${uploadProgress}%` : '...'}
+                      </>
+                    ) : (
+                      <>
+                        <ImageIcon className="w-5 h-5 mr-2" />
+                        {formData.backgroundImage ? '更换图片' : '上传背景图片'}
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                <p className="text-sm text-gray-500">
+                  建议尺寸：1920x1080px，支持 JPG、PNG、WebP、GIF 格式，最大 10MB
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={onClose} disabled={saving} className="flex-1">
+                取消
+              </Button>
+              <Button type="submit" disabled={saving || uploading} className="flex-1 bg-blue-600 hover:bg-blue-700">
+                {saving ? (
+                  <>
+                    <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                    保存中...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-5 h-5 mr-2" />
+                    保存
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 // 开发者调试配置组件
 function DeveloperDebugConfig() {
@@ -289,6 +731,9 @@ function ConfigManagementContent() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ key: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
+  // 同步配置模板
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<any>(null);
 
   // 获取认证token
   const getAuthToken = () => {
@@ -394,6 +839,45 @@ function ConfigManagementContent() {
       setDeleting(false);
       setShowDeleteConfirm(false);
       setDeleteTarget(null);
+    }
+  };
+
+  // 同步配置模板
+  const syncConfigTemplates = async () => {
+    try {
+      setSyncing(true);
+      const token = getAuthToken();
+
+      const response = await fetch('/api/admin/config/sync-templates', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          window.location.href = '/admin/login';
+          return;
+        }
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccess(data.message);
+        setSyncResult(data.data);
+        setError('');
+        refresh(); // 刷新缓存
+      } else {
+        setError(data.error || '同步配置模板失败');
+      }
+    } catch (error) {
+      setError('网络错误，请重试');
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -578,6 +1062,9 @@ function ConfigManagementContent() {
               <p className="text-gray-600">请从左侧导航栏选择一个有效的配置分类。</p>
             </CardContent>
           </Card>
+        ) : activeCategory === 'homepage' ? (
+          // 首页配置特殊处理
+          <HomepageConfig />
         ) : activeCategory === 'analytics' ? (
           // 埋点数据分析特殊处理
           <div className="space-y-6">
@@ -616,6 +1103,26 @@ function ConfigManagementContent() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
+                  {/* 同步配置模板按钮 */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={syncConfigTemplates}
+                    disabled={syncing}
+                    className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                  >
+                    {syncing ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        同步中...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        同步模板
+                      </>
+                    )}
+                  </Button>
                   {/* 添加配置按钮 */}
                   <Button
                     variant="outline"

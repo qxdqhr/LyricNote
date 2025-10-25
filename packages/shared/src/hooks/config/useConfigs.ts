@@ -14,6 +14,7 @@
 
 import useSWR, { mutate } from 'swr';
 import { useCallback } from 'react';
+import { logger } from '../../logger';
 
 export interface ConfigItem {
   key: string;
@@ -112,7 +113,7 @@ export function createUseConfigs(options: UseConfigsOptions) {
 
       // 成功时的回调
       onSuccess: (data: AllConfigs) => {
-        console.log('✅ Configs loaded from cache or network');
+        logger.info('✅ Configs loaded from cache or network');
       },
 
       // 错误时的回调

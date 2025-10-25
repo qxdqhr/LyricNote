@@ -2,7 +2,9 @@
  * 调试工具
  */
 
+import { logger } from '../logger';
 import { fileUtils } from './file';
+
 
 export const debugUtils = {
   /**
@@ -25,7 +27,7 @@ export const debugUtils = {
       end: () => {
         const duration = performance.now() - start;
         const message = `${label || 'Timer'}: ${duration.toFixed(2)}ms`;
-        console.log(message);
+        logger.info(message);
         return duration;
       },
     };

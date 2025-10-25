@@ -34,7 +34,7 @@ interface VideoMetadata {
  */
 export class VideoProcessor implements IFileProcessor {
   readonly type: ProcessorType = 'video';
-  
+
   private ffmpeg: any = null;
   private isInitialized = false;
 
@@ -42,13 +42,13 @@ export class VideoProcessor implements IFileProcessor {
    * 初始化视频处理器
    */
   async initialize(): Promise<void> {
-    console.log('🎬 [VideoProcessor] 初始化视频处理器...');
+    logger.info('🎬 [VideoProcessor] 初始化视频处理器...');
 
     try {
       // 尝试加载FFmpeg库
       try {
         this.ffmpeg = require('fluent-ffmpeg');
-        console.log('✅ [VideoProcessor] FFmpeg库加载成功');
+        logger.info('✅ [VideoProcessor] FFmpeg库加载成功');
       } catch (error) {
         console.warn('⚠️ [VideoProcessor] FFmpeg库未安装，使用模拟模式');
         // 创建模拟FFmpeg对象
@@ -56,7 +56,7 @@ export class VideoProcessor implements IFileProcessor {
       }
 
       this.isInitialized = true;
-      console.log('✅ [VideoProcessor] 视频处理器初始化完成');
+      logger.info('✅ [VideoProcessor] 视频处理器初始化完成');
 
     } catch (error) {
       console.error('❌ [VideoProcessor] 视频处理器初始化失败:', error);
@@ -81,7 +81,7 @@ export class VideoProcessor implements IFileProcessor {
     const videoOptions = options as VideoProcessingOptions;
     const startTime = Date.now();
 
-    console.log(`🎬 [VideoProcessor] 开始处理视频: ${inputPath}`);
+    logger.info(`🎬 [VideoProcessor] 开始处理视频: ${inputPath}`);
 
     try {
       // 检查输入文件是否存在
@@ -95,11 +95,11 @@ export class VideoProcessor implements IFileProcessor {
 
       // 获取视频元数据
       const metadata = await this.getVideoMetadata(inputPath);
-      console.log(`📊 [VideoProcessor] 视频信息: ${metadata.width}x${metadata.height}, ${this.formatDuration(metadata.duration)}, ${metadata.fps}fps`);
+      logger.info(`📊 [VideoProcessor] 视频信息: ${metadata.width}x${metadata.height}, ${this.formatDuration(metadata.duration)}, ${metadata.fps}fps`);
 
       // 确定输出格式
       const outputFormat = this.determineOutputFormat(outputPath, videoOptions.format);
-      
+
       // 执行视频处理
       await this.processVideo(inputPath, outputPath, videoOptions, outputFormat);
 
@@ -117,7 +117,7 @@ export class VideoProcessor implements IFileProcessor {
       const processedStats = await fs.stat(outputPath);
       const processingTime = Date.now() - startTime;
 
-      console.log(`✅ [VideoProcessor] 视频处理完成: ${outputPath}, 耗时: ${processingTime}ms`);
+      logger.info(`✅ [VideoProcessor] 视频处理完成: ${outputPath}, 耗时: ${processingTime}ms`);
 
       return {
         success: true,
@@ -143,7 +143,7 @@ export class VideoProcessor implements IFileProcessor {
 
     } catch (error) {
       console.error(`❌ [VideoProcessor] 视频处理失败: ${inputPath}:`, error);
-      
+
       return {
         success: false,
         error: `视频处理失败: ${error instanceof Error ? error.message : '未知错误'}`,
@@ -167,7 +167,7 @@ export class VideoProcessor implements IFileProcessor {
       'video/x-flv', // flv
       'video/x-matroska' // mkv
     ];
-    
+
     return supportedTypes.includes(mimeType.toLowerCase());
   }
 
@@ -283,7 +283,7 @@ export class VideoProcessor implements IFileProcessor {
         // 设置质量
         if (options.quality) {
           command = this.setVideoQuality(command, options.quality);
-          console.log(`🔧 [VideoProcessor] 设置视频质量: ${options.quality}`);
+          logger.info(`🔧 [VideoProcessor] 设置视频质量: ${options.quality}`);
         }
 
         // 设置输出格式
@@ -292,7 +292,7 @@ export class VideoProcessor implements IFileProcessor {
         // 添加进度监听
         command.on('progress', (progress: any) => {
           if (progress.percent) {
-            console.log(`🎬 [VideoProcessor] 处理进度: ${Math.round(progress.percent)}%`);
+            logger.info(`🎬 [VideoProcessor] 处理进度: ${Math.round(progress.percent)}%`);
           }
         });
 
@@ -304,7 +304,7 @@ export class VideoProcessor implements IFileProcessor {
 
         // 添加完成监听
         command.on('end', () => {
-          console.log(`✅ [VideoProcessor] FFmpeg处理完成: ${outputPath}`);
+          logger.info(`✅ [VideoProcessor] FFmpeg处理完成: ${outputPath}`);
           resolve();
         });
 
@@ -377,7 +377,7 @@ export class VideoProcessor implements IFileProcessor {
     return new Promise((resolve, reject) => {
       try {
         const thumbnailPath = this.getThumbnailPath(outputPath);
-        
+
         this.ffmpeg(inputPath)
           .seekInput(timeOffset)
           .frames(1)
@@ -387,7 +387,7 @@ export class VideoProcessor implements IFileProcessor {
             reject(err);
           })
           .on('end', () => {
-            console.log(`🖼️ [VideoProcessor] 视频缩略图生成完成: ${thumbnailPath}`);
+            logger.info(`🖼️ [VideoProcessor] 视频缩略图生成完成: ${thumbnailPath}`);
             resolve(thumbnailPath);
           })
           .save(thumbnailPath);
@@ -415,7 +415,7 @@ export class VideoProcessor implements IFileProcessor {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainingSeconds = Math.floor(seconds % 60);
-    
+
     if (hours > 0) {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
     } else {
@@ -462,50 +462,50 @@ export class VideoProcessor implements IFileProcessor {
    * 创建模拟FFmpeg对象（开发测试用）
    */
   private createMockFFmpeg(): any {
-    console.log('🧪 [VideoProcessor] 创建模拟FFmpeg处理器');
+    logger.info('🧪 [VideoProcessor] 创建模拟FFmpeg处理器');
 
     const mockFFmpeg = (input: string) => {
-      console.log(`🧪 [MockFFmpeg] 处理视频: ${input}`);
+      logger.info(`🧪 [MockFFmpeg] 处理视频: ${input}`);
 
       return {
         videoCodec: (codec: string) => {
-          console.log(`🧪 [MockFFmpeg] 设置视频编解码器: ${codec}`);
+          logger.info(`🧪 [MockFFmpeg] 设置视频编解码器: ${codec}`);
           return mockFFmpeg(input);
         },
 
         audioCodec: (codec: string) => {
-          console.log(`🧪 [MockFFmpeg] 设置音频编解码器: ${codec}`);
+          logger.info(`🧪 [MockFFmpeg] 设置音频编解码器: ${codec}`);
           return mockFFmpeg(input);
         },
 
         format: (format: string) => {
-          console.log(`🧪 [MockFFmpeg] 设置输出格式: ${format}`);
+          logger.info(`🧪 [MockFFmpeg] 设置输出格式: ${format}`);
           return mockFFmpeg(input);
         },
 
         outputOptions: (options: string[]) => {
-          console.log(`🧪 [MockFFmpeg] 设置输出选项:`, options);
+          logger.info(`🧪 [MockFFmpeg] 设置输出选项:`, options);
           return mockFFmpeg(input);
         },
 
         seekInput: (time: number) => {
-          console.log(`🧪 [MockFFmpeg] 跳转到时间: ${time}s`);
+          logger.info(`🧪 [MockFFmpeg] 跳转到时间: ${time}s`);
           return mockFFmpeg(input);
         },
 
         frames: (count: number) => {
-          console.log(`🧪 [MockFFmpeg] 提取帧数: ${count}`);
+          logger.info(`🧪 [MockFFmpeg] 提取帧数: ${count}`);
           return mockFFmpeg(input);
         },
 
         size: (size: string) => {
-          console.log(`🧪 [MockFFmpeg] 设置尺寸: ${size}`);
+          logger.info(`🧪 [MockFFmpeg] 设置尺寸: ${size}`);
           return mockFFmpeg(input);
         },
 
         on: (event: string, callback: Function) => {
-          console.log(`🧪 [MockFFmpeg] 注册事件监听: ${event}`);
-          
+          logger.info(`🧪 [MockFFmpeg] 注册事件监听: ${event}`);
+
           if (event === 'progress') {
             // 模拟进度更新
             setTimeout(() => callback({ percent: 25 }), 100);
@@ -516,13 +516,13 @@ export class VideoProcessor implements IFileProcessor {
             // 模拟处理完成
             setTimeout(() => callback(), 500);
           }
-          
+
           return mockFFmpeg(input);
         },
 
         save: async (outputPath: string) => {
-          console.log(`🧪 [MockFFmpeg] 保存视频文件: ${outputPath}`);
-          
+          logger.info(`🧪 [MockFFmpeg] 保存视频文件: ${outputPath}`);
+
           // 创建模拟输出文件
           const outputDir = path.dirname(outputPath);
           await fs.mkdir(outputDir, { recursive: true });
@@ -533,8 +533,8 @@ export class VideoProcessor implements IFileProcessor {
 
     // 添加ffprobe方法
     mockFFmpeg.ffprobe = (filePath: string, callback: Function) => {
-      console.log(`🧪 [MockFFmpeg] 获取视频元数据: ${filePath}`);
-      
+      logger.info(`🧪 [MockFFmpeg] 获取视频元数据: ${filePath}`);
+
       setTimeout(() => {
         const mockMetadata = {
           streams: [{
@@ -551,7 +551,7 @@ export class VideoProcessor implements IFileProcessor {
             bit_rate: '1000000'
           }
         };
-        
+
         callback(null, mockMetadata);
       }, 100);
     };
@@ -570,7 +570,7 @@ export class VideoProcessor implements IFileProcessor {
   ): Promise<ProcessingResult[]> {
     this.ensureInitialized();
 
-    console.log(`🎬 [VideoProcessor] 开始批量处理 ${inputPaths.length} 个视频文件`);
+    logger.info(`🎬 [VideoProcessor] 开始批量处理 ${inputPaths.length} 个视频文件`);
 
     const results: ProcessingResult[] = [];
 
@@ -599,7 +599,7 @@ export class VideoProcessor implements IFileProcessor {
     }
 
     const successCount = results.filter(r => r.success).length;
-    console.log(`✅ [VideoProcessor] 批量处理完成，成功: ${successCount}/${inputPaths.length}`);
+    logger.info(`✅ [VideoProcessor] 批量处理完成，成功: ${successCount}/${inputPaths.length}`);
 
     return results;
   }
@@ -619,15 +619,15 @@ export class VideoProcessor implements IFileProcessor {
     this.ensureInitialized();
 
     const { count = 10, interval, format = 'jpg' } = options;
-    
-    console.log(`🖼️ [VideoProcessor] 提取视频帧: ${inputPath}, 数量: ${count}`);
+
+    logger.info(`🖼️ [VideoProcessor] 提取视频帧: ${inputPath}, 数量: ${count}`);
 
     return new Promise((resolve, reject) => {
       try {
         const framePaths: string[] = [];
-        
+
         let command = this.ffmpeg(inputPath);
-        
+
         if (interval) {
           // 按间隔提取
           command = command.outputOptions([`-vf fps=1/${interval}`]);
@@ -637,7 +637,7 @@ export class VideoProcessor implements IFileProcessor {
         }
 
         const outputPattern = path.join(outputDir, `frame_%03d.${format}`);
-        
+
         command
           .on('error', (err: any) => {
             console.error(`❌ [VideoProcessor] 提取帧失败:`, err);
@@ -651,8 +651,8 @@ export class VideoProcessor implements IFileProcessor {
                 .filter(file => file.startsWith('frame_') && file.endsWith(`.${format}`))
                 .sort()
                 .map(file => path.join(outputDir, file));
-              
-              console.log(`✅ [VideoProcessor] 帧提取完成，共 ${frameFiles.length} 帧`);
+
+              logger.info(`✅ [VideoProcessor] 帧提取完成，共 ${frameFiles.length} 帧`);
               resolve(frameFiles);
             } catch (error) {
               reject(error);
@@ -677,7 +677,7 @@ export class VideoProcessor implements IFileProcessor {
     this.ensureInitialized();
 
     const startTime = Date.now();
-    console.log(`🗜️ [VideoProcessor] 开始视频压缩: ${inputPath}, 级别: ${compressionLevel}`);
+    logger.info(`🗜️ [VideoProcessor] 开始视频压缩: ${inputPath}, 级别: ${compressionLevel}`);
 
     const options: VideoProcessingOptions = {
       type: 'video',
@@ -699,4 +699,4 @@ export class VideoProcessor implements IFileProcessor {
       default: return 60;
     }
   }
-} 
+}

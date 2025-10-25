@@ -60,14 +60,14 @@ export class ProcessingQueue extends EventEmitter {
   private tasks: Map<string, QueueTask> = new Map();
   private runningTasks: Set<string> = new Set();
   private processors: Map<ProcessorType, IFileProcessor> = new Map();
-  
+
   private options: Required<QueueOptions>;
   private isStarted = false;
   private processInterval: NodeJS.Timeout | null = null;
 
   constructor(options: QueueOptions = {}) {
     super();
-    
+
     this.options = {
       maxConcurrentTasks: options.maxConcurrentTasks || 3,
       maxRetries: options.maxRetries || 2,
@@ -76,8 +76,8 @@ export class ProcessingQueue extends EventEmitter {
       autoStart: options.autoStart !== false
     };
 
-    console.log('📋 [ProcessingQueue] 队列管理器已创建');
-    
+    logger.info('📋 [ProcessingQueue] 队列管理器已创建');
+
     if (this.options.autoStart) {
       this.start();
     }
@@ -88,7 +88,7 @@ export class ProcessingQueue extends EventEmitter {
    */
   registerProcessor(processor: IFileProcessor): void {
     this.processors.set(processor.type, processor);
-    console.log(`🔧 [ProcessingQueue] 注册处理器: ${processor.type}`);
+    logger.info(`🔧 [ProcessingQueue] 注册处理器: ${processor.type}`);
   }
 
   /**
@@ -101,7 +101,7 @@ export class ProcessingQueue extends EventEmitter {
     taskOptions: Partial<Pick<QueueTask, 'priority' | 'maxRetries' | 'onProgress' | 'onComplete' | 'onError'>> = {}
   ): string {
     const taskId = this.generateTaskId();
-    
+
     const task: QueueTask = {
       id: taskId,
       inputPath,
@@ -124,16 +124,16 @@ export class ProcessingQueue extends EventEmitter {
     task.processor = processor;
 
     this.tasks.set(taskId, task);
-    
-    console.log(`📝 [ProcessingQueue] 添加任务: ${taskId} (${inputPath})`);
-    
+
+    logger.info(`📝 [ProcessingQueue] 添加任务: ${taskId} (${inputPath})`);
+
     this.emit('taskAdded', task);
-    
+
     // 如果队列已启动，尝试立即处理
     if (this.isStarted) {
       this.processNext();
     }
-    
+
     return taskId;
   }
 
@@ -147,15 +147,15 @@ export class ProcessingQueue extends EventEmitter {
     }
 
     this.isStarted = true;
-    console.log('▶️ [ProcessingQueue] 启动队列处理');
-    
+    logger.info('▶️ [ProcessingQueue] 启动队列处理');
+
     // 定期检查并处理任务
     this.processInterval = setInterval(() => {
       this.processNext();
     }, 1000);
-    
+
     this.emit('started');
-    
+
     // 立即尝试处理任务
     this.processNext();
   }
@@ -170,13 +170,13 @@ export class ProcessingQueue extends EventEmitter {
     }
 
     this.isStarted = false;
-    
+
     if (this.processInterval) {
       clearInterval(this.processInterval);
       this.processInterval = null;
     }
-    
-    console.log('⏹️ [ProcessingQueue] 停止队列处理');
+
+    logger.info('⏹️ [ProcessingQueue] 停止队列处理');
     this.emit('stopped');
   }
 
@@ -196,8 +196,8 @@ export class ProcessingQueue extends EventEmitter {
     }
 
     task.status = 'cancelled';
-    console.log(`⏸️ [ProcessingQueue] 暂停任务: ${taskId}`);
-    
+    logger.info(`⏸️ [ProcessingQueue] 暂停任务: ${taskId}`);
+
     this.emit('taskCancelled', task);
     return true;
   }
@@ -218,8 +218,8 @@ export class ProcessingQueue extends EventEmitter {
     }
 
     task.status = 'cancelled';
-    console.log(`❌ [ProcessingQueue] 取消任务: ${taskId}`);
-    
+    logger.info(`❌ [ProcessingQueue] 取消任务: ${taskId}`);
+
     this.emit('taskCancelled', task);
     return true;
   }
@@ -258,7 +258,7 @@ export class ProcessingQueue extends EventEmitter {
   getStats(): QueueStats {
     const allTasks = Array.from(this.tasks.values());
     const completedTasks = allTasks.filter(task => task.status === 'completed');
-    
+
     const totalProcessingTime = completedTasks.reduce((sum, task) => {
       if (task.startTime && task.endTime) {
         return sum + (task.endTime - task.startTime);
@@ -283,17 +283,17 @@ export class ProcessingQueue extends EventEmitter {
    */
   cleanup(): void {
     const beforeCount = this.tasks.size;
-    
+
     for (const [taskId, task] of Array.from(this.tasks.entries())) {
       if (task.status === 'completed' || task.status === 'failed' || task.status === 'cancelled') {
         this.tasks.delete(taskId);
       }
     }
-    
+
     const afterCount = this.tasks.size;
     const cleanedCount = beforeCount - afterCount;
-    
-    console.log(`🧹 [ProcessingQueue] 清理完成，移除 ${cleanedCount} 个任务`);
+
+    logger.info(`🧹 [ProcessingQueue] 清理完成，移除 ${cleanedCount} 个任务`);
     this.emit('cleanup', { cleaned: cleanedCount, remaining: afterCount });
   }
 
@@ -360,13 +360,13 @@ export class ProcessingQueue extends EventEmitter {
       return;
     }
 
-    console.log(`🚀 [ProcessingQueue] 开始处理任务: ${task.id}`);
-    
+    logger.info(`🚀 [ProcessingQueue] 开始处理任务: ${task.id}`);
+
     // 更新任务状态
     task.status = 'running';
     task.startTime = Date.now();
     this.runningTasks.add(task.id);
-    
+
     this.emit('taskStarted', task);
 
     // 设置超时
@@ -406,11 +406,11 @@ export class ProcessingQueue extends EventEmitter {
     task.status = 'completed';
     task.endTime = Date.now();
     task.result = result;
-    
+
     this.runningTasks.delete(task.id);
-    
-    console.log(`✅ [ProcessingQueue] 任务完成: ${task.id}`);
-    
+
+    logger.info(`✅ [ProcessingQueue] 任务完成: ${task.id}`);
+
     if (task.onComplete) {
       try {
         task.onComplete(task, result);
@@ -418,9 +418,9 @@ export class ProcessingQueue extends EventEmitter {
         console.error('❌ [ProcessingQueue] 任务完成回调错误:', error);
       }
     }
-    
+
     this.emit('taskCompleted', task, result);
-    
+
     // 尝试处理下一个任务
     setTimeout(() => this.processNext(), 0);
   }
@@ -430,24 +430,24 @@ export class ProcessingQueue extends EventEmitter {
    */
   private retryOrFailTask(task: QueueTask, error: string): void {
     this.runningTasks.delete(task.id);
-    
+
     if (task.retries < task.maxRetries) {
       // 重试任务
       task.retries++;
       task.status = 'pending';
       task.error = undefined;
-      
-      console.log(`🔄 [ProcessingQueue] 重试任务: ${task.id} (${task.retries}/${task.maxRetries})`);
-      
+
+      logger.info(`🔄 [ProcessingQueue] 重试任务: ${task.id} (${task.retries}/${task.maxRetries})`);
+
       this.emit('taskRetried', task);
-      
+
       // 延迟重试
       setTimeout(() => {
         if (this.isStarted) {
           this.processNext();
         }
       }, this.options.retryDelay);
-      
+
     } else {
       // 任务失败
       this.failTask(task, error);
@@ -461,11 +461,11 @@ export class ProcessingQueue extends EventEmitter {
     task.status = 'failed';
     task.endTime = Date.now();
     task.error = error;
-    
+
     this.runningTasks.delete(task.id);
-    
+
     console.error(`❌ [ProcessingQueue] 任务失败: ${task.id} - ${error}`);
-    
+
     if (task.onError) {
       try {
         task.onError(task, error);
@@ -473,9 +473,9 @@ export class ProcessingQueue extends EventEmitter {
         console.error('❌ [ProcessingQueue] 任务失败回调错误:', callbackError);
       }
     }
-    
+
     this.emit('taskFailed', task, error);
-    
+
     // 尝试处理下一个任务
     setTimeout(() => this.processNext(), 0);
   }
@@ -504,7 +504,7 @@ export class ProcessingQueue extends EventEmitter {
     const results = new Map<string, ProcessingResult>();
     let completedCount = 0;
 
-    console.log(`📦 [ProcessingQueue] 批量添加 ${tasks.length} 个任务`);
+    logger.info(`📦 [ProcessingQueue] 批量添加 ${tasks.length} 个任务`);
 
     for (const taskSpec of tasks) {
       const taskId = this.addTask(
@@ -516,11 +516,11 @@ export class ProcessingQueue extends EventEmitter {
           onComplete: (task, result) => {
             results.set(task.id, result);
             completedCount++;
-            
+
             if (onBatchProgress) {
               onBatchProgress(completedCount, tasks.length);
             }
-            
+
             if (completedCount === tasks.length && onBatchComplete) {
               onBatchComplete(results);
             }
@@ -528,18 +528,18 @@ export class ProcessingQueue extends EventEmitter {
           onError: (task, error) => {
             results.set(task.id, { success: false, error });
             completedCount++;
-            
+
             if (onBatchProgress) {
               onBatchProgress(completedCount, tasks.length);
             }
-            
+
             if (completedCount === tasks.length && onBatchComplete) {
               onBatchComplete(results);
             }
           }
         }
       );
-      
+
       taskIds.push(taskId);
     }
 
@@ -582,4 +582,4 @@ export class ProcessingQueue extends EventEmitter {
       recommendations
     };
   }
-} 
+}

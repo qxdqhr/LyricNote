@@ -1,140 +1,249 @@
-import Link from 'next/link';
-import { APP_CONFIG } from '@lyricnote/shared';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { ChevronDown, ImageIcon } from 'lucide-react';
+import { logger } from '@lyricnote/shared';
+import Image from 'next/image';
+
+interface HomepageSection {
+  id: number;
+  title: string;
+  description: string;
+  backgroundImage: string | null;
+  order: number;
+}
+
+interface ImageLoadState {
+  [key: number]: 'loading' | 'loaded' | 'error';
+}
 
 export default function HomePage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-      <div className="container mx-auto px-4 py-16">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            {APP_CONFIG.icon} {APP_CONFIG.name} Backend
-          </h1>
-          <p className="text-xl text-gray-600 mb-8">日语音乐识别应用后端系统 + Web 管理平台</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
-              Next.js 15
-            </span>
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-              TypeScript
-            </span>
-            <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-              Prisma ORM
-            </span>
-            <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
-              PostgreSQL
-            </span>
-            <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-              Redis
-            </span>
-          </div>
-        </div>
+  const [sections, setSections] = useState<HomepageSection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentSection, setCurrentSection] = useState(0);
+  const [imageLoadState, setImageLoadState] = useState<ImageLoadState>({});
 
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div className="text-3xl mb-4">🎤</div>
-            <h3 className="text-xl font-semibold mb-2">音乐识别 API</h3>
-            <p className="text-gray-600">基于 AI 的日语歌曲识别，支持多种音频格式，高准确率识别</p>
-          </div>
+  useEffect(() => {
+    fetchSections();
+  }, []);
 
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div className="text-3xl mb-4">📝</div>
-            <h3 className="text-xl font-semibold mb-2">歌词处理</h3>
-            <p className="text-gray-600">汉字、平假名、罗马音多语言转换，AI 增强的翻译服务</p>
-          </div>
+  // 预加载图片
+  useEffect(() => {
+    if (sections.length > 0) {
+      sections.forEach((section) => {
+        if (section.backgroundImage) {
+          setImageLoadState((prev) => ({ ...prev, [section.id]: 'loading' }));
+          const img = new window.Image();
+          img.onload = () => {
+            setImageLoadState((prev) => ({ ...prev, [section.id]: 'loaded' }));
+          };
+          img.onerror = () => {
+            setImageLoadState((prev) => ({ ...prev, [section.id]: 'error' }));
+            logger.error(`图片加载失败: ${section.backgroundImage}`);
+          };
+          img.src = section.backgroundImage;
+        }
+      });
+    }
+  }, [sections]);
 
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div className="text-3xl mb-4">👥</div>
-            <h3 className="text-xl font-semibold mb-2">用户管理</h3>
-            <p className="text-gray-600">完整的用户注册、登录、权限控制和会话管理系统</p>
-          </div>
+  const fetchSections = async () => {
+    try {
+      const response = await fetch('/api/homepage-sections');
+      const result = await response.json();
+      if (result.success) {
+        logger.info('获取首页配置成功', result.data);
+        setSections(result.data);
+      } else {
+        logger.error('获取首页配置失败', result.error);
+      }
+    } catch (error) {
+      logger.error('获取首页配置失败', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div className="text-3xl mb-4">📚</div>
-            <h3 className="text-xl font-semibold mb-2">收藏管理</h3>
-            <p className="text-gray-600">智能分类的歌曲收藏系统，支持学习进度跟踪</p>
-          </div>
+  const scrollToNext = () => {
+    if (currentSection < sections.length - 1) {
+      const nextSection = currentSection + 1;
+      setCurrentSection(nextSection);
+      document.getElementById(`section-${nextSection}`)?.scrollIntoView({
+        behavior: 'smooth',
+      });
+    }
+  };
 
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div className="text-3xl mb-4">🤖</div>
-            <h3 className="text-xl font-semibold mb-2">AI 集成</h3>
-            <p className="text-gray-600">DeepSeek 大模型日语优化处理，智能歌词转换和翻译</p>
-          </div>
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const newSection = Math.round(scrollPosition / windowHeight);
+      setCurrentSection(newSection);
+    };
 
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div className="text-3xl mb-4">📊</div>
-            <h3 className="text-xl font-semibold mb-2">管理后台</h3>
-            <p className="text-gray-600">完整的 Web 管理界面，数据分析和系统监控</p>
-          </div>
-        </div>
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-        {/* API Status */}
-        <div className="bg-white rounded-lg shadow-md p-8 mb-16">
-          <h2 className="text-2xl font-bold mb-6 text-center">API 状态</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-green-500 text-2xl mb-2">✅</div>
-              <h3 className="font-semibold">认证服务</h3>
-              <p className="text-sm text-gray-600">正常运行</p>
-            </div>
-            <div className="text-center">
-              <div className="text-green-500 text-2xl mb-2">✅</div>
-              <h3 className="font-semibold">音乐识别</h3>
-              <p className="text-sm text-gray-600">正常运行</p>
-            </div>
-            <div className="text-center">
-              <div className="text-green-500 text-2xl mb-2">✅</div>
-              <h3 className="font-semibold">歌词处理</h3>
-              <p className="text-sm text-gray-600">正常运行</p>
-            </div>
-            <div className="text-center">
-              <div className="text-yellow-500 text-2xl mb-2">⚠️</div>
-              <h3 className="font-semibold">AI 服务</h3>
-              <p className="text-sm text-gray-600">需要配置</p>
-            </div>
-          </div>
-        </div>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
-        {/* Quick Actions */}
+  if (sections.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-8">快速开始</h2>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/admin"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-            >
-              管理后台
-            </Link>
-            <a
-              href="/api/health"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-            >
-              API 健康检查
-            </a>
-            <a
-              href="https://github.com/your-org/lyricnote-backend"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-            >
-              GitHub 文档
-            </a>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center mt-16 pt-8 border-t border-gray-200">
-          <p className="text-gray-500">
-            {APP_CONFIG.name} Backend v{APP_CONFIG.version} • {APP_CONFIG.description}
-          </p>
-          <p className="text-sm text-gray-400 mt-2">
-            Built with ❤️ using Next.js, TypeScript, and modern web technologies
-          </p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">欢迎使用 LyricNote</h1>
+          <p className="text-gray-600">请在后台配置首页内容</p>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      {sections.map((section, index) => {
+        const hasImage = section.backgroundImage && imageLoadState[section.id] === 'loaded';
+        const imageError = imageLoadState[section.id] === 'error';
+        const imageLoading = imageLoadState[section.id] === 'loading';
+
+        return (
+          <section
+            key={section.id}
+            id={`section-${index}`}
+            className="relative h-screen flex items-center justify-center overflow-hidden snap-start"
+            style={{
+              background: !hasImage
+                ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                : undefined,
+            }}
+          >
+            {/* 背景图片 */}
+            {hasImage && (
+              <div className="absolute inset-0">
+                <Image
+                  src={section.backgroundImage!}
+                  alt={section.title}
+                  fill
+                  className="object-cover"
+                  style={{ objectPosition: 'center' }}
+                  priority={index === 0}
+                  unoptimized // OSS 外部图片需要 unoptimized
+                  quality={90}
+                />
+              </div>
+            )}
+
+            {/* 图片加载中 */}
+            {imageLoading && (
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">加载图片中...</p>
+                </div>
+              </div>
+            )}
+
+            {/* 图片加载失败 */}
+            {imageError && (
+              <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <ImageIcon className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <p>图片加载失败</p>
+                  <p className="text-sm mt-2 opacity-75">{section.backgroundImage}</p>
+                </div>
+              </div>
+            )}
+          {/* 内容 */}
+          <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-fade-in-up">
+              {section.title}
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 mb-8 animate-fade-in-up animation-delay-200">
+              {section.description}
+            </p>
+
+            {index === 0 && (
+              <a
+                href="/admin"
+                className="inline-block px-8 py-4 bg-white text-blue-600 rounded-full font-semibold text-lg hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 animate-fade-in-up animation-delay-400"
+              >
+                进入后台管理
+              </a>
+            )}
+          </div>
+
+          {/* 滚动提示 */}
+          {index < sections.length - 1 && (
+            <button
+              onClick={scrollToNext}
+              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce cursor-pointer bg-white/10 backdrop-blur-sm rounded-full p-3 hover:bg-white/20 transition-all z-30"
+              aria-label="滚动到下一节"
+            >
+              <ChevronDown className="w-6 h-6" />
+            </button>
+          )}
+
+          {/* 页面指示器 */}
+          <div className="absolute bottom-8 right-8 flex flex-col gap-2 z-30">
+            {sections.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setCurrentSection(idx);
+                  document.getElementById(`section-${idx}`)?.scrollIntoView({
+                    behavior: 'smooth',
+                  });
+                }}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  idx === currentSection
+                    ? 'bg-white h-8'
+                    : 'bg-white/50 hover:bg-white/75'
+                }`}
+                aria-label={`跳转到第 ${idx + 1} 节`}
+              />
+            ))}
+          </div>
+        </section>
+        );
+      })}
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in-up {
+          animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .animation-delay-200 {
+          animation-delay: 0.2s;
+          opacity: 0;
+        }
+
+        .animation-delay-400 {
+          animation-delay: 0.4s;
+          opacity: 0;
+        }
+
+        html {
+          scroll-snap-type: y mandatory;
+          scroll-behavior: smooth;
+        }
+      `}</style>
     </div>
   );
 }

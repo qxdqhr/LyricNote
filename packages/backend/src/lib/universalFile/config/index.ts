@@ -222,7 +222,7 @@ export class FileServiceConfigManager {
     };
 
     // 检查必需的配置项
-    console.log('🔍 [ConfigManager] 阿里云OSS配置:', {
+    logger.info('🔍 [ConfigManager] 阿里云OSS配置:', {
       region: config.region,
       bucket: config.bucket,
       accessKeyId: config.accessKeyId ? '***' : '未设置',
@@ -232,7 +232,7 @@ export class FileServiceConfigManager {
     if (config.region && config.bucket && config.accessKeyId && config.accessKeySecret) {
       this.enableStorageProvider('aliyun-oss', config);
       this.config.defaultStorage = 'aliyun-oss';
-      console.log('✅ [ConfigManager] 从环境变量加载阿里云OSS配置成功');
+      logger.info('✅ [ConfigManager] 从环境变量加载阿里云OSS配置成功');
     } else {
       console.warn('⚠️ [ConfigManager] 阿里云OSS环境变量配置不完整');
     }
@@ -247,11 +247,11 @@ export class FileServiceConfigManager {
       if (typeof window === 'undefined') {
         const { EnvConfigService } = await import('@/modules/configManager/services/envConfigService');
         const service = EnvConfigService.getInstance();
-        
+
         // 先加载配置到缓存
         await service.loadConfigFromDatabase();
         const config = service.getCachedConfig();
-        console.log('🔍 [ConfigManager] 从配置管理模块加载阿里云OSS配置:', config);
+        logger.info('🔍 [ConfigManager] 从配置管理模块加载阿里云OSS配置:', config);
         const ossConfig: Partial<AliyunOSSConfig> = {
           region: config.ALIYUN_OSS_REGION,
           bucket: config.ALIYUN_OSS_BUCKET,
@@ -262,7 +262,7 @@ export class FileServiceConfigManager {
           internal: config.ALIYUN_OSS_INTERNAL === 'true'
         };
 
-        console.log('🔍 [ConfigManager] 从配置管理模块加载阿里云OSS配置:', {
+        logger.info('🔍 [ConfigManager] 从配置管理模块加载阿里云OSS配置:', {
           region: ossConfig.region,
           bucket: ossConfig.bucket,
           accessKeyId: ossConfig.accessKeyId ? '***' : '未设置',
@@ -273,7 +273,7 @@ export class FileServiceConfigManager {
         if (ossConfig.region && ossConfig.bucket && ossConfig.accessKeyId && ossConfig.accessKeySecret) {
           this.enableStorageProvider('aliyun-oss', ossConfig);
           this.config.defaultStorage = 'aliyun-oss';
-          console.log('✅ [ConfigManager] 从配置管理模块加载阿里云OSS配置成功');
+          logger.info('✅ [ConfigManager] 从配置管理模块加载阿里云OSS配置成功');
         } else {
           console.warn('⚠️ [ConfigManager] 配置管理模块中的阿里云OSS配置不完整');
         }
@@ -297,10 +297,10 @@ export class FileServiceConfigManager {
     // 检查必需的配置项
     if (config.domain && config.accessKeyId && config.accessKeySecret) {
       this.enableCDNProvider('aliyun-cdn', config);
-      console.log('✅ [ConfigManager] 从环境变量加载阿里云CDN配置成功');
+      logger.info('✅ [ConfigManager] 从环境变量加载阿里云CDN配置成功');
     } else {
       // CDN配置是可选的，不输出警告
-      console.log('ℹ️ [ConfigManager] 阿里云CDN未配置，将使用默认存储方式');
+      logger.info('ℹ️ [ConfigManager] 阿里云CDN未配置，将使用默认存储方式');
     }
   }
 
@@ -363,7 +363,7 @@ export class FileServiceConfigManager {
  */
 export function createFileServiceConfig(customConfig?: Partial<UniversalFileServiceConfig>): FileServiceConfigManager {
   const configManager = new FileServiceConfigManager(customConfig);
-  
+
   // 尝试从环境变量加载云服务配置
   configManager.loadAliyunOSSFromEnv();
   configManager.loadAliyunCDNFromEnv();
@@ -376,16 +376,16 @@ export function createFileServiceConfig(customConfig?: Partial<UniversalFileServ
  */
 export async function createFileServiceConfigWithConfigManager(customConfig?: Partial<UniversalFileServiceConfig>): Promise<FileServiceConfigManager> {
   const configManager = new FileServiceConfigManager(customConfig);
-  
+
   // 优先从配置管理模块加载配置
   await configManager.loadAliyunOSSFromConfigManager();
-  
+
   // 如果配置管理模块没有配置，则从环境变量加载
   const ossConfig = configManager.getStorageConfig('aliyun-oss');
   if (!ossConfig || !ossConfig.enabled) {
     configManager.loadAliyunOSSFromEnv();
   }
-  
+
   // 检查OSS配置是否有效
   const finalOssConfig = configManager.getStorageConfig('aliyun-oss');
   if (!finalOssConfig || !finalOssConfig.enabled || !validateAliyunOSSConfig(finalOssConfig as AliyunOSSConfig)) {
@@ -393,19 +393,19 @@ export async function createFileServiceConfigWithConfigManager(customConfig?: Pa
     // 启用本地存储作为备用
     configManager.enableStorageProvider('local');
     configManager.updateConfig({ defaultStorage: 'local' });
-    console.log('ℹ️ [ConfigManager] 已启用本地存储作为备用方案');
+    logger.info('ℹ️ [ConfigManager] 已启用本地存储作为备用方案');
   } else {
     // OSS配置有效，确保使用OSS作为默认存储
     configManager.updateConfig({ defaultStorage: 'aliyun-oss' });
-    console.log('✅ [ConfigManager] 使用阿里云OSS作为默认存储');
-    
+    logger.info('✅ [ConfigManager] 使用阿里云OSS作为默认存储');
+
     // 同时启用本地存储作为备用
     configManager.enableStorageProvider('local');
-    console.log('ℹ️ [ConfigManager] 同时启用本地存储作为备用方案');
+    logger.info('ℹ️ [ConfigManager] 同时启用本地存储作为备用方案');
   }
-  
+
   configManager.loadAliyunCDNFromEnv();
-  
+
   return configManager;
 }
 
@@ -444,11 +444,11 @@ export function validateAliyunCDNConfig(config: AliyunCDNConfig): boolean {
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 B';
-  
+
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
@@ -470,7 +470,7 @@ export function getStorageProviderDisplayName(type: StorageType): string {
     'aws-s3': 'AWS S3',
     'qcloud-cos': '腾讯云COS'
   };
-  
+
   return names[type] || type;
 }
 
@@ -484,6 +484,6 @@ export function getCDNProviderDisplayName(type: CDNType): string {
     'aws-cloudfront': 'AWS CloudFront',
     'qcloud-cdn': '腾讯云CDN'
   };
-  
+
   return names[type] || type;
-} 
+}

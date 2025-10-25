@@ -2,7 +2,7 @@ import { LoggerAdapter, LogEntry, LogLevel } from './types';
 
 /**
  * 控制台日志适配器
- * 使用 console.log/warn/error 输出日志
+ * 使用 logger.info/warn/error 输出日志
  */
 export class ConsoleLoggerAdapter implements LoggerAdapter {
   private readonly colors = {

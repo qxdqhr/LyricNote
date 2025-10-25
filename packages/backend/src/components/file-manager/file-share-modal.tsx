@@ -143,7 +143,7 @@ const FileShareModal: React.FC<FileShareModalProps> = ({
     try {
       await navigator.clipboard.writeText(text);
       // 这里可以显示复制成功提示
-      console.log('复制成功');
+      logger.info('复制成功');
     } catch (error) {
       console.error('复制失败:', error);
       // 备用方案
@@ -440,7 +440,7 @@ const FileShareModal: React.FC<FileShareModalProps> = ({
           <button
             onClick={() => {
               // 生成二维码或其他分享方式
-              console.log('其他分享方式');
+              logger.info('其他分享方式');
             }}
             className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
           >

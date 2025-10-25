@@ -219,7 +219,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
       if (response.ok) {
         const data = await response.json();
         setSavedConfigs(data.configs || []);
-        console.log('🔍 [ExportConfigEditor] 加载配置成功:', data.configs?.length || 0, '个配置');
+        logger.info('🔍 [ExportConfigEditor] 加载配置成功:', data.configs?.length || 0, '个配置');
       } else {
         console.error('🔍 [ExportConfigEditor] 加载配置失败:', response.status, response.statusText);
       }
@@ -241,7 +241,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
         setSavedConfigs(prev => prev.filter(cfg => cfg.id !== configId));
         // 通知外部组件配置已变化
         onConfigChange?.();
-        console.log('🔄 [ExportConfigEditor] 配置删除成功，通知外部组件刷新');
+        logger.info('🔄 [ExportConfigEditor] 配置删除成功，通知外部组件刷新');
       }
     } catch (error) {
       console.error('删除配置失败:', error);
@@ -475,7 +475,7 @@ export const ExportConfigEditor: React.FC<ExportConfigEditorProps> = ({
 
     // 通知外部组件配置已变化
     onConfigChange?.();
-    console.log('🔄 [ExportConfigEditor] 配置保存成功，通知外部组件刷新');
+    logger.info('🔄 [ExportConfigEditor] 配置保存成功，通知外部组件刷新');
   }, [config, onSave, onConfigChange]);
 
   // ============= 渲染字段项 =============

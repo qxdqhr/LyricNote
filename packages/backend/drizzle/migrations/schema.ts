@@ -263,3 +263,82 @@ import { analyticsEvents as baseAnalyticsEvents } from '@lyricnote/shared/analyt
 
 // 添加外键关系
 export const analyticsEvents = baseAnalyticsEvents;
+
+// ============================================================================
+// 导入子模块的Schema定义
+// ============================================================================
+
+// === 文件服务相关表 (UniversalFile) ===
+// 支持多模块文件管理、版本控制、分享功能、处理记录等
+export {
+  // 表定义
+  fileStorageProviders,
+  fileFolders,
+  fileMetadata,
+  fileVersions,
+  fileProcessingRecords,
+  fileShares,
+  fileAccessLogs,
+  fileThumbnails,
+  // Relations
+  fileStorageProvidersRelations,
+  fileFoldersRelations,
+  fileMetadataRelations,
+  fileVersionsRelations,
+  fileProcessingRecordsRelations,
+  fileSharesRelations,
+  fileAccessLogsRelations,
+  fileThumbnailsRelations,
+  // Types
+  type FileStorageProvider,
+  type NewFileStorageProvider,
+  type FileFolder,
+  type NewFileFolder,
+  type FileMetadata,
+  type NewFileMetadata,
+  type FileVersion,
+  type NewFileVersion,
+  type FileProcessingRecord,
+  type NewFileProcessingRecord,
+  type FileShare,
+  type NewFileShare,
+  type FileAccessLog,
+  type NewFileAccessLog,
+  type FileThumbnail,
+  type NewFileThumbnail,
+} from '../../src/lib/universalFile/db/schema';
+
+// === 导出服务相关表 (UniversalExport) ===
+// 支持多格式数据导出、配置管理、导出历史记录等
+export {
+  // 表定义
+  exportConfigs,
+  exportHistory,
+  // Relations
+  exportConfigsRelations,
+  exportHistoryRelations,
+  // Types
+  type ExportConfig,
+  type NewExportConfig,
+  type ExportHistory,
+  type NewExportHistory,
+} from '../../src/lib/universalExport/schema';
+
+// === 首页配置表 ===
+export const homepageSections = pgTable('homepage_sections', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  title: text().notNull(),
+  description: text().notNull(),
+  backgroundImage: text('background_image'),
+  order: integer().notNull().default(0),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at', { precision: 3, mode: 'string' })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp('updated_at', { precision: 3, mode: 'string' })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+}, (table) => [
+  index('homepage_sections_order_idx').using('btree', table.order.asc().nullsLast().op('int4_ops')),
+  index('homepage_sections_is_active_idx').using('btree', table.isActive.asc().nullsLast().op('bool_ops')),
+]);

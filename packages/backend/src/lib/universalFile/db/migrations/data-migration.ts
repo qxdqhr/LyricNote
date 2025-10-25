@@ -74,7 +74,7 @@ export class UniversalFileDataMigration {
 
       if (messageLevelIndex >= currentLevelIndex) {
         const timestamp = new Date().toISOString();
-        console.log(`[${timestamp}] [${level.toUpperCase()}] ${message}`, data || '');
+        logger.info(`[${timestamp}] [${level.toUpperCase()}] ${message}`, data || '');
       }
     };
   }
@@ -154,7 +154,7 @@ export class UniversalFileDataMigration {
       if (!this.options.dryRun) {
         await this.db.insert(fileStorageProviders).values(defaultProvider);
       }
-      
+
       this.logger('info', '创建默认存储提供者', defaultProvider);
     }
   }
@@ -247,7 +247,7 @@ export class UniversalFileDataMigration {
     // 分批处理
     for (let i = 0; i < transfers.length; i += this.options.batchSize) {
       const batch = transfers.slice(i, i + this.options.batchSize);
-      
+
       for (const transfer of batch) {
         try {
           // 生成文件哈希（如果文件存在）
@@ -360,9 +360,9 @@ export class UniversalFileDataMigration {
 
     // 检查数据完整性
     const duplicateHashes = await this.db
-      .select({ 
-        md5Hash: fileMetadata.md5Hash, 
-        count: sql<number>`count(*)` 
+      .select({
+        md5Hash: fileMetadata.md5Hash,
+        count: sql<number>`count(*)`
       })
       .from(fileMetadata)
       .groupBy(fileMetadata.md5Hash)
@@ -418,4 +418,4 @@ export async function migrateFileData(options: MigrationOptions): Promise<Migrat
 export async function rollbackMigration(options: MigrationOptions): Promise<void> {
   const migration = new UniversalFileDataMigration(options);
   await migration.rollback();
-} 
+}

@@ -147,7 +147,7 @@
 - TypeScript 类型检查
 - 未使用变量警告
 - 禁止使用 var
-- console.log 警告（保留 warn 和 error）
+- logger.info 警告（保留 warn 和 error）
 
 ### VSCode 配置
 

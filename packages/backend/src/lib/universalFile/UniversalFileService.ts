@@ -8,6 +8,7 @@ import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 import { createHash } from 'crypto';
 import * as path from 'path';
+import { logger } from '../logger';
 // import mime from 'mime-types'; // 临时注释，后续添加类型定义
 
 // 临时mime类型解析函数
@@ -102,7 +103,7 @@ export class UniversalFileService extends EventEmitter {
    * 初始化文件服务
    */
   async initialize(): Promise<void> {
-    console.log('🚀 [UniversalFileService] 开始初始化文件服务...');
+    logger.info('🚀 [UniversalFileService] 开始初始化文件服务...');
 
     try {
       // 初始化存储提供者
@@ -114,7 +115,7 @@ export class UniversalFileService extends EventEmitter {
       // 初始化文件处理器
       await this.initializeFileProcessors();
 
-      console.log('✅ [UniversalFileService] 文件服务初始化完成');
+      logger.info('✅ [UniversalFileService] 文件服务初始化完成');
     } catch (error) {
       console.error('❌ [UniversalFileService] 文件服务初始化失败:', error);
       throw error;
@@ -125,7 +126,7 @@ export class UniversalFileService extends EventEmitter {
    * 重新初始化存储提供者（支持配置热更新）
    */
   async reinitializeStorageProviders(): Promise<void> {
-    console.log('🔄 [UniversalFileService] 重新初始化存储提供者...');
+    logger.info('🔄 [UniversalFileService] 重新初始化存储提供者...');
 
     try {
       // 重新初始化OSS提供者
@@ -133,12 +134,12 @@ export class UniversalFileService extends EventEmitter {
       if (ossConfig && ossConfig.enabled) {
         const ossProvider = this.storageProviders.get('aliyun-oss');
         if (ossProvider && 'reinitialize' in ossProvider) {
-          console.log('🔄 [UniversalFileService] 重新初始化阿里云OSS提供者...');
+          logger.info('🔄 [UniversalFileService] 重新初始化阿里云OSS提供者...');
           await (ossProvider as any).reinitialize(ossConfig);
         }
       }
 
-      console.log('✅ [UniversalFileService] 存储提供者重新初始化完成');
+      logger.info('✅ [UniversalFileService] 存储提供者重新初始化完成');
     } catch (error) {
       console.error('❌ [UniversalFileService] 存储提供者重新初始化失败:', error);
       throw error;
@@ -150,7 +151,7 @@ export class UniversalFileService extends EventEmitter {
    */
   registerStorageProvider(provider: IStorageProvider): void {
     this.storageProviders.set(provider.type, provider);
-    console.log(`📦 [UniversalFileService] 注册存储提供者: ${provider.type}`);
+    logger.info(`📦 [UniversalFileService] 注册存储提供者: ${provider.type}`);
   }
 
   /**
@@ -158,7 +159,7 @@ export class UniversalFileService extends EventEmitter {
    */
   registerCDNProvider(provider: ICDNProvider): void {
     this.cdnProviders.set(provider.type, provider);
-    console.log(`🌐 [UniversalFileService] 注册CDN提供者: ${provider.type}`);
+    logger.info(`🌐 [UniversalFileService] 注册CDN提供者: ${provider.type}`);
   }
 
   /**
@@ -166,7 +167,7 @@ export class UniversalFileService extends EventEmitter {
    */
   registerFileProcessor(processor: IFileProcessor): void {
     this.fileProcessors.set(processor.type, processor);
-    console.log(`⚙️ [UniversalFileService] 注册文件处理器: ${processor.type}`);
+    logger.info(`⚙️ [UniversalFileService] 注册文件处理器: ${processor.type}`);
   }
 
   // ============= 核心文件操作方法 =============
@@ -182,7 +183,7 @@ export class UniversalFileService extends EventEmitter {
     const fileId = uuidv4();
     const startTime = Date.now();
 
-    console.log(`📤 [UniversalFileService] 开始上传文件: ${fileInfo.file.name}, ID: ${fileId}`);
+    logger.info(`📤 [UniversalFileService] 开始上传文件: ${fileInfo.file.name}, ID: ${fileId}`);
 
     try {
       // 验证文件
@@ -211,12 +212,12 @@ export class UniversalFileService extends EventEmitter {
 
       // 如果指定的存储提供者不可用，优先尝试OSS
       if (!storageProvider) {
-        console.log(`⚠️ [UniversalFileService] 存储提供者 ${selectedStorageType} 不可用，尝试使用OSS`);
+        logger.info(`⚠️ [UniversalFileService] 存储提供者 ${selectedStorageType} 不可用，尝试使用OSS`);
         storageProvider = this.storageProviders.get('aliyun-oss');
 
         // 如果OSS也不可用，回退到本地存储
         if (!storageProvider) {
-          console.log(`⚠️ [UniversalFileService] OSS不可用，回退到本地存储`);
+          logger.info(`⚠️ [UniversalFileService] OSS不可用，回退到本地存储`);
           storageProvider = this.storageProviders.get('local');
         }
       }
@@ -278,7 +279,7 @@ export class UniversalFileService extends EventEmitter {
       onProgress?.(progress);
 
       const uploadTime = Date.now() - startTime;
-      console.log(`✅ [UniversalFileService] 文件上传完成: ${fileId}, 耗时: ${uploadTime}ms`);
+      logger.info(`✅ [UniversalFileService] 文件上传完成: ${fileId}, 耗时: ${uploadTime}ms`);
 
       this.emitFileEvent('upload:complete', fileId, {
         fileName: fileInfo.file.name,
@@ -314,7 +315,7 @@ export class UniversalFileService extends EventEmitter {
    * 下载文件
    */
   async downloadFile(fileId: string, userId?: string): Promise<Buffer> {
-    console.log(`📥 [UniversalFileService] 开始下载文件: ${fileId}`);
+    logger.info(`📥 [UniversalFileService] 开始下载文件: ${fileId}`);
 
     try {
       this.emitFileEvent('download:start', fileId);
@@ -342,7 +343,7 @@ export class UniversalFileService extends EventEmitter {
       // 更新访问统计
       await this.updateAccessStats(fileId);
 
-      console.log(`✅ [UniversalFileService] 文件下载完成: ${fileId}`);
+      logger.info(`✅ [UniversalFileService] 文件下载完成: ${fileId}`);
       this.emitFileEvent('download:complete', fileId, { size: fileBuffer.length });
 
       return fileBuffer;
@@ -357,7 +358,7 @@ export class UniversalFileService extends EventEmitter {
    * 删除文件
    */
   async deleteFile(fileId: string, userId?: string): Promise<void> {
-    console.log(`🗑️ [UniversalFileService] 开始删除文件: ${fileId}`);
+    logger.info(`🗑️ [UniversalFileService] 开始删除文件: ${fileId}`);
 
     try {
       // 获取文件元数据
@@ -390,7 +391,7 @@ export class UniversalFileService extends EventEmitter {
       // 清除缓存
       this.clearMetadataCache(fileId);
 
-      console.log(`✅ [UniversalFileService] 文件删除完成: ${fileId}`);
+      logger.info(`✅ [UniversalFileService] 文件删除完成: ${fileId}`);
       this.emitFileEvent('delete:complete', fileId);
 
     } catch (error) {
@@ -429,7 +430,7 @@ export class UniversalFileService extends EventEmitter {
       url = metadata.cdnUrl;
     } else {
       // 获取存储提供者访问URL
-      console.log(`🔗 qhr222 ${metadata.storagePath} fileID ${fileId} metadata.storageProvider ${metadata.storageProvider}`);
+      logger.info(`🔗 qhr222 ${metadata.storagePath} fileID ${fileId} metadata.storageProvider ${metadata.storageProvider}`);
 
       const storageProvider = this.storageProviders.get(metadata.storageProvider);
 
@@ -443,7 +444,7 @@ export class UniversalFileService extends EventEmitter {
     // 缓存URL
     const cacheExpires = Date.now() + (this.config.cache.urlTTL * 1000);
     this.urlCache.set(cacheKey, { url, expires: cacheExpires });
-    console.log(`🔗 qhr ${url}`);
+    logger.info(`🔗 qhr ${url}`);
 
     return url;
   }
@@ -519,7 +520,7 @@ export class UniversalFileService extends EventEmitter {
   // ============= 私有方法 =============
 
   private async initializeStorageProviders(): Promise<void> {
-    console.log('📦 [UniversalFileService] 开始初始化存储提供者...');
+    logger.info('📦 [UniversalFileService] 开始初始化存储提供者...');
 
     // 如果还没有注册任何存储提供者，先注册默认的
     if (this.storageProviders.size === 0) {
@@ -532,7 +533,7 @@ export class UniversalFileService extends EventEmitter {
         if (provider) {
           try {
             await provider.initialize(config);
-            console.log(`✅ [UniversalFileService] 存储提供者初始化完成: ${type}`);
+            logger.info(`✅ [UniversalFileService] 存储提供者初始化完成: ${type}`);
           } catch (error) {
             console.warn(`⚠️ [UniversalFileService] 存储提供者初始化失败: ${type}:`, error);
             // 如果默认存储提供者初始化失败，切换到本地存储
@@ -549,7 +550,7 @@ export class UniversalFileService extends EventEmitter {
   }
 
   private async registerDefaultStorageProviders(): Promise<void> {
-    console.log('📦 [UniversalFileService] 注册默认存储提供者...');
+    logger.info('📦 [UniversalFileService] 注册默认存储提供者...');
 
     // 优先注册OSS提供者
     const ossConfig = this.config.storageProviders['aliyun-oss'];
@@ -558,7 +559,7 @@ export class UniversalFileService extends EventEmitter {
         const { AliyunOSSProvider } = await import('./providers/AliyunOSSProvider');
         const ossProvider = new AliyunOSSProvider();
         this.registerStorageProvider(ossProvider);
-        console.log('✅ [UniversalFileService] 阿里云OSS提供者注册成功');
+        logger.info('✅ [UniversalFileService] 阿里云OSS提供者注册成功');
       } catch (error) {
         console.warn('⚠️ [UniversalFileService] 阿里云OSS提供者注册失败:', error);
       }
@@ -571,7 +572,7 @@ export class UniversalFileService extends EventEmitter {
         const { LocalStorageProvider } = await import('./providers/LocalStorageProvider');
         const localProvider = new LocalStorageProvider();
         this.registerStorageProvider(localProvider);
-        console.log('✅ [UniversalFileService] 本地存储提供者注册成功');
+        logger.info('✅ [UniversalFileService] 本地存储提供者注册成功');
       } catch (error) {
         console.warn('⚠️ [UniversalFileService] 本地存储提供者注册失败:', error);
       }
@@ -584,7 +585,7 @@ export class UniversalFileService extends EventEmitter {
         const { LocalStorageProvider } = await import('./providers/LocalStorageProvider');
         const localProvider = new LocalStorageProvider();
         this.registerStorageProvider(localProvider);
-        console.log('✅ [UniversalFileService] 本地存储提供者注册成功（备用）');
+        logger.info('✅ [UniversalFileService] 本地存储提供者注册成功（备用）');
       } catch (error) {
         console.error('❌ [UniversalFileService] 无法注册任何存储提供者:', error);
         throw new Error('无法初始化存储提供者');
@@ -598,7 +599,7 @@ export class UniversalFileService extends EventEmitter {
         const provider = this.cdnProviders.get(type as CDNType);
         if (provider) {
           await provider.initialize(config);
-          console.log(`✅ [UniversalFileService] CDN提供者初始化完成: ${type}`);
+          logger.info(`✅ [UniversalFileService] CDN提供者初始化完成: ${type}`);
         }
       }
     }
@@ -607,7 +608,7 @@ export class UniversalFileService extends EventEmitter {
   private async initializeFileProcessors(): Promise<void> {
     for (const processor of Array.from(this.fileProcessors.values())) {
       await processor.initialize();
-      console.log(`✅ [UniversalFileService] 文件处理器初始化完成: ${processor.type}`);
+      logger.info(`✅ [UniversalFileService] 文件处理器初始化完成: ${processor.type}`);
     }
   }
 
@@ -768,7 +769,7 @@ export class UniversalFileService extends EventEmitter {
   private async saveFileMetadata(metadata: FileMetadata): Promise<void> {
     try {
       // 导入数据库相关模块
-      const { db } = await import('@/db/index');
+      const { db } = await import('@/lib/drizzle/db');
       const { fileMetadata } = await import('./db/schema');
       const { eq } = await import('drizzle-orm');
 
@@ -794,7 +795,7 @@ export class UniversalFileService extends EventEmitter {
           throw new Error('未找到可用的存储提供者');
         }
 
-        console.log(`✅ [UniversalFileService] 使用默认存储提供者: ${defaultProvider.name} (${defaultProvider.type})`);
+        logger.info(`✅ [UniversalFileService] 使用默认存储提供者: ${defaultProvider.name} (${defaultProvider.type})`);
 
         // 保存到数据库
         await db.insert(fileMetadata).values({
@@ -823,7 +824,7 @@ export class UniversalFileService extends EventEmitter {
           expiresAt: metadata.expiresAt
         });
       } else {
-        console.log(`✅ [UniversalFileService] 使用存储提供者: ${storageProvider.name} (${storageProvider.type})`);
+        logger.info(`✅ [UniversalFileService] 使用存储提供者: ${storageProvider.name} (${storageProvider.type})`);
 
         // 保存到数据库
         await db.insert(fileMetadata).values({
@@ -853,7 +854,7 @@ export class UniversalFileService extends EventEmitter {
         });
       }
 
-      console.log('💾 [UniversalFileService] 文件元数据保存成功:', metadata.id);
+      logger.info('💾 [UniversalFileService] 文件元数据保存成功:', metadata.id);
     } catch (error) {
       console.error('❌ [UniversalFileService] 保存文件元数据失败:', error);
       throw new FileUploadError(`保存文件元数据失败: ${error instanceof Error ? error.message : '未知错误'}`);
@@ -869,7 +870,7 @@ export class UniversalFileService extends EventEmitter {
 
     try {
       // 导入数据库相关模块
-      const { db } = await import('@/db/index');
+      const { db } = await import('@/lib/drizzle/db');
       const { fileMetadata, fileStorageProviders } = await import('./db/schema');
       const { eq } = await import('drizzle-orm');
 
@@ -881,7 +882,7 @@ export class UniversalFileService extends EventEmitter {
         .limit(1);
 
       if (!record) {
-        console.log('🔍 [UniversalFileService] 文件元数据不存在:', fileId);
+        logger.info('🔍 [UniversalFileService] 文件元数据不存在:', fileId);
         return null;
       }
 
@@ -893,7 +894,7 @@ export class UniversalFileService extends EventEmitter {
         .limit(1);
 
       if (!provider) {
-        console.log('🔍 [UniversalFileService] 存储提供者不存在:', record.storageProviderId);
+        logger.info('🔍 [UniversalFileService] 存储提供者不存在:', record.storageProviderId);
         return null;
       }
 
@@ -923,7 +924,7 @@ export class UniversalFileService extends EventEmitter {
       // 缓存结果
       this.cacheMetadata(metadata);
 
-      console.log('🔍 [UniversalFileService] 文件元数据查询成功:', fileId);
+      logger.info('🔍 [UniversalFileService] 文件元数据查询成功:', fileId);
       return metadata;
     } catch (error) {
       console.error('❌ [UniversalFileService] 查询文件元数据失败:', error);
@@ -934,7 +935,7 @@ export class UniversalFileService extends EventEmitter {
   private async deleteFileMetadata(fileId: string): Promise<void> {
     try {
       // 导入数据库相关模块
-      const { db } = await import('@/db/index');
+      const { db } = await import('@/lib/drizzle/db');
       const { fileMetadata } = await import('./db/schema');
       const { eq } = await import('drizzle-orm');
 
@@ -951,7 +952,7 @@ export class UniversalFileService extends EventEmitter {
       // 清除缓存
       this.clearMetadataCache(fileId);
 
-      console.log('🗑️ [UniversalFileService] 文件元数据删除成功:', fileId);
+      logger.info('🗑️ [UniversalFileService] 文件元数据删除成功:', fileId);
     } catch (error) {
       console.error('❌ [UniversalFileService] 删除文件元数据失败:', error);
       throw new FileUploadError(`删除文件元数据失败: ${error instanceof Error ? error.message : '未知错误'}`);
@@ -961,7 +962,7 @@ export class UniversalFileService extends EventEmitter {
   private async updateAccessStats(fileId: string): Promise<void> {
     try {
       // 导入数据库相关模块
-      const { db } = await import('@/db/index');
+      const { db } = await import('@/lib/drizzle/db');
       const { fileMetadata } = await import('./db/schema');
       const { eq, sql } = await import('drizzle-orm');
 
@@ -975,7 +976,7 @@ export class UniversalFileService extends EventEmitter {
         })
         .where(eq(fileMetadata.id, fileId));
 
-      console.log('📊 [UniversalFileService] 访问统计更新成功:', fileId);
+      logger.info('📊 [UniversalFileService] 访问统计更新成功:', fileId);
     } catch (error) {
       console.error('❌ [UniversalFileService] 更新访问统计失败:', error);
     }
@@ -1003,14 +1004,14 @@ export class UniversalFileService extends EventEmitter {
  * 创建支持动态配置加载的通用文件服务
  */
 export async function createUniversalFileServiceWithConfigManager(): Promise<UniversalFileService> {
-  console.log('🔧 [UniversalFileService] 创建支持动态配置的文件服务...');
+  logger.info('🔧 [UniversalFileService] 创建支持动态配置的文件服务...');
 
   // 使用支持配置管理模块的配置管理器
   const { createFileServiceConfigWithConfigManager } = await import('./config');
   const configManager = await createFileServiceConfigWithConfigManager();
   const config = configManager.getConfig();
 
-  console.log('📋 [UniversalFileService] 动态配置加载完成:', {
+  logger.info('📋 [UniversalFileService] 动态配置加载完成:', {
     defaultStorage: config.defaultStorage,
     ossEnabled: config.storageProviders['aliyun-oss']?.enabled,
     cdnEnabled: config.cdnProviders[config.defaultCDN]?.enabled

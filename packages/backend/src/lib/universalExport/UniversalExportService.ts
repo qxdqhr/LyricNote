@@ -249,7 +249,7 @@ export class UniversalExportService {
     const exportId = this.generateId();
     const startTime = new Date();
 
-    console.log('🚀 [UniversalExportService] 开始导出:', {
+    logger.info('🚀 [UniversalExportService] 开始导出:', {
       exportId,
       configId: request.configId,
       hasDataSource: !!request.dataSource,
@@ -262,7 +262,7 @@ export class UniversalExportService {
       if (typeof request.configId === 'object' && request.configId !== null) {
         // 直接传入配置对象
         config = request.configId as ExportConfig;
-        console.log('📋 [UniversalExportService] 使用直接传入的配置:', {
+        logger.info('📋 [UniversalExportService] 使用直接传入的配置:', {
           configId: config.id,
           configName: config.name,
           format: config.format,
@@ -274,13 +274,13 @@ export class UniversalExportService {
         });
       } else {
         // 从缓存获取配置
-        console.log('🔍 [UniversalExportService] 从缓存获取配置:', request.configId);
+        logger.info('🔍 [UniversalExportService] 从缓存获取配置:', request.configId);
         const cachedConfig = await this.getConfig(request.configId as string);
         if (!cachedConfig) {
           throw new ExportConfigError(`导出配置不存在: ${request.configId}`);
         }
         config = cachedConfig;
-        console.log('✅ [UniversalExportService] 成功获取缓存配置:', {
+        logger.info('✅ [UniversalExportService] 成功获取缓存配置:', {
           configId: config.id,
           configName: config.name,
         });
@@ -308,15 +308,15 @@ export class UniversalExportService {
 
       // 调用进度回调
       if (request.callbacks?.onProgress) {
-        console.log('📞 [UniversalExportService] 调用 onProgress 回调 - 开始');
+        logger.info('📞 [UniversalExportService] 调用 onProgress 回调 - 开始');
         request.callbacks.onProgress(progress);
       }
 
-      console.log('📊 [UniversalExportService] 开始获取数据...');
+      logger.info('📊 [UniversalExportService] 开始获取数据...');
 
       // 获取数据
       const data = await this.getData(request);
-      console.log('✅ [UniversalExportService] 数据获取成功:', {
+      logger.info('✅ [UniversalExportService] 数据获取成功:', {
         dataLength: data.length,
         firstItem: data[0] ? Object.keys(data[0]) : [],
         sampleData: data.slice(0, 2),
@@ -327,30 +327,30 @@ export class UniversalExportService {
 
       // 更新进度回调
       if (request.callbacks?.onProgress) {
-        console.log('📞 [UniversalExportService] 调用 onProgress 回调 - 数据处理');
+        logger.info('📞 [UniversalExportService] 调用 onProgress 回调 - 数据处理');
         progress.progress = 30;
         request.callbacks.onProgress(progress);
       }
 
       // 过滤和排序数据
-      console.log('🔄 [UniversalExportService] 开始处理数据...');
+      logger.info('🔄 [UniversalExportService] 开始处理数据...');
       const processedData = await this.processData(data, request, config);
-      console.log('✅ [UniversalExportService] 数据处理完成:', {
+      logger.info('✅ [UniversalExportService] 数据处理完成:', {
         originalLength: data.length,
         processedLength: processedData.length,
       });
 
       // 更新进度回调
       if (request.callbacks?.onProgress) {
-        console.log('📞 [UniversalExportService] 调用 onProgress 回调 - 数据完成');
+        logger.info('📞 [UniversalExportService] 调用 onProgress 回调 - 数据完成');
         progress.progress = 60;
         request.callbacks.onProgress(progress);
       }
 
       // 生成文件
-      console.log('📄 [UniversalExportService] 开始生成文件...');
+      logger.info('📄 [UniversalExportService] 开始生成文件...');
       const result = await this.generateFile(processedData, config, request, exportId);
-      console.log('✅ [UniversalExportService] 文件生成成功:', {
+      logger.info('✅ [UniversalExportService] 文件生成成功:', {
         fileName: result.fileName,
         fileSize: result.fileSize,
         exportedRows: result.exportedRows,
@@ -363,7 +363,7 @@ export class UniversalExportService {
 
       // 调用成功回调
       if (request.callbacks?.onSuccess) {
-        console.log('📞 [UniversalExportService] 调用 onSuccess 回调');
+        logger.info('📞 [UniversalExportService] 调用 onSuccess 回调');
         request.callbacks.onSuccess(result);
       }
 
@@ -404,7 +404,7 @@ export class UniversalExportService {
 
       // 调用错误回调
       if (request.callbacks?.onError) {
-        console.log('📞 [UniversalExportService] 调用 onError 回调');
+        logger.info('📞 [UniversalExportService] 调用 onError 回调');
         request.callbacks.onError(errorObj);
       }
 
@@ -514,12 +514,12 @@ export class UniversalExportService {
    * 获取数据
    */
   private async getData(request: ExportRequest): Promise<any[]> {
-    console.log('🔍 [UniversalExportService] getData 开始执行...');
+    logger.info('🔍 [UniversalExportService] getData 开始执行...');
     try {
       if (typeof request.dataSource === 'function') {
-        console.log('📞 [UniversalExportService] 调用数据源函数...');
+        logger.info('📞 [UniversalExportService] 调用数据源函数...');
         const data = await request.dataSource();
-        console.log('✅ [UniversalExportService] 数据源函数执行成功:', {
+        logger.info('✅ [UniversalExportService] 数据源函数执行成功:', {
           dataType: typeof data,
           isArray: Array.isArray(data),
           length: Array.isArray(data) ? data.length : 'N/A',
@@ -547,7 +547,7 @@ export class UniversalExportService {
     request: ExportRequest,
     config: ExportConfig
   ): Promise<any[]> {
-    console.log('🔄 [UniversalExportService] processData 开始执行:', {
+    logger.info('🔄 [UniversalExportService] processData 开始执行:', {
       dataLength: data.length,
       hasFilters: !!(request.filters && request.filters.length > 0),
       hasSortBy: !!(request.sortBy && request.sortBy.length > 0),
@@ -557,7 +557,7 @@ export class UniversalExportService {
     });
 
     // 🔍 详细调试分组配置
-    console.log('🔍 [UniversalExportService] 详细分组配置检查:', {
+    logger.info('🔍 [UniversalExportService] 详细分组配置检查:', {
       configGrouping: config.grouping,
       groupingExists: !!config.grouping,
       groupingEnabled: config.grouping?.enabled,
@@ -569,9 +569,9 @@ export class UniversalExportService {
 
     // 应用过滤器
     if (request.filters && request.filters.length > 0) {
-      console.log('🔍 [UniversalExportService] 应用过滤器...');
+      logger.info('🔍 [UniversalExportService] 应用过滤器...');
       processedData = this.applyFilters(processedData, request.filters);
-      console.log('✅ [UniversalExportService] 过滤器应用完成:', {
+      logger.info('✅ [UniversalExportService] 过滤器应用完成:', {
         beforeLength: data.length,
         afterLength: processedData.length,
       });
@@ -579,16 +579,16 @@ export class UniversalExportService {
 
     // 应用排序
     if (request.sortBy && request.sortBy.length > 0) {
-      console.log('📊 [UniversalExportService] 应用排序...');
+      logger.info('📊 [UniversalExportService] 应用排序...');
       processedData = this.applySorting(processedData, request.sortBy);
-      console.log('✅ [UniversalExportService] 排序应用完成');
+      logger.info('✅ [UniversalExportService] 排序应用完成');
     }
 
     // 应用分组
     if (config.grouping && config.grouping.enabled) {
-      console.log('📊 [UniversalExportService] 应用分组...');
+      logger.info('📊 [UniversalExportService] 应用分组...');
       processedData = this.applyGrouping(processedData, config.grouping);
-      console.log('✅ [UniversalExportService] 分组应用完成:', {
+      logger.info('✅ [UniversalExportService] 分组应用完成:', {
         groupsCount: this.countGroups(processedData),
         resultLength: processedData.length,
       });
@@ -596,12 +596,12 @@ export class UniversalExportService {
 
     // 应用分页
     if (request.pagination) {
-      console.log('📄 [UniversalExportService] 应用分页...');
+      logger.info('📄 [UniversalExportService] 应用分页...');
       const { page, pageSize } = request.pagination;
       const start = (page - 1) * pageSize;
       const end = start + pageSize;
       processedData = processedData.slice(start, end);
-      console.log('✅ [UniversalExportService] 分页应用完成:', {
+      logger.info('✅ [UniversalExportService] 分页应用完成:', {
         page,
         pageSize,
         start,
@@ -612,15 +612,15 @@ export class UniversalExportService {
 
     // 限制行数
     if (config.maxRows && processedData.length > config.maxRows) {
-      console.log('📏 [UniversalExportService] 应用行数限制...');
+      logger.info('📏 [UniversalExportService] 应用行数限制...');
       processedData = processedData.slice(0, config.maxRows);
-      console.log('✅ [UniversalExportService] 行数限制应用完成:', {
+      logger.info('✅ [UniversalExportService] 行数限制应用完成:', {
         maxRows: config.maxRows,
         resultLength: processedData.length,
       });
     }
 
-    console.log('✅ [UniversalExportService] processData 执行完成:', {
+    logger.info('✅ [UniversalExportService] processData 执行完成:', {
       originalLength: data.length,
       finalLength: processedData.length,
     });
@@ -703,7 +703,7 @@ export class UniversalExportService {
       // 特殊处理：强制保留某些重要字段，即使所有行都为空值
       const forceKeepFields = ['pickupMethod', 'notes', 'adminNotes'];
       if (forceKeepFields.includes(field.key)) {
-        console.log(`🔧 [UniversalExportService] 强制保留字段 "${field.key}" (${field.label})`);
+        logger.info(`🔧 [UniversalExportService] 强制保留字段 "${field.key}" (${field.label})`);
         return true;
       }
 
@@ -714,13 +714,13 @@ export class UniversalExportService {
       });
 
       if (!hasValue) {
-        console.log(`🔍 [UniversalExportService] 字段 "${field.key}" (${field.label}) 被过滤掉 - 所有行都为空值`);
+        logger.info(`🔍 [UniversalExportService] 字段 "${field.key}" (${field.label}) 被过滤掉 - 所有行都为空值`);
       }
 
       return hasValue;
     });
 
-    console.log('📊 [UniversalExportService] 字段过滤结果:', {
+    logger.info('📊 [UniversalExportService] 字段过滤结果:', {
       原始字段数: fields.length,
       过滤后字段数: filteredFields.length,
       被过滤的字段: fields.filter(f => !filteredFields.includes(f)).map(f => f.key),
@@ -742,7 +742,7 @@ export class UniversalExportService {
     const startTime = new Date();
     const enabledFields = config.fields.filter(f => f.enabled);
 
-    console.log('📄 [UniversalExportService] generateFile 开始执行:', {
+    logger.info('📄 [UniversalExportService] generateFile 开始执行:', {
       dataLength: data.length,
       enabledFieldsCount: enabledFields.length,
       format: config.format,
@@ -755,19 +755,19 @@ export class UniversalExportService {
 
       switch (config.format) {
         case 'csv':
-          console.log('📊 [UniversalExportService] 生成CSV格式...');
+          logger.info('📊 [UniversalExportService] 生成CSV格式...');
           content = this.generateCSV(data, enabledFields, config);
           fileName = this.generateFileName(request.customFileName || config.fileNameTemplate, 'csv');
-          console.log('✅ [UniversalExportService] CSV生成完成:', {
+          logger.info('✅ [UniversalExportService] CSV生成完成:', {
             contentLength: content.length,
             fileName,
           });
           break;
         case 'excel':
-          console.log('📊 [UniversalExportService] 生成Excel格式...');
+          logger.info('📊 [UniversalExportService] 生成Excel格式...');
           const excelBuffer = this.generateExcel(data, enabledFields, config);
           fileName = this.generateFileName(request.customFileName || config.fileNameTemplate, 'xlsx');
-          console.log('✅ [UniversalExportService] Excel生成完成:', {
+          logger.info('✅ [UniversalExportService] Excel生成完成:', {
             bufferLength: excelBuffer.byteLength,
             fileName,
           });
@@ -792,10 +792,10 @@ export class UniversalExportService {
             },
           };
         case 'json':
-          console.log('📄 [UniversalExportService] 生成JSON格式...');
+          logger.info('📄 [UniversalExportService] 生成JSON格式...');
           content = this.generateJSON(data, enabledFields);
           fileName = this.generateFileName(request.customFileName || config.fileNameTemplate, 'json');
-          console.log('✅ [UniversalExportService] JSON生成完成:', {
+          logger.info('✅ [UniversalExportService] JSON生成完成:', {
             contentLength: content.length,
             fileName,
           });
@@ -845,7 +845,7 @@ export class UniversalExportService {
    * 生成CSV内容
    */
   private generateCSV(data: any[], fields: ExportField[], config: ExportConfig): string {
-    console.log('📊 [UniversalExportService] generateCSV 开始执行:', {
+    logger.info('📊 [UniversalExportService] generateCSV 开始执行:', {
       dataLength: data.length,
       fieldsCount: fields.length,
       includeHeader: config.includeHeader,
@@ -858,12 +858,12 @@ export class UniversalExportService {
     // 添加BOM
     if (config.addBOM) {
       lines.push('\uFEFF');
-      console.log('📝 [UniversalExportService] 添加BOM');
+      logger.info('📝 [UniversalExportService] 添加BOM');
     }
 
     // 过滤掉所有行都为空值的字段
     const nonEmptyFields = this.filterEmptyFields(data, fields);
-    console.log('📊 [UniversalExportService] 过滤空字段:', {
+    logger.info('📊 [UniversalExportService] 过滤空字段:', {
       originalFieldsCount: fields.length,
       nonEmptyFieldsCount: nonEmptyFields.length,
       removedFields: fields.filter((f: ExportField) => !nonEmptyFields.includes(f)).map((f: ExportField) => f.key),
@@ -873,15 +873,15 @@ export class UniversalExportService {
     if (config.includeHeader) {
       const headers = nonEmptyFields.map(f => this.escapeCSVField(f.label));
       lines.push(headers.join(config.delimiter));
-      console.log('📋 [UniversalExportService] 添加表头:', headers);
+      logger.info('📋 [UniversalExportService] 添加表头:', headers);
     }
 
     // 添加数据行
-    console.log('📊 [UniversalExportService] 开始处理数据行...');
+    logger.info('📊 [UniversalExportService] 开始处理数据行...');
     for (let i = 0; i < data.length; i++) {
       const item = data[i];
       if (i === 0) {
-        console.log('📊 [UniversalExportService] 第一行数据示例:', item);
+        logger.info('📊 [UniversalExportService] 第一行数据示例:', item);
       }
 
       const row = nonEmptyFields.map(field => {
@@ -907,12 +907,12 @@ export class UniversalExportService {
       lines.push(row.join(config.delimiter));
 
       if (i === 0) {
-        console.log('📊 [UniversalExportService] 第一行处理结果:', row);
+        logger.info('📊 [UniversalExportService] 第一行处理结果:', row);
       }
     }
 
     const result = lines.join('\n');
-    console.log('✅ [UniversalExportService] CSV生成完成:', {
+    logger.info('✅ [UniversalExportService] CSV生成完成:', {
       totalLines: lines.length,
       resultLength: result.length,
     });
@@ -1008,7 +1008,7 @@ export class UniversalExportService {
    * 应用分组
    */
   private applyGrouping(data: any[], groupingConfig: GroupingConfig): any[] {
-    console.log('📊 [UniversalExportService] applyGrouping 开始执行:', {
+    logger.info('📊 [UniversalExportService] applyGrouping 开始执行:', {
       dataLength: data.length,
       groupingFields: groupingConfig.fields.map(f => f.key),
       preserveOrder: groupingConfig.preserveOrder,
@@ -1024,7 +1024,7 @@ export class UniversalExportService {
     // 处理分组后的数据
     const result = this.processGroupedData(grouped, groupingConfig);
 
-    console.log('✅ [UniversalExportService] applyGrouping 执行完成:', {
+    logger.info('✅ [UniversalExportService] applyGrouping 执行完成:', {
       originalLength: data.length,
       groupedLength: result.length,
     });
@@ -1193,7 +1193,7 @@ export class UniversalExportService {
 
     result.push(firstItem);
 
-    console.log('🔗 [UniversalExportService] 处理多字段合并模式:', {
+    logger.info('🔗 [UniversalExportService] 处理多字段合并模式:', {
       groupItemsLength: groupItems.length,
       groupFields: groupFields.map(f => f.key),
       firstItem: firstItem,
@@ -1247,7 +1247,7 @@ export class UniversalExportService {
    * 生成Excel文件
    */
   private generateExcel(data: any[], fields: ExportField[], config: ExportConfig): ArrayBuffer {
-    console.log('📊 [UniversalExportService] generateExcel 开始执行:', {
+    logger.info('📊 [UniversalExportService] generateExcel 开始执行:', {
       dataLength: data.length,
       fieldsCount: fields.length,
       hasGrouping: !!(config.grouping && config.grouping.enabled),
@@ -1286,7 +1286,7 @@ export class UniversalExportService {
       cellStyles: true
     });
 
-    console.log('✅ [UniversalExportService] generateExcel 执行完成');
+    logger.info('✅ [UniversalExportService] generateExcel 执行完成');
     return excelBuffer;
   }
 
@@ -1296,7 +1296,7 @@ export class UniversalExportService {
   private prepareExcelData(data: any[], fields: ExportField[], config: ExportConfig): any[][] {
     const result: any[][] = [];
 
-    console.log('📊 [UniversalExportService] 准备Excel数据:', {
+    logger.info('📊 [UniversalExportService] 准备Excel数据:', {
       dataLength: data.length,
       fieldsCount: fields.length,
       includeHeader: config.includeHeader,
@@ -1307,7 +1307,7 @@ export class UniversalExportService {
     if (config.includeHeader) {
       const headers = fields.map(field => field.label);
       result.push(headers);
-      console.log('📋 [UniversalExportService] 添加表头:', headers);
+      logger.info('📋 [UniversalExportService] 添加表头:', headers);
     }
 
     // 添加数据行
@@ -1337,11 +1337,11 @@ export class UniversalExportService {
       result.push(row);
 
       if (i === 0) {
-        console.log('📊 [UniversalExportService] 第一行数据示例:', row);
+        logger.info('📊 [UniversalExportService] 第一行数据示例:', row);
       }
     }
 
-    console.log('✅ [UniversalExportService] Excel数据准备完成:', {
+    logger.info('✅ [UniversalExportService] Excel数据准备完成:', {
       totalRows: result.length,
       headerRows: config.includeHeader ? 1 : 0,
       dataRows: result.length - (config.includeHeader ? 1 : 0),
@@ -1361,7 +1361,7 @@ export class UniversalExportService {
     const headerOffset = includeHeader ? 1 : 0; // 是否有表头
     let currentRow = headerOffset;
 
-    console.log('📊 [UniversalExportService] 开始处理Excel分组和合并单元格:', {
+    logger.info('📊 [UniversalExportService] 开始处理Excel分组和合并单元格:', {
       dataLength: data.length,
       headerOffset,
       groupingFields: groupingConfig.fields.map(f => ({ key: f.key, mergeCells: f.mergeCells })),
@@ -1371,7 +1371,7 @@ export class UniversalExportService {
       const item = data[i];
 
       if (item.__isGroupFirst && item.__groupSize > 1) {
-        console.log('🔗 [UniversalExportService] 处理分组合并:', {
+        logger.info('🔗 [UniversalExportService] 处理分组合并:', {
           row: currentRow,
           groupSize: item.__groupSize,
           item: item,
@@ -1391,7 +1391,7 @@ export class UniversalExportService {
                 e: { r: currentRow + groupSize - 1, c: fieldIndex }  // 结束行列
               };
 
-              console.log('📊 [UniversalExportService] 添加合并区域:', {
+              logger.info('📊 [UniversalExportService] 添加合并区域:', {
                 field: groupField.key,
                 fieldIndex,
                 groupSize,
@@ -1423,7 +1423,7 @@ export class UniversalExportService {
       currentRow++;
     }
 
-    console.log('✅ [UniversalExportService] Excel分组和合并单元格处理完成:', {
+    logger.info('✅ [UniversalExportService] Excel分组和合并单元格处理完成:', {
       totalMerges: worksheet['!merges']?.length || 0,
     });
   }
@@ -1460,7 +1460,7 @@ export class UniversalExportService {
       }
     }
 
-    console.log('✅ [UniversalExportService] Excel列宽和样式设置完成:', {
+    logger.info('✅ [UniversalExportService] Excel列宽和样式设置完成:', {
       columnsCount: colWidths.length,
       columnWidths: colWidths.map((col, index) => ({ field: fields[index]?.key, width: col.wch })),
     });
@@ -1475,7 +1475,7 @@ export class UniversalExportService {
     const range = XLSX.utils.decode_range(worksheet['!ref']);
     const startRow = includeHeader ? 1 : 0; // 跳过表头
 
-    console.log('🎨 [UniversalExportService] 开始应用Excel数据样式:', {
+    logger.info('🎨 [UniversalExportService] 开始应用Excel数据样式:', {
       totalRows: range.e.r + 1,
       totalCols: range.e.c + 1,
       startRow,
@@ -1506,6 +1506,6 @@ export class UniversalExportService {
       }
     }
 
-    console.log('✅ [UniversalExportService] Excel数据样式应用完成');
+    logger.info('✅ [UniversalExportService] Excel数据样式应用完成');
   }
 }

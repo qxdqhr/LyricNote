@@ -46,6 +46,18 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
+    title: '网站管理',
+    icon: Settings,
+    items: [
+      {
+        title: '首页配置',
+        icon: Settings,
+        href: '/admin/config?category=homepage',
+        description: '管理首页展示内容',
+      },
+    ],
+  },
+  {
     title: '系统管理',
     icon: Settings,
     items: [
@@ -101,7 +113,7 @@ export function Sidebar({ user }: SidebarProps) {
   const searchParams = useSearchParams();
   const { logout } = useAuth(apiClient);
   const [collapsed, setCollapsed] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(['内容管理', '系统管理']);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(['网站管理', '内容管理', '系统管理']);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [analytics] = useState<Analytics>(() => getWebAdminAnalytics());
   const [isLoggingOut, setIsLoggingOut] = useState(false);

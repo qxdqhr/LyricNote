@@ -23,7 +23,7 @@ import { StorageProviderError } from '../types';
  */
 export class LocalStorageProvider implements IStorageProvider {
   readonly type: StorageType = 'local';
-  
+
   private config: LocalStorageConfig | null = null;
   private isInitialized = false;
 
@@ -36,19 +36,19 @@ export class LocalStorageProvider implements IStorageProvider {
     }
 
     this.config = config as LocalStorageConfig;
-    
-    console.log(`📂 [LocalStorageProvider] 初始化本地存储，根目录: ${this.config.rootPath}`);
+
+    logger.info(`📂 [LocalStorageProvider] 初始化本地存储，根目录: ${this.config.rootPath}`);
 
     try {
       // 确保根目录存在
       await this.ensureDirectoryExists(this.config.rootPath);
-      
+
       // 验证目录访问权限
       await this.validateDirectoryAccess(this.config.rootPath);
-      
+
       this.isInitialized = true;
-      console.log('✅ [LocalStorageProvider] 本地存储初始化完成');
-      
+      logger.info('✅ [LocalStorageProvider] 本地存储初始化完成');
+
     } catch (error) {
       console.error('❌ [LocalStorageProvider] 本地存储初始化失败:', error);
       throw new StorageProviderError(
@@ -62,26 +62,26 @@ export class LocalStorageProvider implements IStorageProvider {
    */
   async upload(fileInfo: UploadFileInfo, filePath: string): Promise<StorageResult> {
     this.ensureInitialized();
-    
+
     const startTime = Date.now();
-    console.log(`📤 [LocalStorageProvider] 开始上传文件: ${filePath}`);
+    logger.info(`📤 [LocalStorageProvider] 开始上传文件: ${filePath}`);
 
     try {
       // 生成完整文件路径
       const fullPath = this.getFullPath(filePath);
-      
+
       // 确保父目录存在
       await this.ensureDirectoryExists(path.dirname(fullPath));
-      
+
       // 将File对象转换为Buffer
       const buffer = Buffer.from(await fileInfo.file.arrayBuffer());
-      
+
       // 写入文件
       await fs.writeFile(fullPath, buffer);
-      
+
       // 验证文件写入
       const stats = await fs.stat(fullPath);
-      
+
       if (stats.size !== fileInfo.file.size) {
         throw new StorageProviderError(
           `文件大小不匹配: 期望 ${fileInfo.file.size}, 实际 ${stats.size}`
@@ -90,9 +90,9 @@ export class LocalStorageProvider implements IStorageProvider {
 
       // 生成访问URL
       const accessUrl = this.generateAccessUrl(filePath);
-      
+
       const uploadTime = Date.now() - startTime;
-      console.log(`✅ [LocalStorageProvider] 文件上传完成: ${filePath}, 耗时: ${uploadTime}ms`);
+      logger.info(`✅ [LocalStorageProvider] 文件上传完成: ${filePath}, 耗时: ${uploadTime}ms`);
 
       return {
         success: true,
@@ -107,7 +107,7 @@ export class LocalStorageProvider implements IStorageProvider {
 
     } catch (error) {
       console.error(`❌ [LocalStorageProvider] 文件上传失败: ${filePath}:`, error);
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : '上传失败'
@@ -120,12 +120,12 @@ export class LocalStorageProvider implements IStorageProvider {
    */
   async download(path: string): Promise<Buffer> {
     this.ensureInitialized();
-    
-    console.log(`📥 [LocalStorageProvider] 开始下载文件: ${path}`);
+
+    logger.info(`📥 [LocalStorageProvider] 开始下载文件: ${path}`);
 
     try {
       const fullPath = this.getFullPath(path);
-      
+
       // 检查文件是否存在
       if (!existsSync(fullPath)) {
         throw new StorageProviderError(`文件不存在: ${path}`);
@@ -133,9 +133,9 @@ export class LocalStorageProvider implements IStorageProvider {
 
       // 读取文件
       const buffer = await fs.readFile(fullPath);
-      
-      console.log(`✅ [LocalStorageProvider] 文件下载完成: ${path}, 大小: ${buffer.length}`);
-      
+
+      logger.info(`✅ [LocalStorageProvider] 文件下载完成: ${path}, 大小: ${buffer.length}`);
+
       return buffer;
 
     } catch (error) {
@@ -151,12 +151,12 @@ export class LocalStorageProvider implements IStorageProvider {
    */
   async delete(path: string): Promise<StorageResult> {
     this.ensureInitialized();
-    
-    console.log(`🗑️ [LocalStorageProvider] 开始删除文件: ${path}`);
+
+    logger.info(`🗑️ [LocalStorageProvider] 开始删除文件: ${path}`);
 
     try {
       const fullPath = this.getFullPath(path);
-      
+
       // 检查文件是否存在
       if (!existsSync(fullPath)) {
         console.warn(`⚠️ [LocalStorageProvider] 文件不存在: ${path}`);
@@ -168,9 +168,9 @@ export class LocalStorageProvider implements IStorageProvider {
 
       // 删除文件
       await fs.unlink(fullPath);
-      
-      console.log(`✅ [LocalStorageProvider] 文件删除完成: ${path}`);
-      
+
+      logger.info(`✅ [LocalStorageProvider] 文件删除完成: ${path}`);
+
       return {
         success: true,
         data: { deletedPath: fullPath }
@@ -178,7 +178,7 @@ export class LocalStorageProvider implements IStorageProvider {
 
     } catch (error) {
       console.error(`❌ [LocalStorageProvider] 文件删除失败: ${path}:`, error);
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : '删除失败'
@@ -191,10 +191,10 @@ export class LocalStorageProvider implements IStorageProvider {
    */
   async getFileInfo(path: string): Promise<StorageResult> {
     this.ensureInitialized();
-    
+
     try {
       const fullPath = this.getFullPath(path);
-      
+
       if (!existsSync(fullPath)) {
         return {
           success: false,
@@ -203,7 +203,7 @@ export class LocalStorageProvider implements IStorageProvider {
       }
 
       const stats = await fs.stat(fullPath);
-      
+
       return {
         success: true,
         size: stats.size,
@@ -230,7 +230,7 @@ export class LocalStorageProvider implements IStorageProvider {
    */
   async getAccessUrl(path: string, expiresIn?: number): Promise<string> {
     this.ensureInitialized();
-    
+
     // 本地存储不支持过期时间，忽略expiresIn参数
     return this.generateAccessUrl(path);
   }
@@ -240,7 +240,7 @@ export class LocalStorageProvider implements IStorageProvider {
    */
   async getUploadUrl(path: string, expiresIn?: number): Promise<string> {
     this.ensureInitialized();
-    
+
     // 本地存储不支持预签名上传，返回普通访问URL
     console.warn(`⚠️ [LocalStorageProvider] 本地存储不支持预签名上传URL`);
     return this.generateAccessUrl(path);
@@ -251,7 +251,7 @@ export class LocalStorageProvider implements IStorageProvider {
    */
   async exists(path: string): Promise<boolean> {
     this.ensureInitialized();
-    
+
     try {
       const fullPath = this.getFullPath(path);
       return existsSync(fullPath);
@@ -265,12 +265,12 @@ export class LocalStorageProvider implements IStorageProvider {
    */
   async list(prefix: string, maxKeys?: number): Promise<string[]> {
     this.ensureInitialized();
-    
+
     try {
       const fullPrefix = this.getFullPath(prefix);
       const baseDir = path.dirname(fullPrefix);
       const filePattern = path.basename(fullPrefix);
-      
+
       if (!existsSync(baseDir)) {
         return [];
       }
@@ -313,13 +313,13 @@ export class LocalStorageProvider implements IStorageProvider {
     if (!this.config) {
       throw new StorageProviderError('存储提供者未初始化');
     }
-    
+
     // 防止路径遍历攻击
     const normalizedPath = path.normalize(relativePath);
     if (normalizedPath.includes('..')) {
       throw new StorageProviderError('非法路径：不允许使用父目录引用');
     }
-    
+
     return path.join(this.config.rootPath, normalizedPath);
   }
 
@@ -327,17 +327,17 @@ export class LocalStorageProvider implements IStorageProvider {
    * 生成访问URL
    */
   private generateAccessUrl(relativePath: string): string {
-    console.log(`qhr1111133333`);
+    logger.info(`qhr1111133333`);
     if (!this.config) {
       throw new StorageProviderError('存储提供者未初始化');
     }
-    
+
     // 规范化路径分隔符为URL格式
     const urlPath = relativePath.replace(/\\/g, '/');
-    
+
     // 确保URL路径以/开头
     const normalizedUrlPath = urlPath.startsWith('/') ? urlPath : `/${urlPath}`;
-    
+
     return `${this.config.baseUrl}${normalizedUrlPath}`;
   }
 
@@ -377,30 +377,30 @@ export class LocalStorageProvider implements IStorageProvider {
     filePath: string
   ): Promise<StorageResult> {
     this.ensureInitialized();
-    
+
     const startTime = Date.now();
-    console.log(`📤 [LocalStorageProvider] 开始流式上传文件: ${filePath}`);
+    logger.info(`📤 [LocalStorageProvider] 开始流式上传文件: ${filePath}`);
 
     try {
       const fullPath = this.getFullPath(filePath);
-      
+
       // 确保父目录存在
       await this.ensureDirectoryExists(path.dirname(fullPath));
-      
+
       // 创建写入流
       const writeStream = createWriteStream(fullPath);
-      
+
       // 使用pipeline进行流式传输
       await pipeline(readableStream, writeStream);
-      
+
       // 获取文件信息
       const stats = await fs.stat(fullPath);
-      
+
       // 生成访问URL
       const accessUrl = this.generateAccessUrl(filePath);
-      
+
       const uploadTime = Date.now() - startTime;
-      console.log(`✅ [LocalStorageProvider] 流式上传完成: ${filePath}, 大小: ${stats.size}, 耗时: ${uploadTime}ms`);
+      logger.info(`✅ [LocalStorageProvider] 流式上传完成: ${filePath}, 大小: ${stats.size}, 耗时: ${uploadTime}ms`);
 
       return {
         success: true,
@@ -415,7 +415,7 @@ export class LocalStorageProvider implements IStorageProvider {
 
     } catch (error) {
       console.error(`❌ [LocalStorageProvider] 流式上传失败: ${filePath}:`, error);
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : '流式上传失败'
@@ -428,13 +428,13 @@ export class LocalStorageProvider implements IStorageProvider {
    */
   createDownloadStream(path: string): NodeJS.ReadableStream {
     this.ensureInitialized();
-    
+
     const fullPath = this.getFullPath(path);
-    
+
     if (!existsSync(fullPath)) {
       throw new StorageProviderError(`文件不存在: ${path}`);
     }
-    
+
     return createReadStream(fullPath);
   }
-} 
+}

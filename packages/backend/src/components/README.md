@@ -40,7 +40,7 @@ import { FileUploader, type FileUploaderProps } from '@/components/file-uploader
   moduleId="profile"
   acceptedTypes={['image/*']}
   maxFileSize={10}
-  onUploadSuccess={(files) => console.log(files)}
+  onUploadSuccess={(files) => logger.info(files)}
 />
 ```
 
@@ -145,11 +145,11 @@ file-uploader/
 export-button/
 ```
 
-### 文件名: PascalCase (大写开头)
+### 文件名: kebab-case (小写短横线)
 ```
-OrderManager.tsx
-FileUploader.tsx
-ExportButton.tsx
+order-manager.tsx
+file-uploader.tsx
+export-button.tsx
 ```
 
 ### 组件名: PascalCase (大写开头)
@@ -179,7 +179,7 @@ import { ExportButton } from '@/components/export-button';
 
 ### 直接导入(也可以)
 ```typescript
-import { OrderManager } from '@/components/order-manager/OrderManager';
+import { OrderManager } from '@/components/order-manager/order-manager';
 ```
 
 ### 类型导入
@@ -201,16 +201,16 @@ import type {
    mkdir packages/backend/src/components/my-component
    ```
 
-2. **创建组件文件(PascalCase)**
+2. **创建组件文件(kebab-case)**
    ```bash
-   touch packages/backend/src/components/my-component/MyComponent.tsx
+   touch packages/backend/src/components/my-component/my-component.tsx
    ```
 
 3. **创建导出文件**
    ```typescript
    // index.ts
-   export { MyComponent } from './MyComponent';
-   export type { MyComponentProps } from './MyComponent';
+   export { MyComponent } from './my-component';
+   export type { MyComponentProps } from './my-component';
    ```
 
 ### 组件模板
