@@ -1,5 +1,4 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { APP_CONFIG, UI_TEXT } from '@lyricnote/shared';
 
 export default function Layout() {
   return (
@@ -7,14 +6,14 @@ export default function Layout() {
       {/* 侧边导航 */}
       <nav className="sidebar">
         <div className="logo">
-          <span className="logo-icon">{APP_CONFIG.icon}</span>
-          <span className="logo-text">{APP_CONFIG.name}</span>
+          <span className="logo-icon">🎵</span>
+          <span className="logo-text">LyricNote</span>
         </div>
 
         <div className="nav-links">
           <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <span className="nav-icon">🏠</span>
-            <span className="nav-text">{UI_TEXT.navigation.home}</span>
+            <span className="nav-text">首页</span>
           </NavLink>
 
           <NavLink
@@ -22,7 +21,7 @@ export default function Layout() {
             className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
           >
             <span className="nav-icon">👤</span>
-            <span className="nav-text">{UI_TEXT.navigation.profile}</span>
+            <span className="nav-text">个人中心</span>
           </NavLink>
         </div>
       </nav>
