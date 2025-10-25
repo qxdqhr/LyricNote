@@ -1,8 +1,8 @@
 # LyricNote Backend Dockerfile - pnpm Monorepo
 FROM node:20-alpine AS base
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Install pnpm 9.x (must match the version used to generate pnpm-lock.yaml)
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
 # Install dependencies only when needed
 FROM base AS deps
