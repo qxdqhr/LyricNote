@@ -4,11 +4,7 @@
  */
 
 import Taro from '@tarojs/taro';
-import {
-  BaseApiClient,
-  MiniAppStorageAdapter,
-  MiniappRequestAdapter,
-} from '@lyricnote/shared';
+import { BaseApiClient, MiniAppStorageAdapter, MiniappRequestAdapter } from '@lyricnote/shared';
 
 // API 配置
 const API_BASE_URL = process.env.TARO_APP_API_URL || 'http://localhost:3000/api';
