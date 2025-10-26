@@ -175,12 +175,12 @@ import { useTranslation } from '@lyricnote/shared';
 
 function Navigation() {
   const { t } = useTranslation();
-  
+
   const menuItems = [
     { key: 'home', label: t('nav.home') },
     { key: 'profile', label: t('nav.profile') },
   ];
-  
+
   return (/* ... */);
 }
 ```
@@ -193,13 +193,13 @@ import { UI_TEXT } from '@lyricnote/shared';
 
 const validateForm = (values) => {
   const errors = {};
-  
+
   if (!values.email) {
     errors.email = UI_TEXT.form.required;
   } else if (!/\S+@\S+\.\S+/.test(values.email)) {
     errors.email = UI_TEXT.form.emailInvalid;
   }
-  
+
   return errors;
 };
 
@@ -208,15 +208,15 @@ import { t } from '@lyricnote/shared';
 
 const validateForm = (values) => {
   const errors = {};
-  
+
   if (!values.email) {
-    errors.email = t('validation.required', { 
-      context: { field: t('user.email') } 
+    errors.email = t('validation.required', {
+      context: { field: t('user.email') }
     });
   } else if (!/\S+@\S+\.\S+/.test(values.email)) {
     errors.email = t('validation.invalid_email');
   }
-  
+
   return errors;
 };
 ```
@@ -323,7 +323,7 @@ A: 使用 Next.js 的元数据 API：
 ```tsx
 export async function generateMetadata({ params }) {
   const { locale } = params;
-  
+
   return {
     title: t('pages.home.title'),
     description: t('pages.home.description'),
@@ -364,16 +364,16 @@ describe('i18n migration', () => {
 
   it('should translate correctly', () => {
     const { result } = renderHook(() => useTranslation());
-    
+
     expect(result.current.t('app.name')).toBe('LyricNote');
     expect(result.current.t('user.login')).toBe('登录');
   });
 
   it('should switch language', () => {
     const { result } = renderHook(() => useTranslation());
-    
+
     result.current.setLocale('en-US');
-    
+
     expect(result.current.t('user.login')).toBe('Login');
   });
 });
@@ -385,10 +385,10 @@ describe('i18n migration', () => {
 describe('Language switching', () => {
   it('should switch language correctly', () => {
     cy.visit('/');
-    
+
     // 默认中文
     cy.contains('登录');
-    
+
     // 切换到英文
     cy.get('[data-testid="language-switcher"]').click();
     cy.contains('English').click();

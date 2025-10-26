@@ -68,7 +68,7 @@ export default function Toolbar() {
 ### 自定义样式
 
 ```tsx
-<LanguageSwitcher 
+<LanguageSwitcher
   variant="buttons"
   className="my-custom-switcher"
 />
@@ -167,7 +167,7 @@ export function MobileNav() {
         <div className="mobile-menu">
           <a href="/">{t('nav.home')}</a>
           <a href="/profile">{t('nav.profile')}</a>
-          
+
           <div className="mobile-language">
             <LanguageSwitcher variant="buttons" />
           </div>
@@ -252,17 +252,17 @@ import { LanguageSwitcher } from '@/components/language-switcher';
 describe('LanguageSwitcher', () => {
   it('should render language options', () => {
     render(<LanguageSwitcher />);
-    
+
     expect(screen.getByText('简体中文')).toBeInTheDocument();
     expect(screen.getByText('English')).toBeInTheDocument();
   });
 
   it('should switch language on click', () => {
     render(<LanguageSwitcher />);
-    
+
     const englishButton = screen.getByText('English');
     fireEvent.click(englishButton);
-    
+
     // 验证语言已切换
   });
 });
@@ -274,14 +274,14 @@ describe('LanguageSwitcher', () => {
 describe('Language switching', () => {
   it('should persist language preference', () => {
     cy.visit('/');
-    
+
     // 切换到英文
     cy.get('[data-testid="language-switcher"]').click();
     cy.contains('English').click();
-    
+
     // 刷新页面
     cy.reload();
-    
+
     // 验证语言保持
     cy.contains('Login').should('exist');
   });
