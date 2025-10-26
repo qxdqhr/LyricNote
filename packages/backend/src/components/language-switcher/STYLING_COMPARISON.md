@@ -229,7 +229,7 @@ A: 不会。它会作为备选方案保留，用于不支持 Tailwind 的场景�
 A: 当然！Tailwind 版本更容易自定义：
 
 ```tsx
-<LanguageSwitcher 
+<LanguageSwitcher
   className="shadow-xl border-2 border-blue-500"
   variant="icon"
 />
