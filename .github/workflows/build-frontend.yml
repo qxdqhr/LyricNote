@@ -227,22 +227,18 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: 📱 构建 iOS (EAS Build)
+      - name: ℹ️ iOS 构建说明
         run: |
-          cd packages/mobile
-          eas build --platform ios --profile production --non-interactive --no-wait
-        continue-on-error: true
-
-      - name: ℹ️ EAS Build 说明
-        run: |
-          echo "📱 iOS 构建已提交到 EAS Build 云服务"
-          echo "🔗 查看构建状态: https://expo.dev/accounts/[your-account]/projects/lyricnote/builds"
-          echo "⚠️  如果未配置 EXPO_TOKEN, 此步骤会被跳过"
+          echo "📱 iOS 构建需要 Apple Developer 证书"
           echo ""
-          echo "配置 EAS Build:"
-          echo "1. 访问 https://expo.dev"
-          echo "2. 创建账号并获取 Access Token"
-          echo "3. 在 GitHub Secrets 中添加 EXPO_TOKEN"
+          echo "⚠️ iOS 构建在 CI 中需要额外配置:"
+          echo "1. Apple Developer 账号 ($99/年)"
+          echo "2. 在 EAS 中配置 Distribution Certificate 和 Provisioning Profile"
+          echo "3. 运行: cd packages/mobile && eas build --platform ios --profile production"
+          echo ""
+          echo "🔗 配置指南: https://docs.expo.dev/app-signing/managed-credentials/"
+          echo ""
+          echo "💡 推荐: 在本地手动构建 iOS,或使用 EAS Build 的交互模式"
 
   # ========== 5. Mobile Android 构建 (EAS Build) ==========
   build-mobile-android:

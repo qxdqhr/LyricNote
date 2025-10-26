@@ -14,7 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.qhrqht.lyricnote"
+      "bundleIdentifier": "com.qhrqht.lyricnote",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.qhrqht.lyricnote",
