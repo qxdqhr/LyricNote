@@ -153,66 +153,16 @@ echo ""
 echo "${YELLOW}🏪 [3/3] 配置 MiniApp (Taro + weapp-tailwindcss)...${NC}"
 cd "${ROOT_DIR}/packages/miniapp"
 
-# 安装依赖
+# 安装依赖 (使用 Tailwind v3)
 echo "  → 安装 weapp-tailwindcss 依赖..."
-pnpm add -D weapp-tailwindcss tailwindcss postcss autoprefixer postcss-rem-to-responsive-pixel
+pnpm add -D weapp-tailwindcss tailwindcss@^3.4.1 postcss autoprefixer postcss-rem-to-responsive-pixel
 
-# 创建 Tailwind 配置
-echo "  → 创建 tailwind.config.js..."
-cat > tailwind.config.js << 'EOF'
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: ['./src/**/*.{js,ts,jsx,tsx}'],
-  theme: {
-    extend: {
-      colors: {
-        primary: '#5B8AFF',
-        secondary: '#FF6B9D',
-      },
-    },
-  },
-  plugins: [],
-  corePlugins: {
-    preflight: false, // 小程序不需要重置样式
-  },
-}
-EOF
+echo "${YELLOW}  ⚠️  小程序 Tailwind 配置需要手动完成:${NC}"
+echo "  1. 在 config/index.ts 中添加 weapp-tailwindcss webpack 插件"
+echo "  2. 在 src/app.scss 中添加 Tailwind 指令 (已有模板)"
+echo "  3. 参考: docs/TAILWIND_SETUP_ALL_PLATFORMS.md"
 
-# 创建 PostCSS 配置
-echo "  → 创建 postcss.config.js..."
-cat > postcss.config.js << 'EOF'
-module.exports = {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-    'postcss-rem-to-responsive-pixel': {
-      rootValue: 32,
-      propList: ['*'],
-      transformUnit: 'rpx',
-    },
-  },
-}
-EOF
-
-# 更新 app.css
-echo "  → 更新 src/app.css..."
-if [ -f src/app.css ]; then
-  # 备份
-  cp src/app.css src/app.css.backup
-fi
-
-cat > src/app.css << 'EOF'
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* 小程序全局样式 */
-page {
-  @apply bg-gray-50 text-gray-900;
-}
-EOF
-
-echo "${GREEN}  ✅ MiniApp 配置完成${NC}"
+echo "${GREEN}  ✅ MiniApp 依赖安装完成${NC}"
 echo ""
 
 # ==================== 总结 ====================
