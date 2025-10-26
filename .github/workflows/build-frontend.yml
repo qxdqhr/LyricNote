@@ -26,8 +26,8 @@ jobs:
     name: 构建微信小程序
     runs-on: ubuntu-latest
     if: |
-      github.event.inputs.platforms == 'miniapp' || 
-      github.event.inputs.platforms == 'all' || 
+      github.event.inputs.platforms == 'miniapp' ||
+      github.event.inputs.platforms == 'all' ||
       github.event.inputs.platforms == ''
     steps:
       - name: 📥 Checkout 代码
@@ -83,8 +83,8 @@ jobs:
     name: 构建 Desktop (macOS)
     runs-on: macos-latest
     if: |
-      github.event.inputs.platforms == 'desktop' || 
-      github.event.inputs.platforms == 'all' || 
+      github.event.inputs.platforms == 'desktop' ||
+      github.event.inputs.platforms == 'all' ||
       github.event.inputs.platforms == ''
     steps:
       - name: 📥 Checkout 代码
@@ -138,8 +138,8 @@ jobs:
     name: 构建 Desktop (Windows)
     runs-on: windows-latest
     if: |
-      github.event.inputs.platforms == 'desktop' || 
-      github.event.inputs.platforms == 'all' || 
+      github.event.inputs.platforms == 'desktop' ||
+      github.event.inputs.platforms == 'all' ||
       github.event.inputs.platforms == ''
     steps:
       - name: 📥 Checkout 代码
@@ -193,8 +193,8 @@ jobs:
     name: 构建 Mobile (iOS)
     runs-on: ubuntu-latest
     if: |
-      (github.event.inputs.platforms == 'mobile' || 
-       github.event.inputs.platforms == 'all' || 
+      (github.event.inputs.platforms == 'mobile' ||
+       github.event.inputs.platforms == 'all' ||
        github.event.inputs.platforms == '') &&
       github.event_name != 'pull_request'
     steps:
@@ -250,8 +250,8 @@ jobs:
     name: 构建 Mobile (Android)
     runs-on: ubuntu-latest
     if: |
-      (github.event.inputs.platforms == 'mobile' || 
-       github.event.inputs.platforms == 'all' || 
+      (github.event.inputs.platforms == 'mobile' ||
+       github.event.inputs.platforms == 'all' ||
        github.event.inputs.platforms == '') &&
       github.event_name != 'pull_request'
     steps:

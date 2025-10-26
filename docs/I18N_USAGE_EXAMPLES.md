@@ -209,19 +209,19 @@ export function NewComponent() {
 
 ### 完整的替换映射表
 
-| 旧的 constants | 新的 i18n 键 |
-|----------------|--------------|
-| `APP_CONFIG.name` | `app.name` |
-| `APP_CONFIG.fullName` | `app.fullName` |
-| `APP_CONFIG.description` | `app.description` |
-| `APP_TITLES.main` | `titles.main` |
-| `APP_TITLES.welcome` | `titles.welcome` |
-| `UI_TEXT.buttons.login` | `user.login` |
-| `UI_TEXT.buttons.logout` | `nav.logout` |
-| `UI_TEXT.navigation.home` | `nav.home` |
-| `UI_TEXT.navigation.profile` | `nav.profile` |
-| `UI_TEXT.status.loading` | `status.loading` |
-| `UI_TEXT.status.success` | `status.success` |
+| 旧的 constants               | 新的 i18n 键      |
+| ---------------------------- | ----------------- |
+| `APP_CONFIG.name`            | `app.name`        |
+| `APP_CONFIG.fullName`        | `app.fullName`    |
+| `APP_CONFIG.description`     | `app.description` |
+| `APP_TITLES.main`            | `titles.main`     |
+| `APP_TITLES.welcome`         | `titles.welcome`  |
+| `UI_TEXT.buttons.login`      | `user.login`      |
+| `UI_TEXT.buttons.logout`     | `nav.logout`      |
+| `UI_TEXT.navigation.home`    | `nav.home`        |
+| `UI_TEXT.navigation.profile` | `nav.profile`     |
+| `UI_TEXT.status.loading`     | `status.loading`  |
+| `UI_TEXT.status.success`     | `status.success`  |
 
 ---
 
@@ -269,18 +269,14 @@ export function LoginForm() {
       <div className="form-group">
         <label>{t('user.username')}</label>
         <input type="text" placeholder={t('user.username')} />
-        {errors.username && (
-          <span className="error">{errors.username}</span>
-        )}
+        {errors.username && <span className="error">{errors.username}</span>}
       </div>
 
       {/* 密码 */}
       <div className="form-group">
         <label>{t('user.password')}</label>
         <input type="password" placeholder={t('user.password')} />
-        {errors.password && (
-          <span className="error">{errors.password}</span>
-        )}
+        {errors.password && <span className="error">{errors.password}</span>}
       </div>
 
       {/* 按钮 */}
@@ -404,7 +400,7 @@ export default function HomePage() {
 }
 
 // 客户端组件
-'use client';
+('use client');
 function ClientComponent() {
   const { t } = useTranslation();
   return <p>{t('app.description')}</p>;
@@ -503,9 +499,7 @@ export default function ProfilePage() {
 
       {/* 退出登录 */}
       <div className="logout-section">
-        <button className="logout-button">
-          {t('nav.logout')}
-        </button>
+        <button className="logout-button">{t('nav.logout')}</button>
       </div>
     </div>
   );
@@ -619,4 +613,3 @@ describe('i18n', () => {
 5. ✅ 适配不同平台
 
 现在开始使用 i18n 让你的应用国际化吧！🚀
-

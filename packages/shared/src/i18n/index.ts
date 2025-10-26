@@ -41,4 +41,3 @@ export type { LanguageSwitcherProps, LanguageOption } from './components/Languag
 // 翻译资源
 export { default as zhCN } from './locales/zh-CN';
 export { default as enUS } from './locales/en-US';
-

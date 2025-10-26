@@ -259,4 +259,3 @@ export function SuccessToast({ action }: { action: 'saved' | 'deleted' | 'update
     </div>
   );
 }
-

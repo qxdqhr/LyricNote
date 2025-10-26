@@ -2,7 +2,8 @@
 
 ## 概述
 
-LyricNote 项目在 `@lyricnote/shared` 包中内置了轻量级的国际化 (i18n) 解决方案，支持：
+LyricNote 项目在 `@lyricnote/shared`
+包中内置了轻量级的国际化 (i18n) 解决方案，支持：
 
 - ✅ Web (Next.js)
 - ✅ React Native (Mobile)
@@ -305,7 +306,10 @@ export function LoginForm() {
         <label className="block text-sm font-medium">
           {t('user.password')}
         </label>
-        <input type="password" className="mt-1 block w-full rounded border p-2" />
+        <input
+          type="password"
+          className="mt-1 block w-full rounded border p-2"
+        />
         {errors.password && (
           <p className="mt-1 text-sm text-red-600">{errors.password}</p>
         )}
@@ -366,7 +370,8 @@ export function addCustomTranslations() {
 
 ### 2. 创建新的语言文件
 
-如果需要支持更多语言（如繁体中文、日语），在 `packages/shared/src/i18n/locales/` 目录下创建新文件：
+如果需要支持更多语言（如繁体中文、日语），在 `packages/shared/src/i18n/locales/`
+目录下创建新文件：
 
 ```typescript
 // packages/shared/src/i18n/locales/zh-TW.ts
@@ -394,15 +399,15 @@ export { default as zhTW } from './locales/zh-TW';
 const { t, locale, setLocale } = useTranslation();
 
 // t: 翻译函数
-t('common.hello')
-t('validation.required', { context: { field: '用户名' } })
-t('items', { count: 5 })
+t('common.hello');
+t('validation.required', { context: { field: '用户名' } });
+t('items', { count: 5 });
 
 // locale: 当前语言
 console.log(locale); // 'zh-CN'
 
 // setLocale: 切换语言
-setLocale('en-US')
+setLocale('en-US');
 ```
 
 ### t() - 翻译函数
@@ -411,17 +416,17 @@ setLocale('en-US')
 import { t } from '@lyricnote/shared';
 
 // 基础使用
-t('common.hello')
+t('common.hello');
 
 // 插值
-t('greeting', { context: { name: '张三' } })
+t('greeting', { context: { name: '张三' } });
 
 // 复数
-t('items', { count: 1 })
-t('items', { count: 5 })
+t('items', { count: 1 });
+t('items', { count: 5 });
 
 // 默认值
-t('not.exist', { defaultValue: '默认值' })
+t('not.exist', { defaultValue: '默认值' });
 ```
 
 ## 最佳实践
@@ -435,4 +440,3 @@ t('not.exist', { defaultValue: '默认值' })
 ## 完整文档
 
 查看 `packages/shared/src/i18n/README.md` 获取完整文档和高级用法。
-

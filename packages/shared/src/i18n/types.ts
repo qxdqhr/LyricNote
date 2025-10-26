@@ -29,10 +29,7 @@ export interface TranslateOptions {
 }
 
 // 插值函数类型
-export type InterpolateFunction = (
-  template: string,
-  data: Record<string, any>
-) => string;
+export type InterpolateFunction = (template: string, data: Record<string, any>) => string;
 
 // i18n 配置类型
 export interface I18nConfig {
@@ -57,4 +54,3 @@ export interface I18nAdapter {
   saveLocale: (locale: Locale) => Promise<void>;
   loadLocale: () => Promise<Locale | null>;
 }
-

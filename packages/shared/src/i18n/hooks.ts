@@ -53,4 +53,3 @@ export function useLocale() {
     setLocale,
   };
 }
-

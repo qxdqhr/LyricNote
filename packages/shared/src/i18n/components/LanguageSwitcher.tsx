@@ -109,10 +109,7 @@ export function LanguageSwitcherDropdown({
 /**
  * 图标按钮语言切换器（带下拉菜单）
  */
-export function LanguageSwitcherIcon({
-  className = '',
-  onLanguageChange,
-}: LanguageSwitcherProps) {
+export function LanguageSwitcherIcon({ className = '', onLanguageChange }: LanguageSwitcherProps) {
   const { locale, setLocale } = useTranslation();
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -167,31 +164,15 @@ export function LanguageSwitcher({
 }: LanguageSwitcherProps) {
   switch (variant) {
     case 'dropdown':
-      return (
-        <LanguageSwitcherDropdown
-          className={className}
-          onLanguageChange={onLanguageChange}
-        />
-      );
+      return <LanguageSwitcherDropdown className={className} onLanguageChange={onLanguageChange} />;
     case 'icon':
-      return (
-        <LanguageSwitcherIcon
-          className={className}
-          onLanguageChange={onLanguageChange}
-        />
-      );
+      return <LanguageSwitcherIcon className={className} onLanguageChange={onLanguageChange} />;
     case 'buttons':
     default:
-      return (
-        <LanguageSwitcherButtons
-          className={className}
-          onLanguageChange={onLanguageChange}
-        />
-      );
+      return <LanguageSwitcherButtons className={className} onLanguageChange={onLanguageChange} />;
   }
 }
 
 // ==================== 默认导出 ====================
 
 export default LanguageSwitcher;
-

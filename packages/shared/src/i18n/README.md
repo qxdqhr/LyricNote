@@ -1,6 +1,7 @@
 # LyricNote i18n 国际化库
 
-轻量级、类型安全的国际化解决方案，支持 Web、React Native、Taro 小程序、Electron 等多平台。
+轻量级、类型安全的国际化解决方案，支持 Web、React
+Native、Taro 小程序、Electron 等多平台。
 
 ## 特性
 
@@ -46,12 +47,8 @@ function MyComponent() {
       <p>{t('user.login')}</p>
 
       {/* 切换语言 */}
-      <button onClick={() => setLocale('en-US')}>
-        English
-      </button>
-      <button onClick={() => setLocale('zh-CN')}>
-        中文
-      </button>
+      <button onClick={() => setLocale('en-US')}>English</button>
+      <button onClick={() => setLocale('zh-CN')}>中文</button>
     </div>
   );
 }
@@ -122,7 +119,7 @@ t('user.profile.email')  // => "邮箱"
 ### 默认值
 
 ```typescript
-t('not.exist.key', { defaultValue: '默认值' })
+t('not.exist.key', { defaultValue: '默认值' });
 // => "默认值"
 ```
 
@@ -140,7 +137,7 @@ i18n.addResources('zh-CN', {
   },
 });
 
-t('custom.message')  // => "自定义消息"
+t('custom.message'); // => "自定义消息"
 ```
 
 ## 平台适配
@@ -175,7 +172,12 @@ await adapter.saveLocale('en-US');
 ### React Native
 
 ```typescript
-import { initI18n, ReactNativeI18nAdapter, zhCN, enUS } from '@lyricnote/shared';
+import {
+  initI18n,
+  ReactNativeI18nAdapter,
+  zhCN,
+  enUS,
+} from '@lyricnote/shared';
 
 const adapter = new ReactNativeI18nAdapter();
 
@@ -299,16 +301,28 @@ initI18n({
 ```typescript
 export default {
   // 通用
-  common: { /* ... */ },
+  common: {
+    /* ... */
+  },
 
   // 按功能模块
-  auth: { /* ... */ },
-  profile: { /* ... */ },
-  settings: { /* ... */ },
+  auth: {
+    /* ... */
+  },
+  profile: {
+    /* ... */
+  },
+  settings: {
+    /* ... */
+  },
 
   // 共享
-  errors: { /* ... */ },
-  validation: { /* ... */ },
+  errors: {
+    /* ... */
+  },
+  validation: {
+    /* ... */
+  },
 } as const;
 ```
 
@@ -348,7 +362,7 @@ function MyComponent() {
 
   return (
     <div>
-      {['item1', 'item2'].map(key => (
+      {['item1', 'item2'].map((key) => (
         <span key={key}>{t(key)}</span>
       ))}
     </div>
@@ -359,14 +373,17 @@ function MyComponent() {
 function MyComponent() {
   const { t } = useTranslation();
 
-  const items = useMemo(() => [
-    { key: 'item1', label: t('item1') },
-    { key: 'item2', label: t('item2') },
-  ], [t]);
+  const items = useMemo(
+    () => [
+      { key: 'item1', label: t('item1') },
+      { key: 'item2', label: t('item2') },
+    ],
+    [t]
+  );
 
   return (
     <div>
-      {items.map(item => (
+      {items.map((item) => (
         <span key={item.key}>{item.label}</span>
       ))}
     </div>
@@ -376,18 +393,18 @@ function MyComponent() {
 
 ## 与其他库对比
 
-| 特性 | LyricNote i18n | i18next | react-intl |
-|------|----------------|---------|------------|
-| 体积 | < 5KB | ~50KB | ~60KB |
-| 依赖 | 0 | 多个 | 多个 |
-| React 集成 | ✅ | ✅ | ✅ |
-| 跨平台 | ✅ | ✅ | ⚠️ |
-| 类型安全 | ✅ | ⚠️ | ✅ |
-| 学习成本 | 低 | 中 | 中 |
-| 插值 | ✅ | ✅ | ✅ |
-| 复数 | 简单 | 完整 | 完整 |
-| 格式化 | ❌ | ✅ | ✅ |
-| 懒加载 | 手动 | ✅ | ✅ |
+| 特性       | LyricNote i18n | i18next | react-intl |
+| ---------- | -------------- | ------- | ---------- |
+| 体积       | < 5KB          | ~50KB   | ~60KB      |
+| 依赖       | 0              | 多个    | 多个       |
+| React 集成 | ✅             | ✅      | ✅         |
+| 跨平台     | ✅             | ✅      | ⚠️         |
+| 类型安全   | ✅             | ⚠️      | ✅         |
+| 学习成本   | 低             | 中      | 中         |
+| 插值       | ✅             | ✅      | ✅         |
+| 复数       | 简单           | 完整    | 完整       |
+| 格式化     | ❌             | ✅      | ✅         |
+| 懒加载     | 手动           | ✅      | ✅         |
 
 ## FAQ
 
@@ -424,7 +441,7 @@ new Intl.NumberFormat('zh-CN').format(1234567.89);
 // 货币格式化
 new Intl.NumberFormat('zh-CN', {
   style: 'currency',
-  currency: 'CNY'
+  currency: 'CNY',
 }).format(100);
 ```
 
@@ -453,4 +470,3 @@ const text = i18n.t('common.hello');
 ## 许可
 
 MIT
-

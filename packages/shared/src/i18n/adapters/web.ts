@@ -30,12 +30,12 @@ export class WebI18nAdapter implements I18nAdapter {
       'zh-CN': 'zh-CN',
       'zh-TW': 'zh-TW',
       'zh-HK': 'zh-TW',
-      'zh': 'zh-CN',
+      zh: 'zh-CN',
       'en-US': 'en-US',
       'en-GB': 'en-US',
-      'en': 'en-US',
+      en: 'en-US',
       'ja-JP': 'ja-JP',
-      'ja': 'ja-JP',
+      ja: 'ja-JP',
     };
     return map[locale] || 'zh-CN';
   }
@@ -66,14 +66,13 @@ export class ElectronI18nAdapter implements I18nAdapter {
       'zh-CN': 'zh-CN',
       'zh-TW': 'zh-TW',
       'zh-HK': 'zh-TW',
-      'zh': 'zh-CN',
+      zh: 'zh-CN',
       'en-US': 'en-US',
       'en-GB': 'en-US',
-      'en': 'en-US',
+      en: 'en-US',
       'ja-JP': 'ja-JP',
-      'ja': 'ja-JP',
+      ja: 'ja-JP',
     };
     return map[locale] || 'zh-CN';
   }
 }
-

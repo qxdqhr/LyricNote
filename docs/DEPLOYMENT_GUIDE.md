@@ -67,6 +67,7 @@ sudo firewall-cmd --list-ports
 ### 云服务器安全组
 
 如果使用阿里云、腾讯云等，需要在控制台的**安全组**中添加规则：
+
 - 端口范围: 3002
 - 授权对象: 0.0.0.0/0
 - 协议: TCP
@@ -148,6 +149,7 @@ sudo systemctl reload nginx
 ```
 
 配置完成后，访问：
+
 - HTTP: `http://qhr062.top`
 - HTTPS: `https://qhr062.top`
 
@@ -171,7 +173,7 @@ services:
     container_name: lyricnote-backend
     restart: unless-stopped
     ports:
-      - "3002:3000"
+      - '3002:3000'
     env_file:
       - .env.production
     environment:
@@ -291,4 +293,3 @@ docker logs --tail 100 lyricnote-backend
 ```bash
 docker logs lyricnote-backend > lyricnote.log 2>&1
 ```
-

@@ -2,10 +2,10 @@
 
 ## 📦 两个版本
 
-| 版本 | 文件 | 样式 | 推荐 |
-|------|------|------|------|
-| **Tailwind** | `LanguageSwitcherTailwind.tsx` | Tailwind CSS | ✅ **推荐** |
-| **CSS** | `LanguageSwitcherWrapper.tsx` | 独立 CSS 文件 | ⚠️ 备选 |
+| 版本         | 文件                           | 样式          | 推荐        |
+| ------------ | ------------------------------ | ------------- | ----------- |
+| **Tailwind** | `LanguageSwitcherTailwind.tsx` | Tailwind CSS  | ✅ **推荐** |
+| **CSS**      | `LanguageSwitcherWrapper.tsx`  | 独立 CSS 文件 | ⚠️ 备选     |
 
 ---
 
@@ -17,10 +17,11 @@
 import { LanguageSwitcher } from '@/components/language-switcher';
 
 // 自动使用 Tailwind 版本
-<LanguageSwitcher variant="icon" />
+<LanguageSwitcher variant="icon" />;
 ```
 
 **特点**：
+
 - ✅ 与项目风格一致
 - ✅ 自动深色模式
 - ✅ 响应式设计
@@ -36,12 +37,14 @@ import { LanguageSwitcher } from '@/components/language-switcher';
 **样式方案**：Tailwind CSS 内联样式
 
 **优点**：
+
 - 与 Next.js 项目集成
 - 自动支持深色模式
 - 响应式开箱即用
 - 打包体积更小
 
 **使用**：
+
 ```tsx
 import { LanguageSwitcher } from '@/components/language-switcher';
 ```
@@ -53,21 +56,25 @@ import { LanguageSwitcher } from '@/components/language-switcher';
 **样式方案**：导入独立 CSS 文件
 
 **CSS 文件位置**：
+
 ```
 packages/shared/src/i18n/components/LanguageSwitcher.css
 ```
 
 **优点**：
+
 - 完全独立的样式
 - 不依赖 Tailwind
 - 跨框架兼容
 
 **缺点**：
+
 - 打包体积更大
 - 需要额外导入 CSS
 - 与项目风格不一致
 
 **使用**：
+
 ```tsx
 import { LanguageSwitcherWrapper } from '@/components/language-switcher';
 ```
@@ -120,7 +127,7 @@ packages/
 
 ```tsx
 // index.ts
-export { LanguageSwitcher } from './LanguageSwitcherTailwind';  // 默认
+export { LanguageSwitcher } from './LanguageSwitcherTailwind'; // 默认
 ```
 
 ### 如果想使用 CSS 版本
@@ -134,16 +141,16 @@ import { LanguageSwitcherWrapper as LanguageSwitcher } from '@/components/langua
 
 ## 📊 对比
 
-| 特性 | Tailwind 版本 | CSS 版本 |
-|------|---------------|----------|
-| **文件大小** | ~3KB | ~8KB |
-| **依赖** | Tailwind CSS | 独立 CSS 文件 |
-| **深色模式** | `dark:` 自动 | `@media` 手动 |
-| **响应式** | `sm:` `md:` | `@media` 手动 |
-| **与项目一致** | ✅ | ❌ |
-| **开发体验** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| **维护成本** | 低 | 中 |
-| **跨框架** | ❌ | ✅ |
+| 特性           | Tailwind 版本 | CSS 版本      |
+| -------------- | ------------- | ------------- |
+| **文件大小**   | ~3KB          | ~8KB          |
+| **依赖**       | Tailwind CSS  | 独立 CSS 文件 |
+| **深色模式**   | `dark:` 自动  | `@media` 手动 |
+| **响应式**     | `sm:` `md:`   | `@media` 手动 |
+| **与项目一致** | ✅            | ❌            |
+| **开发体验**   | ⭐⭐⭐⭐⭐    | ⭐⭐⭐        |
+| **维护成本**   | 低            | 中            |
+| **跨框架**     | ❌            | ✅            |
 
 ---
 
@@ -152,18 +159,22 @@ import { LanguageSwitcherWrapper as LanguageSwitcher } from '@/components/langua
 ### Backend 项目
 
 **保留**：
+
 - ✅ `LanguageSwitcherTailwind.tsx`
 - ✅ `index.ts`
 
 **可选保留**（如果需要备选方案）：
+
 - ⚠️ `LanguageSwitcherWrapper.tsx`
 
 **不需要关心**：
+
 - ❌ `LanguageSwitcher.css`（在 shared 包中）
 
 ### Shared 包
 
 **保留所有**：
+
 - ✅ `components/LanguageSwitcher.tsx`
 - ✅ `components/LanguageSwitcher.css`
 - ✅ `adapters/web.ts`
@@ -179,7 +190,7 @@ import { LanguageSwitcherWrapper as LanguageSwitcher } from '@/components/langua
 ```tsx
 // ✅ 推荐
 import { LanguageSwitcher } from '@/components/language-switcher';
-<LanguageSwitcher variant="icon" />
+<LanguageSwitcher variant="icon" />;
 ```
 
 ### 2. 自定义样式
@@ -216,13 +227,13 @@ import { LanguageSwitcher } from '@/components/language-switcher';
 
 ## 🎯 总结
 
-| 问题 | 答案 |
-|------|------|
-| **使用哪个版本？** | Tailwind 版本（默认） |
-| **CSS 文件在哪？** | `shared` 包中，不在 Backend |
-| **需要导入 CSS 吗？** | 不需要（使用 Tailwind 版本） |
-| **可以删除 CSS 版本吗？** | 可以，但建议保留作为备选 |
-| **如何自定义样式？** | 通过 `className` 传递 Tailwind 类 |
+| 问题                      | 答案                              |
+| ------------------------- | --------------------------------- |
+| **使用哪个版本？**        | Tailwind 版本（默认）             |
+| **CSS 文件在哪？**        | `shared` 包中，不在 Backend       |
+| **需要导入 CSS 吗？**     | 不需要（使用 Tailwind 版本）      |
+| **可以删除 CSS 版本吗？** | 可以，但建议保留作为备选          |
+| **如何自定义样式？**      | 通过 `className` 传递 Tailwind 类 |
 
 **推荐配置**：保持当前配置，默认使用 Tailwind 版本，无需修改任何内容！✨
 

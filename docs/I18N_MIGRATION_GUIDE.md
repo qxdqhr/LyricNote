@@ -61,9 +61,9 @@ grep -r "title.*:" packages/ | grep -v node_modules
 // zh-CN.ts
 export default {
   app: {
-    name: 'LyricNote',              // 替换 '通用标题1'
-    fullName: 'LyricNote - 歌词笔记',  // 替换 '通用全称'
-    description: '...',              // 替换 '通用描述'
+    name: 'LyricNote', // 替换 '通用标题1'
+    fullName: 'LyricNote - 歌词笔记', // 替换 '通用全称'
+    description: '...', // 替换 '通用描述'
   },
   // ...
 };
@@ -211,7 +211,7 @@ const validateForm = (values) => {
 
   if (!values.email) {
     errors.email = t('validation.required', {
-      context: { field: t('user.email') }
+      context: { field: t('user.email') },
     });
   } else if (!/\S+@\S+\.\S+/.test(values.email)) {
     errors.email = t('validation.invalid_email');
@@ -255,17 +255,17 @@ function saveData() {
 
 ```typescript
 // ✅ 好的命名
-t('app.name')              // 应用相关
-t('nav.home')              // 导航相关
-t('user.login')            // 用户相关
-t('validation.required')   // 验证相关
-t('errors.network')        // 错误相关
-t('success.saved')         // 成功消息
+t('app.name'); // 应用相关
+t('nav.home'); // 导航相关
+t('user.login'); // 用户相关
+t('validation.required'); // 验证相关
+t('errors.network'); // 错误相关
+t('success.saved'); // 成功消息
 
 // ❌ 避免的命名
-t('appName')               // 不够明确
-t('home')                  // 缺少命名空间
-t('loginButton')           // 过于具体
+t('appName'); // 不够明确
+t('home'); // 缺少命名空间
+t('loginButton'); // 过于具体
 ```
 
 ## 迁移检查清单
@@ -284,16 +284,19 @@ t('loginButton')           // 过于具体
 你可以逐步迁移，无需一次性完成：
 
 ### 第 1 阶段：核心功能
+
 - ✅ 导航菜单
 - ✅ 按钮文案
 - ✅ 错误/成功消息
 
 ### 第 2 阶段：表单和验证
+
 - ⏳ 表单标签
 - ⏳ 验证消息
 - ⏳ 占位符文本
 
 ### 第 3 阶段：页面内容
+
 - ⏳ 页面标题
 - ⏳ 描述文本
 - ⏳ 帮助文档
@@ -310,7 +313,7 @@ A: 使用 TypeScript 的 `as const` 和类型推导：
 
 ```typescript
 const translations = {
-  hello: '你好'
+  hello: '你好',
 } as const;
 
 type TranslationKeys = keyof typeof translations;
@@ -408,4 +411,3 @@ describe('Language switching', () => {
 5. ✅ **用户体验**：用户可以选择喜欢的语言
 
 现在就开始迁移吧！🚀
-

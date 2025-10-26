@@ -52,4 +52,3 @@ if (typeof window !== 'undefined') {
 
 // 重新导出 hooks 和组件
 export { useTranslation, useLocale } from '@lyricnote/shared';
-

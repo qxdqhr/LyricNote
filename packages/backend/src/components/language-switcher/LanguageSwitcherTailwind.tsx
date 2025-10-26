@@ -34,7 +34,9 @@ export function LanguageSwitcherButtons({ className = '' }: LanguageSwitcherProp
   const { locale, setLocale } = useTranslation();
 
   return (
-    <div className={`inline-flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg ${className}`}>
+    <div
+      className={`inline-flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg ${className}`}
+    >
       {LANGUAGE_OPTIONS.map((option) => (
         <button
           key={option.locale}
@@ -67,7 +69,10 @@ export function LanguageSwitcherDropdown({ className = '' }: LanguageSwitcherPro
 
   return (
     <div className={`inline-flex flex-col gap-2 ${className}`}>
-      <label htmlFor="language-select" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+      <label
+        htmlFor="language-select"
+        className="text-sm font-medium text-gray-700 dark:text-gray-300"
+      >
         {t('language.label')}
       </label>
       <select
@@ -184,7 +189,11 @@ export function LanguageSwitcherIcon({ className = '' }: LanguageSwitcherProps) 
               <span className="text-lg leading-none">{option.flag}</span>
               <span className="flex-1 text-left">{option.label}</span>
               {locale === option.locale && (
-                <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="w-4 h-4 text-blue-600 dark:text-blue-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -216,4 +225,3 @@ export function LanguageSwitcher({ variant = 'icon', className }: LanguageSwitch
 }
 
 export default LanguageSwitcher;
-

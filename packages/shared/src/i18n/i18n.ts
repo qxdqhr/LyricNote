@@ -155,4 +155,3 @@ export function getI18n(): I18nInstance {
 export function t(key: string, options?: TranslateOptions): string {
   return getI18n().t(key, options);
 }
-

@@ -13,4 +13,4 @@ module.exports = {
   corePlugins: {
     preflight: false, // 小程序不需要重置样式
   },
-}
+};

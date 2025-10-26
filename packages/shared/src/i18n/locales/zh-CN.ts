@@ -130,4 +130,3 @@ export default {
     ja_jp: '日本語',
   },
 } as const;
-

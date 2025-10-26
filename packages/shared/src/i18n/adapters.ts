@@ -30,12 +30,12 @@ export class WebI18nAdapter implements I18nAdapter {
       'zh-CN': 'zh-CN',
       'zh-TW': 'zh-TW',
       'zh-HK': 'zh-TW',
-      'zh': 'zh-CN',
+      zh: 'zh-CN',
       'en-US': 'en-US',
       'en-GB': 'en-US',
-      'en': 'en-US',
+      en: 'en-US',
       'ja-JP': 'ja-JP',
-      'ja': 'ja-JP',
+      ja: 'ja-JP',
     };
     return map[locale] || 'zh-CN';
   }
@@ -90,19 +90,19 @@ export class ReactNativeI18nAdapter implements I18nAdapter {
   private normalizeLocale(locale: string): Locale {
     const map: Record<string, Locale> = {
       'zh-CN': 'zh-CN',
-      'zh_CN': 'zh-CN',
+      zh_CN: 'zh-CN',
       'zh-Hans': 'zh-CN',
-      'zh_Hans_CN': 'zh-CN',
+      zh_Hans_CN: 'zh-CN',
       'zh-TW': 'zh-TW',
-      'zh_TW': 'zh-TW',
+      zh_TW: 'zh-TW',
       'zh-Hant': 'zh-TW',
-      'zh_Hant_TW': 'zh-TW',
+      zh_Hant_TW: 'zh-TW',
       'en-US': 'en-US',
-      'en_US': 'en-US',
-      'en': 'en-US',
+      en_US: 'en-US',
+      en: 'en-US',
       'ja-JP': 'ja-JP',
-      'ja_JP': 'ja-JP',
-      'ja': 'ja-JP',
+      ja_JP: 'ja-JP',
+      ja: 'ja-JP',
     };
     return map[locale] || 'zh-CN';
   }
@@ -153,13 +153,13 @@ export class TaroI18nAdapter implements I18nAdapter {
 
   private normalizeLocale(locale: string): Locale {
     const map: Record<string, Locale> = {
-      'zh_CN': 'zh-CN',
+      zh_CN: 'zh-CN',
       'zh-CN': 'zh-CN',
-      'zh_TW': 'zh-TW',
+      zh_TW: 'zh-TW',
       'zh-TW': 'zh-TW',
-      'en': 'en-US',
+      en: 'en-US',
       'en-US': 'en-US',
-      'ja': 'ja-JP',
+      ja: 'ja-JP',
       'ja-JP': 'ja-JP',
     };
     return map[locale] || 'zh-CN';
@@ -191,14 +191,13 @@ export class ElectronI18nAdapter implements I18nAdapter {
       'zh-CN': 'zh-CN',
       'zh-TW': 'zh-TW',
       'zh-HK': 'zh-TW',
-      'zh': 'zh-CN',
+      zh: 'zh-CN',
       'en-US': 'en-US',
       'en-GB': 'en-US',
-      'en': 'en-US',
+      en: 'en-US',
       'ja-JP': 'ja-JP',
-      'ja': 'ja-JP',
+      ja: 'ja-JP',
     };
     return map[locale] || 'zh-CN';
   }
 }
-

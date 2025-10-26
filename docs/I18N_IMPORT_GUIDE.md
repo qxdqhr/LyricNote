@@ -2,7 +2,8 @@
 
 ## 问题说明
 
-为了避免打包工具（如 Next.js/Webpack）尝试解析不同平台的依赖（如 React Native、Taro），我们将平台适配器从主导出中移除。
+为了避免打包工具（如 Next.js/Webpack）尝试解析不同平台的依赖（如 React
+Native、Taro），我们将平台适配器从主导出中移除。
 
 ### 之前的问题
 
@@ -12,6 +13,7 @@ import { WebI18nAdapter, ReactNativeI18nAdapter } from '@lyricnote/shared';
 ```
 
 **错误信息**：
+
 ```
 Error: × Expected 'from', got 'typeOf'
 import typeof * as ReactNativePublicAPI from './index.js.flow';
@@ -32,7 +34,10 @@ import typeof * as ReactNativePublicAPI from './index.js.flow';
 import { initI18n, useTranslation, zhCN, enUS } from '@lyricnote/shared';
 
 // ✅ Web 适配器从 i18n/web 导入
-import { WebI18nAdapter, ElectronI18nAdapter } from '@lyricnote/shared/i18n/web';
+import {
+  WebI18nAdapter,
+  ElectronI18nAdapter,
+} from '@lyricnote/shared/i18n/web';
 ```
 
 **示例**：
@@ -44,7 +49,7 @@ import { WebI18nAdapter } from '@lyricnote/shared/i18n/web';
 
 export async function initializeI18n() {
   const adapter = new WebI18nAdapter();
-  const locale = await adapter.loadLocale() || 'zh-CN';
+  const locale = (await adapter.loadLocale()) || 'zh-CN';
 
   initI18n({
     locale,
@@ -75,7 +80,7 @@ import { ReactNativeI18nAdapter } from '@lyricnote/shared/dist/i18n/adapters';
 
 export async function initializeI18n() {
   const adapter = new ReactNativeI18nAdapter();
-  const locale = await adapter.loadLocale() || adapter.getSystemLocale();
+  const locale = (await adapter.loadLocale()) || adapter.getSystemLocale();
 
   initI18n({
     locale,
@@ -106,7 +111,7 @@ import { TaroI18nAdapter } from '@lyricnote/shared/dist/i18n/adapters';
 
 export async function initializeI18n() {
   const adapter = new TaroI18nAdapter();
-  const locale = await adapter.loadLocale() || adapter.getSystemLocale();
+  const locale = (await adapter.loadLocale()) || adapter.getSystemLocale();
 
   initI18n({
     locale,
@@ -137,7 +142,7 @@ import { ElectronI18nAdapter } from '@lyricnote/shared/i18n/web';
 
 export async function initializeI18n() {
   const adapter = new ElectronI18nAdapter();
-  const locale = await adapter.loadLocale() || adapter.getSystemLocale();
+  const locale = (await adapter.loadLocale()) || adapter.getSystemLocale();
 
   initI18n({
     locale,
@@ -151,12 +156,12 @@ export async function initializeI18n() {
 
 ## 导入路径总结
 
-| 平台 | 适配器 | 导入路径 |
-|------|--------|----------|
-| **Web (Next.js)** | `WebI18nAdapter` | `@lyricnote/shared/i18n/web` |
-| **Electron** | `ElectronI18nAdapter` | `@lyricnote/shared/i18n/web` |
-| **React Native** | `ReactNativeI18nAdapter` | `@lyricnote/shared/dist/i18n/adapters` |
-| **Taro 小程序** | `TaroI18nAdapter` | `@lyricnote/shared/dist/i18n/adapters` |
+| 平台              | 适配器                   | 导入路径                               |
+| ----------------- | ------------------------ | -------------------------------------- |
+| **Web (Next.js)** | `WebI18nAdapter`         | `@lyricnote/shared/i18n/web`           |
+| **Electron**      | `ElectronI18nAdapter`    | `@lyricnote/shared/i18n/web`           |
+| **React Native**  | `ReactNativeI18nAdapter` | `@lyricnote/shared/dist/i18n/adapters` |
+| **Taro 小程序**   | `TaroI18nAdapter`        | `@lyricnote/shared/dist/i18n/adapters` |
 
 ---
 
@@ -219,7 +224,8 @@ import { WebI18nAdapter } from '@lyricnote/shared/i18n/web';
 export { WebI18nAdapter, ReactNativeI18nAdapter } from './i18n/adapters';
 ```
 
-打包工具（Webpack、Vite 等）会尝试解析所有导入的模块，即使你只用到 `WebI18nAdapter`，它也会尝试解析 `react-native`，导致：
+打包工具（Webpack、Vite 等）会尝试解析所有导入的模块，即使你只用到
+`WebI18nAdapter`，它也会尝试解析 `react-native`，导致：
 
 1. **打包失败**：Next.js 无法解析 React Native 的 Flow 语法
 2. **包体积增大**：引入不需要的依赖
@@ -304,9 +310,9 @@ import { ReactNativeI18nAdapter } from '@lyricnote/shared/dist/i18n/adapters';
 
 ### Q: 如何添加新的平台？
 
-**A**: 在 `shared/src/i18n/adapters.ts` 中创建新的适配器类，然后在该平台的项目中从 `dist/i18n/adapters` 导入。
+**A**: 在 `shared/src/i18n/adapters.ts`
+中创建新的适配器类，然后在该平台的项目中从 `dist/i18n/adapters` 导入。
 
 ---
 
 **最后更新**: 2025-10-26
-

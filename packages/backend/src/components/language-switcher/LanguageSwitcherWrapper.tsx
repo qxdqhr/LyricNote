@@ -55,4 +55,3 @@ export function LanguageSwitcherWrapper({
 }
 
 export default LanguageSwitcherWrapper;
-

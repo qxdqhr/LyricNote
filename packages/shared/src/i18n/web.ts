@@ -27,4 +27,3 @@ export type {
   I18nAdapter,
   LanguageSwitcherProps,
 } from './index';
-

@@ -7,6 +7,7 @@
 **文件**: `LanguageSwitcherTailwind.tsx`
 
 #### 优点
+
 - ✅ **与项目一致**：使用 Next.js/Tailwind 项目的统一样式系统
 - ✅ **开发效率高**：直接在组件中编写样式，无需切换文件
 - ✅ **类型安全**：TypeScript + Tailwind 智能提示
@@ -17,10 +18,12 @@
 - ✅ **热更新快**：修改样式立即生效
 
 #### 缺点
+
 - ⚠️ **仅限 Web**：不能用于 React Native、Taro
 - ⚠️ **依赖 Tailwind**：需要项目配置 Tailwind CSS
 
 #### 适用场景
+
 - ✅ Next.js Backend (当前项目)
 - ✅ 任何使用 Tailwind 的 React Web 项目
 - ✅ 需要深度定制样式的场景
@@ -32,12 +35,14 @@
 **文件**: `LanguageSwitcherWrapper.tsx` + `LanguageSwitcher.css`
 
 #### 优点
+
 - ✅ **跨平台兼容**：理论上可以用于多种环境
 - ✅ **样式隔离**：CSS 模块化，不会冲突
 - ✅ **无框架依赖**：不依赖任何 CSS 框架
 - ✅ **可移植性强**：可以复制到任何项目
 
 #### 缺点
+
 - ❌ **开发效率低**：需要在两个文件间切换
 - ❌ **维护成本高**：样式和逻辑分离
 - ❌ **Bundle 体积**：所有样式都会打包
@@ -46,6 +51,7 @@
 - ❌ **与项目不一致**：使用不同的样式方案
 
 #### 适用场景
+
 - ⚠️ 需要在非 Tailwind 项目中使用
 - ⚠️ 需要样式完全独立的组件库
 
@@ -53,15 +59,15 @@
 
 ## 功能对比
 
-| 功能 | Tailwind 版本 | CSS 版本 |
-|------|---------------|----------|
-| **深色模式** | `dark:` 自动 | `@media` 手动 |
-| **响应式** | `sm:` `md:` | `@media` 手动 |
-| **悬停效果** | `hover:` | `:hover` |
-| **动画** | `animate-in` | `@keyframes` |
-| **焦点样式** | `focus:` | `:focus` |
-| **条件样式** | 模板字符串 | CSS 类切换 |
-| **调试** | 浏览器直接看 | 需要找 CSS 文件 |
+| 功能         | Tailwind 版本 | CSS 版本        |
+| ------------ | ------------- | --------------- |
+| **深色模式** | `dark:` 自动  | `@media` 手动   |
+| **响应式**   | `sm:` `md:`   | `@media` 手动   |
+| **悬停效果** | `hover:`      | `:hover`        |
+| **动画**     | `animate-in`  | `@keyframes`    |
+| **焦点样式** | `focus:`      | `:focus`        |
+| **条件样式** | 模板字符串    | CSS 类切换      |
+| **调试**     | 浏览器直接看  | 需要找 CSS 文件 |
 
 ---
 
@@ -89,9 +95,7 @@
 ### CSS 版本
 
 ```tsx
-<button className="language-icon-button">
-  {option.flag}
-</button>
+<button className="language-icon-button">{option.flag}</button>
 ```
 
 ```css
@@ -125,12 +129,13 @@
 
 ### 打包体积
 
-| 版本 | 初始大小 | Gzipped |
-|------|---------|---------|
-| **Tailwind** | ~3KB | ~1KB |
-| **CSS** | ~8KB | ~2KB |
+| 版本         | 初始大小 | Gzipped |
+| ------------ | -------- | ------- |
+| **Tailwind** | ~3KB     | ~1KB    |
+| **CSS**      | ~8KB     | ~2KB    |
 
 Tailwind 更小是因为：
+
 1. Tree Shaking：只打包用到的样式
 2. 压缩优化：Tailwind 的类名可以被高效压缩
 3. 共享类：相同样式在多个组件间共享
@@ -166,6 +171,7 @@ import { LanguageSwitcher } from '@/components/language-switcher';
 **强烈推荐使用 Tailwind 版本** ✨
 
 原因：
+
 1. 与项目技术栈一致
 2. 开发效率高
 3. 样式可维护性好
@@ -187,8 +193,8 @@ import { LanguageSwitcher } from '@/components/language-switcher';
 
 ```tsx
 // packages/backend/src/components/language-switcher/index.ts
-export { LanguageSwitcher } from './LanguageSwitcherTailwind';  // 默认
-export { LanguageSwitcherWrapper } from './LanguageSwitcherWrapper';  // 备用
+export { LanguageSwitcher } from './LanguageSwitcherTailwind'; // 默认
+export { LanguageSwitcherWrapper } from './LanguageSwitcherWrapper'; // 备用
 ```
 
 如果需要切换回 CSS 版本：
@@ -201,14 +207,14 @@ import { LanguageSwitcherWrapper as LanguageSwitcher } from '@/components/langua
 
 ## 总结
 
-| 维度 | Tailwind 版本 | CSS 版本 |
-|------|---------------|----------|
-| **开发体验** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| **维护成本** | ⭐⭐⭐⭐⭐ | ⭐⭐ |
-| **性能** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| **可移植性** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **主题支持** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| **学习曲线** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| 维度         | Tailwind 版本 | CSS 版本   |
+| ------------ | ------------- | ---------- |
+| **开发体验** | ⭐⭐⭐⭐⭐    | ⭐⭐⭐     |
+| **维护成本** | ⭐⭐⭐⭐⭐    | ⭐⭐       |
+| **性能**     | ⭐⭐⭐⭐⭐    | ⭐⭐⭐⭐   |
+| **可移植性** | ⭐⭐⭐        | ⭐⭐⭐⭐⭐ |
+| **主题支持** | ⭐⭐⭐⭐⭐    | ⭐⭐⭐     |
+| **学习曲线** | ⭐⭐⭐⭐      | ⭐⭐⭐⭐⭐ |
 
 **最终推荐**：在 Backend 项目中使用 **Tailwind 版本** ✨
 
@@ -218,7 +224,8 @@ import { LanguageSwitcherWrapper as LanguageSwitcher } from '@/components/langua
 
 ### Q: 为什么不一开始就用 Tailwind？
 
-A: 最初考虑到 `shared` 包需要支持多平台（Web、React Native、Taro），所以使用了纯 CSS。但在实际的 Next.js 项目中，Tailwind 是更好的选择。
+A: 最初考虑到 `shared` 包需要支持多平台（Web、React
+Native、Taro），所以使用了纯 CSS。但在实际的 Next.js 项目中，Tailwind 是更好的选择。
 
 ### Q: CSS 版本会被删除吗？
 
@@ -237,9 +244,9 @@ A: 当然！Tailwind 版本更容易自定义：
 
 ### Q: 支持其他 CSS 框架吗？
 
-A: 如果需要其他框架（如 Bootstrap、Ant Design），可以参考 Tailwind 版本的代码结构，替换对应的类名即可。
+A: 如果需要其他框架（如 Bootstrap、Ant
+Design），可以参考 Tailwind 版本的代码结构，替换对应的类名即可。
 
 ---
 
 **最后更新**: 2025-10-26
-
