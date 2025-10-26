@@ -25,7 +25,9 @@ LyricNote 项目在 `@lyricnote/shared` 包中内置了轻量级的国际化 (i1
 
 ```typescript
 // packages/backend/src/lib/i18n.ts
-import { initI18n, zhCN, enUS, WebI18nAdapter } from '@lyricnote/shared';
+import { initI18n, zhCN, enUS } from '@lyricnote/shared';
+// Web 平台适配器单独导入，避免打包其他平台的依赖
+import { WebI18nAdapter } from '@lyricnote/shared/i18n/web';
 
 let isInitialized = false;
 
@@ -99,7 +101,9 @@ export default function HomePage() {
 
 ```typescript
 // packages/mobile/src/lib/i18n.ts
-import { initI18n, zhCN, enUS, ReactNativeI18nAdapter } from '@lyricnote/shared';
+import { initI18n, zhCN, enUS } from '@lyricnote/shared';
+// React Native 平台适配器需要直接从 dist 导入
+import { ReactNativeI18nAdapter } from '@lyricnote/shared/dist/i18n/adapters';
 
 let isInitialized = false;
 
@@ -149,7 +153,9 @@ export default function App() {
 
 ```typescript
 // packages/miniapp/src/lib/i18n.ts
-import { initI18n, zhCN, enUS, TaroI18nAdapter } from '@lyricnote/shared';
+import { initI18n, zhCN, enUS } from '@lyricnote/shared';
+// Taro 平台适配器需要直接从 dist 导入
+import { TaroI18nAdapter } from '@lyricnote/shared/dist/i18n/adapters';
 
 let isInitialized = false;
 
@@ -179,7 +185,9 @@ export { useTranslation } from '@lyricnote/shared';
 
 ```typescript
 // packages/desktop/src/lib/i18n.ts
-import { initI18n, zhCN, enUS, ElectronI18nAdapter } from '@lyricnote/shared';
+import { initI18n, zhCN, enUS } from '@lyricnote/shared';
+// Electron 可以使用 Web 适配器
+import { ElectronI18nAdapter } from '@lyricnote/shared/i18n/web';
 
 let isInitialized = false;
 
@@ -214,14 +222,14 @@ export { useTranslation } from '@lyricnote/shared';
 'use client';
 
 import { useTranslation } from '@/lib/i18n';
-import { WebI18nAdapter } from '@lyricnote/shared';
+import { WebI18nAdapter } from '@lyricnote/shared/i18n/web';
 
 export function LanguageSelector() {
   const { locale, setLocale } = useTranslation();
 
   const handleChange = async (newLocale: string) => {
     setLocale(newLocale as any);
-
+    
     // 保存到本地存储
     const adapter = new WebI18nAdapter();
     await adapter.saveLocale(newLocale as any);

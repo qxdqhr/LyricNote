@@ -29,6 +29,11 @@
       "types": "./dist/universalFile/index.d.ts",
       "import": "./dist/universalFile/index.js",
       "default": "./dist/universalFile/index.js"
+    },
+    "./i18n/web": {
+      "types": "./dist/i18n/web.d.ts",
+      "import": "./dist/i18n/web.js",
+      "default": "./dist/i18n/web.js"
     }
   },
   "scripts": {

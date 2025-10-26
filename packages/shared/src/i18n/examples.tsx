@@ -3,7 +3,8 @@
  */
 
 import React from 'react';
-import { initI18n, useTranslation, zhCN, enUS, WebI18nAdapter } from '../index';
+import { initI18n, useTranslation, zhCN, enUS } from '../index';
+import { WebI18nAdapter } from '../i18n/web';
 
 // =========================
 // 1. 初始化示例

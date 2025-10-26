@@ -127,7 +127,7 @@ export default function SettingsPage() {
       <section className="settings-section">
         <h2>{t('language.label')}</h2>
         <p>选择您偏好的语言，设置会自动保存</p>
-        
+
         <LanguageSwitcher variant="dropdown" />
       </section>
 
@@ -338,9 +338,9 @@ import { toast } from 'react-hot-toast';
 async function saveData(data) {
   try {
     toast.loading(t('status.loading'));
-    
+
     await api.save(data);
-    
+
     toast.success(t('success.saved'));
   } catch (error) {
     toast.error(t('errors.network'));
@@ -365,7 +365,7 @@ import { t } from '@lyricnote/shared';
 
 function ConfirmDialog({ onConfirm, onCancel }) {
   const message = t('common.confirm');
-  
+
   return (
     <div className="dialog">
       <p>{message}</p>
@@ -596,11 +596,11 @@ describe('i18n', () => {
 
   it('should switch language', () => {
     const { result } = renderHook(() => useTranslation());
-    
+
     act(() => {
       result.current.setLocale('en-US');
     });
-    
+
     expect(result.current.t('user.login')).toBe('Login');
   });
 });
