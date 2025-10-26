@@ -186,7 +186,7 @@ import { LanguageSwitcher } from '@/components/language-switcher';
 
 ```tsx
 // ✅ Tailwind 版本容易自定义
-<LanguageSwitcher 
+<LanguageSwitcher
   variant="icon"
   className="shadow-lg border-2 border-blue-500"
 />

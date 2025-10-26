@@ -1,15 +1,15 @@
 /**
  * 语言切换器 - CSS 版本（备选方案）
- * 
+ *
  * ⚠️ 注意：此组件使用独立的 CSS 文件，不依赖 Tailwind
- * 
+ *
  * 推荐使用：LanguageSwitcherTailwind（默认导出）
- * 
+ *
  * 使用场景：
  * - 需要在非 Tailwind 环境中使用
  * - 需要完全独立的样式（不受项目样式影响）
  * - 需要跨框架兼容性
- * 
+ *
  * @deprecated 在 Backend 项目中，推荐使用 Tailwind 版本
  */
 
