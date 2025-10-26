@@ -21,16 +21,18 @@ Error occurred prerendering page "/"
    - 这是为了生成静态 HTML,提升首次加载速度
 
 2. **原有的 i18n 初始化逻辑**
+
    ```typescript
    // ❌ 问题代码
    export async function initializeI18n() {
      // 异步初始化...
    }
-   
+
    if (typeof window !== 'undefined') {
      initializeI18n(); // 只在客户端执行
    }
    ```
+
    - 只在客户端 (`window` 存在时) 初始化
    - 服务端构建时 i18n 未初始化
    - 导致 `useTranslation()` hook 抛出错误
@@ -77,6 +79,7 @@ if (typeof window !== 'undefined') {
 ### 工作流程
 
 #### 1. **构建时 (服务端)**
+
 ```
 导入 i18n.ts
   ↓
@@ -90,6 +93,7 @@ Next.js 成功预渲染页面
 ```
 
 #### 2. **运行时 (客户端)**
+
 ```
 浏览器加载页面
   ↓
@@ -109,6 +113,7 @@ Next.js 成功预渲染页面
 ## 🎯 修复效果
 
 ### Before (❌ 构建失败)
+
 ```
 Generating static pages...
 Error: i18n not initialized
@@ -117,6 +122,7 @@ Build failed ❌
 ```
 
 ### After (✅ 构建成功)
+
 ```
 Generating static pages (34/34)
 Build completed successfully ✅
@@ -159,20 +165,23 @@ Static HTML generated
 ## 🔄 相关文件
 
 ### 修改的文件
+
 - `packages/backend/src/lib/i18n.ts` - i18n 初始化逻辑
 
 ### 受影响的文件
+
 - `packages/backend/src/app/page.tsx` - 首页 (使用 useTranslation)
 - `packages/backend/src/components/admin/admin-layout.tsx` - 后台布局
 
 ### 已正确配置
-✅ `page.tsx` - 标记为 `'use client'`  
-✅ `admin-layout.tsx` - 标记为 `'use client'`  
-✅ `i18n.ts` - 同步初始化  
+
+✅ `page.tsx` - 标记为 `'use client'` ✅ `admin-layout.tsx` - 标记为
+`'use client'` ✅ `i18n.ts` - 同步初始化
 
 ## 🚀 验证步骤
 
 ### 本地测试
+
 ```bash
 cd packages/backend
 pnpm build
@@ -180,10 +189,11 @@ pnpm build
 ```
 
 ### CI/CD 测试
-推送到 GitHub 后,查看 Actions:
-https://github.com/qxdqhr/LyricNote/actions
+
+推送到 GitHub 后,查看 Actions: https://github.com/qxdqhr/LyricNote/actions
 
 应该看到:
+
 - ✅ Backend 构建成功
 - ✅ 所有其他平台构建成功
 - ✅ Artifacts 可下载
@@ -197,14 +207,17 @@ https://github.com/qxdqhr/LyricNote/actions
 ## 🎓 经验教训
 
 ### 1. 'use client' 不意味着只在客户端运行
+
 - 构建时仍会在服务端预渲染
 - 需要确保代码在服务端也能运行
 
 ### 2. 异步初始化要谨慎
+
 - 构建时无法等待异步操作
 - 必须有同步的降级方案
 
 ### 3. 模块级初始化很有用
+
 - 在模块导入时立即执行
 - 确保代码运行前已初始化
 - 但要注意服务端/客户端兼容性
@@ -221,6 +234,7 @@ https://github.com/qxdqhr/LyricNote/actions
 ## 🎉 完成!
 
 现在 i18n 功能在构建时和运行时都能正常工作:
+
 - ✅ Next.js 构建成功
 - ✅ 服务端默认显示中文
 - ✅ 客户端自动加载用户语言
@@ -229,7 +243,5 @@ https://github.com/qxdqhr/LyricNote/actions
 
 ---
 
-**修复时间**: 2025-10-26  
-**影响范围**: Backend 构建,i18n 功能  
-**状态**: ✅ 已解决
-
+**修复时间**: 2025-10-26 **影响范围**: Backend 构建,i18n 功能 **状态**:
+✅ 已解决
