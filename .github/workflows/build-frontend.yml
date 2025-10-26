@@ -228,7 +228,6 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: 📱 构建 iOS (EAS Build)
-        if: ${{ secrets.EXPO_TOKEN != '' }}
         run: |
           cd packages/mobile
           eas build --platform ios --profile production --non-interactive --no-wait
@@ -285,7 +284,6 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: 📱 构建 Android (EAS Build)
-        if: ${{ secrets.EXPO_TOKEN != '' }}
         run: |
           cd packages/mobile
           eas build --platform android --profile production --non-interactive --no-wait
