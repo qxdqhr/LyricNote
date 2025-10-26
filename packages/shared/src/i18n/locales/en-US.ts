@@ -3,7 +3,27 @@
  */
 
 export default {
-  // Common
+  // ==================== App Information ====================
+  app: {
+    name: 'LyricNote',
+    fullName: 'LyricNote - Lyrics & Notes',
+    icon: '🎵',
+    description: 'A powerful lyrics and notes management app',
+    author: 'LyricNote Team',
+    copyright: `© ${new Date().getFullYear()} LyricNote`,
+    version: '1.0.0',
+  },
+
+  // ==================== App Titles ====================
+  titles: {
+    main: '🎵 LyricNote',
+    admin: 'LyricNote Admin',
+    withVersion: 'LyricNote v1.0.0',
+    welcome: 'Welcome to LyricNote',
+    about: 'About LyricNote',
+  },
+
+  // ==================== Common ====================
   common: {
     hello: 'Hello',
     welcome: 'Welcome',
@@ -15,21 +35,27 @@ export default {
     back: 'Back',
     next: 'Next',
     submit: 'Submit',
+    finish: 'Finish',
     loading: 'Loading...',
     success: 'Success',
     error: 'Error',
     retry: 'Retry',
+    empty: 'No data',
   },
 
-  // Navigation
+  // ==================== Navigation ====================
   nav: {
     home: 'Home',
+    lyrics: 'Lyrics',
+    create: 'Create',
+    collection: 'Collection',
     profile: 'Profile',
     settings: 'Settings',
+    history: 'History',
     logout: 'Logout',
   },
 
-  // User
+  // ==================== User ====================
   user: {
     login: 'Login',
     register: 'Register',
@@ -40,15 +66,45 @@ export default {
     nickname: 'Nickname',
   },
 
-  // Form validation
+  // ==================== Pages ====================
+  pages: {
+    home: {
+      title: 'Home',
+      description: 'A powerful lyrics and notes management app',
+    },
+    profile: {
+      title: 'Profile',
+      description: 'Manage your personal information and preferences',
+    },
+    admin: {
+      title: 'LyricNote Admin',
+      description: 'System management and data statistics',
+    },
+    login: {
+      title: 'Login',
+      description: 'Login to LyricNote',
+    },
+  },
+
+  // ==================== Form Validation ====================
   validation: {
     required: '{{field}} is required',
     invalid_email: 'Invalid email format',
     password_too_short: 'Password must be at least {{count}} characters',
+    password_weak: 'Password is too weak',
     passwords_not_match: 'Passwords do not match',
   },
 
-  // Error messages
+  // ==================== Status Messages ====================
+  status: {
+    loading: 'Loading...',
+    success: 'Success',
+    error: 'Error',
+    empty: 'No data',
+    network_error: 'Network error, please try again later',
+  },
+
+  // ==================== Error Messages ====================
   errors: {
     network: 'Network error, please try again later',
     server: 'Server error',
@@ -57,12 +113,21 @@ export default {
     unknown: 'Unknown error',
   },
 
-  // Success messages
+  // ==================== Success Messages ====================
   success: {
     saved: 'Saved successfully',
     deleted: 'Deleted successfully',
     updated: 'Updated successfully',
     created: 'Created successfully',
+  },
+
+  // ==================== Language Settings ====================
+  language: {
+    label: 'Language',
+    zh_cn: '简体中文',
+    zh_tw: '繁體中文',
+    en_us: 'English',
+    ja_jp: '日本語',
   },
 } as const;
 

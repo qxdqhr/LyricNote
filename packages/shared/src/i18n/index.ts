@@ -21,6 +21,16 @@ export type {
 // React Hooks
 export { useTranslation, useLocale } from './hooks';
 
+// React Components
+export {
+  LanguageSwitcher,
+  LanguageSwitcherButtons,
+  LanguageSwitcherDropdown,
+  LanguageSwitcherIcon,
+} from './components/LanguageSwitcher';
+
+export type { LanguageSwitcherProps, LanguageOption } from './components/LanguageSwitcher';
+
 // 平台适配器
 export {
   WebI18nAdapter,

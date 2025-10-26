@@ -84,7 +84,7 @@ export default function HomePage() {
     <div>
       <h1>{t('common.welcome')}</h1>
       <p>{t('nav.home')}</p>
-      
+
       {/* 语言切换 */}
       <select value={locale} onChange={(e) => setLocale(e.target.value as any)}>
         <option value="zh-CN">简体中文</option>
@@ -221,7 +221,7 @@ export function LanguageSelector() {
 
   const handleChange = async (newLocale: string) => {
     setLocale(newLocale as any);
-    
+
     // 保存到本地存储
     const adapter = new WebI18nAdapter();
     await adapter.saveLocale(newLocale as any);

@@ -44,7 +44,7 @@ function MyComponent() {
     <div>
       <h1>{t('common.welcome')}</h1>
       <p>{t('user.login')}</p>
-      
+
       {/* 切换语言 */}
       <button onClick={() => setLocale('en-US')}>
         English
@@ -300,12 +300,12 @@ initI18n({
 export default {
   // 通用
   common: { /* ... */ },
-  
+
   // 按功能模块
   auth: { /* ... */ },
   profile: { /* ... */ },
   settings: { /* ... */ },
-  
+
   // 共享
   errors: { /* ... */ },
   validation: { /* ... */ },
@@ -345,7 +345,7 @@ export type TranslationKeys = keyof typeof translations;
 // ❌ 不推荐
 function MyComponent() {
   const { t } = useTranslation();
-  
+
   return (
     <div>
       {['item1', 'item2'].map(key => (
@@ -358,12 +358,12 @@ function MyComponent() {
 // ✅ 推荐
 function MyComponent() {
   const { t } = useTranslation();
-  
+
   const items = useMemo(() => [
     { key: 'item1', label: t('item1') },
     { key: 'item2', label: t('item2') },
   ], [t]);
-  
+
   return (
     <div>
       {items.map(item => (
@@ -422,9 +422,9 @@ new Intl.DateTimeFormat('zh-CN').format(new Date());
 new Intl.NumberFormat('zh-CN').format(1234567.89);
 
 // 货币格式化
-new Intl.NumberFormat('zh-CN', { 
-  style: 'currency', 
-  currency: 'CNY' 
+new Intl.NumberFormat('zh-CN', {
+  style: 'currency',
+  currency: 'CNY'
 }).format(100);
 ```
 
