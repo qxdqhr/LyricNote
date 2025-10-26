@@ -229,7 +229,7 @@ export function LanguageSelector() {
 
   const handleChange = async (newLocale: string) => {
     setLocale(newLocale as any);
-    
+
     // 保存到本地存储
     const adapter = new WebI18nAdapter();
     await adapter.saveLocale(newLocale as any);

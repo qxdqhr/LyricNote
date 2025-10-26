@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { ChevronDown, ImageIcon } from 'lucide-react';
 import { logger } from '@lyricnote/shared';
 import Image from 'next/image';
+import { LanguageSwitcher } from '@/components/language-switcher';
+import { useTranslation } from '@/lib/i18n';
 
 interface HomepageSection {
   id: number;
@@ -18,6 +20,7 @@ interface ImageLoadState {
 }
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const [sections, setSections] = useState<HomepageSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentSection, setCurrentSection] = useState(0);
@@ -97,8 +100,13 @@ export default function HomePage() {
   if (sections.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+        {/* 语言切换器 */}
+        <div className="fixed top-6 right-6 z-50">
+          <LanguageSwitcher variant="icon" />
+        </div>
+        
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">欢迎使用 LyricNote</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">{t('titles.welcome')}</h1>
           <p className="text-gray-600">请在后台配置首页内容</p>
         </div>
       </div>
@@ -107,6 +115,11 @@ export default function HomePage() {
 
   return (
     <div className="relative">
+      {/* 固定的语言切换器 */}
+      <div className="fixed top-6 right-6 z-50">
+        <LanguageSwitcher variant="icon" />
+      </div>
+
       {sections.map((section, index) => {
         const hasImage = section.backgroundImage && imageLoadState[section.id] === 'loaded';
         const imageError = imageLoadState[section.id] === 'error';
@@ -173,7 +186,7 @@ export default function HomePage() {
                   href="/admin"
                   className="inline-block px-8 py-4 bg-white text-blue-600 rounded-full font-semibold text-lg hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 animate-fade-in-up animation-delay-400"
                 >
-                  进入后台管理
+                  {t('nav.settings')}
                 </a>
               )}
             </div>

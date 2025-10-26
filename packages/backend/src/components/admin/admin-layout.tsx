@@ -9,12 +9,15 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { apiClient } from '@/lib/auth/api-client';
 import { APP_CONFIG, useAuth, type Analytics, getWebAdminAnalytics } from '@lyricnote/shared';
+import { LanguageSwitcher } from '@/components/language-switcher';
+import { useTranslation } from '@/lib/i18n';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
+  const { t } = useTranslation();
   const [analytics] = useState<Analytics>(() => getWebAdminAnalytics());
   const router = useRouter();
   const pathname = usePathname();
@@ -155,6 +158,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
                 <Settings className="h-4 w-4" />
               </Button>
+
+              {/* 语言切换 */}
+              <div className="border-l border-gray-200 pl-4">
+                <LanguageSwitcher variant="icon" />
+              </div>
 
               {/* 用户头像 */}
               <div className="flex items-center space-x-2">

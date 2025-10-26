@@ -45,7 +45,7 @@ import { WebI18nAdapter } from '@lyricnote/shared/i18n/web';
 export async function initializeI18n() {
   const adapter = new WebI18nAdapter();
   const locale = await adapter.loadLocale() || 'zh-CN';
-  
+
   initI18n({
     locale,
     fallbackLocale: 'zh-CN',
@@ -76,7 +76,7 @@ import { ReactNativeI18nAdapter } from '@lyricnote/shared/dist/i18n/adapters';
 export async function initializeI18n() {
   const adapter = new ReactNativeI18nAdapter();
   const locale = await adapter.loadLocale() || adapter.getSystemLocale();
-  
+
   initI18n({
     locale,
     fallbackLocale: 'zh-CN',
@@ -107,7 +107,7 @@ import { TaroI18nAdapter } from '@lyricnote/shared/dist/i18n/adapters';
 export async function initializeI18n() {
   const adapter = new TaroI18nAdapter();
   const locale = await adapter.loadLocale() || adapter.getSystemLocale();
-  
+
   initI18n({
     locale,
     fallbackLocale: 'zh-CN',
@@ -138,7 +138,7 @@ import { ElectronI18nAdapter } from '@lyricnote/shared/i18n/web';
 export async function initializeI18n() {
   const adapter = new ElectronI18nAdapter();
   const locale = await adapter.loadLocale() || adapter.getSystemLocale();
-  
+
   initI18n({
     locale,
     fallbackLocale: 'zh-CN',
