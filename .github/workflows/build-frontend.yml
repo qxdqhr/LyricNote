@@ -1,0 +1,355 @@
+name: Build Frontend Packages
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: '要构建的平台 (desktop,mobile,miniapp,all)'
+        required: false
+        default: 'all'
+
+env:
+  PNPM_VERSION: 9
+
+jobs:
+  # ========== 1. 微信小程序构建 ==========
+  build-miniapp:
+    name: 构建微信小程序
+    runs-on: ubuntu-latest
+    if: |
+      github.event.inputs.platforms == 'miniapp' || 
+      github.event.inputs.platforms == 'all' || 
+      github.event.inputs.platforms == ''
+    steps:
+      - name: 📥 Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: 📚 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ 构建 Shared 包
+        run: |
+          cd packages/shared
+          pnpm build
+
+      - name: 🏗️ 构建微信小程序
+        run: |
+          cd packages/miniapp
+          pnpm build
+
+      - name: 📦 打包小程序代码
+        run: |
+          cd packages/miniapp/dist
+          zip -r ../miniapp-dist.zip .
+          cd ..
+          echo "✅ 小程序代码包已创建: miniapp-dist.zip"
+          ls -lh miniapp-dist.zip
+
+      - name: 📤 上传小程序代码包
+        uses: actions/upload-artifact@v4
+        with:
+          name: miniapp-wechat-${{ github.sha }}
+          path: packages/miniapp/miniapp-dist.zip
+          retention-days: 30
+
+      - name: 📊 构建信息
+        run: |
+          echo "🎉 微信小程序构建完成！"
+          echo "📦 产物名称: miniapp-wechat-${{ github.sha }}"
+          echo "💾 文件大小: $(du -h packages/miniapp/miniapp-dist.zip | cut -f1)"
+
+  # ========== 2. Desktop macOS 构建 ==========
+  build-desktop-macos:
+    name: 构建 Desktop (macOS)
+    runs-on: macos-latest
+    if: |
+      github.event.inputs.platforms == 'desktop' || 
+      github.event.inputs.platforms == 'all' || 
+      github.event.inputs.platforms == ''
+    steps:
+      - name: 📥 Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: 📚 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ 构建 Shared 包
+        run: |
+          cd packages/shared
+          pnpm build
+
+      - name: 🏗️ 构建 Desktop (macOS)
+        run: |
+          cd packages/desktop
+          pnpm build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📤 上传 macOS 安装包
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-macos-${{ github.sha }}
+          path: |
+            packages/desktop/release/*.dmg
+            packages/desktop/release/*.zip
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: 📊 构建信息
+        run: |
+          echo "🎉 macOS Desktop 构建完成！"
+          echo "📦 产物:"
+          ls -lh packages/desktop/release/*.dmg 2>/dev/null || echo "未找到 .dmg 文件"
+          ls -lh packages/desktop/release/*.zip 2>/dev/null || echo "未找到 .zip 文件"
+
+  # ========== 3. Desktop Windows 构建 ==========
+  build-desktop-windows:
+    name: 构建 Desktop (Windows)
+    runs-on: windows-latest
+    if: |
+      github.event.inputs.platforms == 'desktop' || 
+      github.event.inputs.platforms == 'all' || 
+      github.event.inputs.platforms == ''
+    steps:
+      - name: 📥 Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: 📚 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ 构建 Shared 包
+        run: |
+          cd packages/shared
+          pnpm build
+
+      - name: 🏗️ 构建 Desktop (Windows)
+        run: |
+          cd packages/desktop
+          pnpm build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📤 上传 Windows 安装包
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-windows-${{ github.sha }}
+          path: |
+            packages/desktop/release/*.exe
+            packages/desktop/release/*.msi
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: 📊 构建信息
+        run: |
+          echo "🎉 Windows Desktop 构建完成！"
+          echo "📦 产物:"
+          Get-ChildItem packages/desktop/release/*.exe -ErrorAction SilentlyContinue
+          Get-ChildItem packages/desktop/release/*.msi -ErrorAction SilentlyContinue
+
+  # ========== 4. Mobile iOS 构建 (EAS Build) ==========
+  build-mobile-ios:
+    name: 构建 Mobile (iOS)
+    runs-on: ubuntu-latest
+    if: |
+      (github.event.inputs.platforms == 'mobile' || 
+       github.event.inputs.platforms == 'all' || 
+       github.event.inputs.platforms == '') &&
+      github.event_name != 'pull_request'
+    steps:
+      - name: 📥 Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: 📚 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ 构建 Shared 包
+        run: |
+          cd packages/shared
+          pnpm build
+
+      - name: 🏗️ Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 📱 构建 iOS (EAS Build)
+        if: ${{ secrets.EXPO_TOKEN != '' }}
+        run: |
+          cd packages/mobile
+          eas build --platform ios --profile production --non-interactive --no-wait
+        continue-on-error: true
+
+      - name: ℹ️ EAS Build 说明
+        run: |
+          echo "📱 iOS 构建已提交到 EAS Build 云服务"
+          echo "🔗 查看构建状态: https://expo.dev/accounts/[your-account]/projects/lyricnote/builds"
+          echo "⚠️  如果未配置 EXPO_TOKEN, 此步骤会被跳过"
+          echo ""
+          echo "配置 EAS Build:"
+          echo "1. 访问 https://expo.dev"
+          echo "2. 创建账号并获取 Access Token"
+          echo "3. 在 GitHub Secrets 中添加 EXPO_TOKEN"
+
+  # ========== 5. Mobile Android 构建 (EAS Build) ==========
+  build-mobile-android:
+    name: 构建 Mobile (Android)
+    runs-on: ubuntu-latest
+    if: |
+      (github.event.inputs.platforms == 'mobile' || 
+       github.event.inputs.platforms == 'all' || 
+       github.event.inputs.platforms == '') &&
+      github.event_name != 'pull_request'
+    steps:
+      - name: 📥 Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: 📚 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ 构建 Shared 包
+        run: |
+          cd packages/shared
+          pnpm build
+
+      - name: 🏗️ Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 📱 构建 Android (EAS Build)
+        if: ${{ secrets.EXPO_TOKEN != '' }}
+        run: |
+          cd packages/mobile
+          eas build --platform android --profile production --non-interactive --no-wait
+        continue-on-error: true
+
+      - name: ℹ️ EAS Build 说明
+        run: |
+          echo "📱 Android 构建已提交到 EAS Build 云服务"
+          echo "🔗 查看构建状态: https://expo.dev/accounts/[your-account]/projects/lyricnote/builds"
+          echo "⚠️  如果未配置 EXPO_TOKEN, 此步骤会被跳过"
+          echo ""
+          echo "配置 EAS Build:"
+          echo "1. 访问 https://expo.dev"
+          echo "2. 创建账号并获取 Access Token"
+          echo "3. 在 GitHub Secrets 中添加 EXPO_TOKEN"
+
+  # ========== 6. 构建总结 ==========
+  build-summary:
+    name: 📊 构建总结
+    runs-on: ubuntu-latest
+    needs:
+      - build-miniapp
+      - build-desktop-macos
+      - build-desktop-windows
+      - build-mobile-ios
+      - build-mobile-android
+    if: always()
+    steps:
+      - name: 📋 生成构建报告
+        run: |
+          echo "# 🎉 LyricNote 前端构建完成"
+          echo ""
+          echo "## 📦 构建产物"
+          echo ""
+          echo "### 1️⃣ 微信小程序"
+          echo "- 📦 产物: miniapp-wechat-${{ github.sha }}"
+          echo "- 📝 说明: 可上传到微信开发者工具"
+          echo ""
+          echo "### 2️⃣ Desktop 桌面端"
+          echo "- 🍎 macOS: desktop-macos-${{ github.sha }}"
+          echo "- 🪟 Windows: desktop-windows-${{ github.sha }}"
+          echo ""
+          echo "### 3️⃣ Mobile 移动端"
+          echo "- 📱 iOS: 通过 EAS Build 云服务构建"
+          echo "- 🤖 Android: 通过 EAS Build 云服务构建"
+          echo "- 🔗 查看构建: https://expo.dev"
+          echo ""
+          echo "## 📥 下载方式"
+          echo ""
+          echo "1. 在 GitHub Actions 页面找到本次运行"
+          echo "2. 滚动到底部的 'Artifacts' 区域"
+          echo "3. 点击对应平台的产物名称下载"
+          echo ""
+          echo "## 🔧 版本信息"
+          echo "- Commit: ${{ github.sha }}"
+          echo "- Branch: ${{ github.ref_name }}"
+          echo "- Run Number: ${{ github.run_number }}"
+          echo "- Triggered by: ${{ github.actor }}"
+
+      - name: 📊 状态检查
+        run: |
+          echo "构建状态:"
+          echo "- MiniApp: ${{ needs.build-miniapp.result }}"
+          echo "- Desktop macOS: ${{ needs.build-desktop-macos.result }}"
+          echo "- Desktop Windows: ${{ needs.build-desktop-windows.result }}"
+          echo "- Mobile iOS: ${{ needs.build-mobile-ios.result }}"
+          echo "- Mobile Android: ${{ needs.build-mobile-android.result }}"
