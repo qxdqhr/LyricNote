@@ -51,7 +51,8 @@
   },
   "build": {
     "appId": "com.lyricnote.desktop",
-    "productName": "",
+    "productName": "LyricNote",
+    "publish": null,
     "directories": {
       "output": "release"
     },
