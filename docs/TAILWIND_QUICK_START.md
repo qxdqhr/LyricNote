@@ -8,6 +8,7 @@ bash scripts/setup-tailwind-all.sh
 ```
 
 这将自动配置：
+
 - ✅ Desktop (Electron)
 - ✅ Mobile (React Native + NativeWind)
 - ✅ MiniApp (Taro + weapp-tailwindcss)
@@ -17,11 +18,11 @@ bash scripts/setup-tailwind-all.sh
 
 ## 📦 各平台状态
 
-| 平台 | 状态 | 方案 |
-|------|------|------|
-| **Backend** | ✅ 已完成 | Tailwind CSS |
-| **Desktop** | 🔨 运行脚本后配置 | Tailwind CSS |
-| **Mobile** | 🔨 运行脚本后配置 | NativeWind |
+| 平台        | 状态              | 方案              |
+| ----------- | ----------------- | ----------------- |
+| **Backend** | ✅ 已完成         | Tailwind CSS      |
+| **Desktop** | 🔨 运行脚本后配置 | Tailwind CSS      |
+| **Mobile**  | 🔨 运行脚本后配置 | NativeWind        |
 | **MiniApp** | 🔨 运行脚本后配置 | weapp-tailwindcss |
 
 ---
@@ -63,9 +64,11 @@ const config = {
         plugin: {
           install: {
             plugin: UnifiedWebpackPluginV5,
-            args: [{
-              appType: 'taro',
-            }],
+            args: [
+              {
+                appType: 'taro',
+              },
+            ],
           },
         },
       });
@@ -131,9 +134,7 @@ theme: {
 使用：
 
 ```tsx
-<div className="bg-primary text-white">
-  统一的主题色
-</div>
+<div className="bg-primary text-white">统一的主题色</div>
 ```
 
 ---
@@ -141,7 +142,8 @@ theme: {
 ## 📚 详细文档
 
 - [完整配置指南](./TAILWIND_SETUP_ALL_PLATFORMS.md) - 详细的每个平台配置步骤
-- [语言切换器](../packages/backend/src/components/language-switcher/README.md) - Tailwind 版本组件示例
+- [语言切换器](../packages/backend/src/components/language-switcher/README.md) -
+  Tailwind 版本组件示例
 
 ---
 
@@ -156,4 +158,3 @@ theme: {
 ---
 
 **快速开始**: `bash scripts/setup-tailwind-all.sh`
-

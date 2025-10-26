@@ -33,9 +33,9 @@ echo ""
 echo "${YELLOW}📦 [1/3] 配置 Desktop (Electron + Vite)...${NC}"
 cd "${ROOT_DIR}/packages/desktop"
 
-# 安装依赖
-echo "  → 安装 Tailwind CSS 依赖..."
-pnpm add -D tailwindcss postcss autoprefixer
+# 安装依赖（Tailwind CSS v4 需要 @tailwindcss/postcss）
+echo "  → 安装 Tailwind CSS v4 依赖..."
+pnpm add -D tailwindcss @tailwindcss/postcss autoprefixer
 
 # 创建 Tailwind 配置
 echo "  → 创建 tailwind.config.js..."
@@ -59,28 +59,33 @@ export default {
 }
 EOF
 
-# 创建 PostCSS 配置
+# 创建 PostCSS 配置（v4 使用 @tailwindcss/postcss）
 echo "  → 创建 postcss.config.js..."
 cat > postcss.config.js << 'EOF'
 export default {
   plugins: {
-    tailwindcss: {},
+    '@tailwindcss/postcss': {},
     autoprefixer: {},
   },
 }
 EOF
 
-# 创建 CSS 入口文件
-echo "  → 创建 src/index.css..."
-mkdir -p src
-cat > src/index.css << 'EOF'
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+# 创建 CSS 入口文件（v4 使用 @import 语法）
+echo "  → 创建 src/styles/index.css..."
+mkdir -p src/styles
+cat > src/styles/index.css << 'EOF'
+@import "tailwindcss";
 
 /* 自定义全局样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
   @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 EOF
 
@@ -122,7 +127,7 @@ echo "  → 更新 babel.config.js..."
 if [ -f babel.config.js ]; then
   # 备份原文件
   cp babel.config.js babel.config.js.backup
-  
+
   # 添加 nativewind plugin
   cat > babel.config.js << 'EOF'
 module.exports = function(api) {
@@ -217,22 +222,29 @@ echo "${GREEN}============================================${NC}"
 echo ""
 echo "📋 下一步操作："
 echo ""
-echo "1. Desktop (Electron):"
+echo "1. Desktop (Electron + Tailwind v4):"
 echo "   cd packages/desktop"
-echo "   # 在 src/main.tsx 中导入: import './index.css'"
+echo "   # 在 src/main.tsx 中导入: import './styles/index.css'"
 echo "   pnpm dev"
 echo ""
-echo "2. Mobile (React Native):"
+echo "2. Mobile (React Native + NativeWind):"
 echo "   cd packages/mobile"
 echo "   # 重新启动项目以应用 Babel 配置"
 echo "   pnpm start --clear"
 echo ""
-echo "3. MiniApp (Taro):"
+echo "3. MiniApp (Taro + weapp-tailwindcss):"
 echo "   cd packages/miniapp"
 echo "   # 更新 config/index.ts 添加 webpack 插件"
 echo "   # 参考: docs/TAILWIND_SETUP_ALL_PLATFORMS.md"
 echo "   pnpm dev:weapp"
 echo ""
+echo "⚠️  重要提示："
+echo "   - Desktop 使用 Tailwind CSS v4 (需要 @tailwindcss/postcss)"
+echo "   - Backend 使用 Tailwind CSS v4 (Next.js)"
+echo "   - Mobile 使用 NativeWind 3.x (基于 Tailwind v3)"
+echo "   - MiniApp 使用 weapp-tailwindcss (基于 Tailwind v3)"
+echo ""
 echo "📚 详细文档: docs/TAILWIND_SETUP_ALL_PLATFORMS.md"
 echo ""
+
 

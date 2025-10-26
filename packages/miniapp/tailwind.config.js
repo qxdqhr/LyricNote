@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./App.{js,jsx,ts,tsx}",
-    "./src/**/*.{js,jsx,ts,tsx}"
-  ],
+  content: ['./src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -13,4 +10,7 @@ module.exports = {
     },
   },
   plugins: [],
+  corePlugins: {
+    preflight: false, // 小程序不需要重置样式
+  },
 }

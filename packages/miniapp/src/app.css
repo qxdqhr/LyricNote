@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 小程序全局样式 */
+page {
+  @apply bg-gray-50 text-gray-900;
+}

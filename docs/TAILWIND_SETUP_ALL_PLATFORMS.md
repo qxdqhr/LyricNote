@@ -2,27 +2,37 @@
 
 本指南将帮助你在所有 4 个前端平台配置 Tailwind CSS，替代传统 CSS。
 
+> ⚠️ **重要版本说明**
+>
+> - **Backend & Desktop**: 使用 **Tailwind CSS v4** (最新版本)
+>   - 需要安装 `@tailwindcss/postcss`
+>   - CSS 使用 `@import "tailwindcss"` 语法
+> - **Mobile & MiniApp**: 使用基于 **Tailwind CSS v3** 的适配方案
+>   - Mobile: NativeWind 3.x
+>   - MiniApp: weapp-tailwindcss
+
 ## 📊 平台支持概览
 
-| 平台 | 方案 | 状态 | 难度 |
-|------|------|------|------|
-| **Backend (Next.js)** | Tailwind CSS | ✅ 已配置 | ⭐ |
-| **Desktop (Electron)** | Tailwind CSS | 🔨 待配置 | ⭐⭐ |
-| **Mobile (React Native)** | NativeWind | 🔨 待配置 | ⭐⭐⭐ |
-| **MiniApp (Taro)** | weapp-tailwindcss | 🔨 待配置 | ⭐⭐⭐⭐ |
+| 平台                      | 方案              | Tailwind 版本 | 状态      | 难度     |
+| ------------------------- | ----------------- | ------------- | --------- | -------- |
+| **Backend (Next.js)**     | Tailwind CSS      | v4            | ✅ 已配置 | ⭐       |
+| **Desktop (Electron)**    | Tailwind CSS      | v4            | ✅ 已配置 | ⭐⭐     |
+| **Mobile (React Native)** | NativeWind        | v3            | 🔨 待配置 | ⭐⭐⭐   |
+| **MiniApp (Taro)**        | weapp-tailwindcss | v3            | 🔨 待配置 | ⭐⭐⭐⭐ |
 
 ---
 
 ## 1️⃣ Backend (Next.js) ✅ 已完成
 
-### 当前配置
+### 当前配置 (Tailwind v4)
 
 ```bash
 # 已安装
 packages/backend/
-├── tailwind.config.ts  ✅
-├── postcss.config.mjs  ✅
-└── package.json        ✅ tailwindcss, postcss, autoprefixer
+├── tailwind.config.ts     ✅
+├── postcss.config.mjs     ✅ 使用 @tailwindcss/postcss
+├── src/app/globals.css    ✅ 使用 @import "tailwindcss"
+└── package.json           ✅ @tailwindcss/postcss, autoprefixer
 ```
 
 ### 语言切换器
@@ -31,64 +41,71 @@ packages/backend/
 
 ---
 
-## 2️⃣ Desktop (Electron + Vite)
+## 2️⃣ Desktop (Electron + Vite) ✅ 已完成
 
-### 步骤 1: 安装依赖
+### 步骤 1: 安装依赖 (Tailwind v4)
 
 ```bash
 cd packages/desktop
-pnpm add -D tailwindcss postcss autoprefixer
+# v4 需要 @tailwindcss/postcss
+pnpm add -D tailwindcss @tailwindcss/postcss autoprefixer
 ```
 
-### 步骤 2: 初始化配置
-
-```bash
-npx tailwindcss init -p
-```
-
-### 步骤 3: 配置 tailwind.config.js
+### 步骤 2: 配置 tailwind.config.js
 
 ```javascript
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: '#5B8AFF',
+        secondary: '#FF6B9D',
+      },
+    },
   },
   plugins: [],
-  // 深色模式支持
-  darkMode: 'class', // 或 'media'
-}
+  darkMode: 'class',
+};
 ```
 
-### 步骤 4: 配置 postcss.config.js
+### 步骤 3: 配置 postcss.config.js (v4 语法)
 
 ```javascript
 export default {
   plugins: {
-    tailwindcss: {},
+    '@tailwindcss/postcss': {}, // v4 使用这个包
     autoprefixer: {},
   },
+};
+```
+
+### 步骤 4: 创建 CSS 入口文件 (v4 语法)
+
+```css
+/* src/styles/index.css */
+@import 'tailwindcss'; /* v4 使用 @import 而不是 @tailwind */
+
+/* 自定义全局样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 ```
 
-### 步骤 5: 创建 CSS 入口文件
-
-```css
-/* src/index.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-```
-
-### 步骤 6: 导入 CSS
+### 步骤 5: 导入 CSS
 
 ```typescript
 // src/main.tsx
-import './index.css';
+import './styles/index.css';  // 导入 Tailwind CSS
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -134,22 +151,19 @@ npx tailwindcss init
 ```javascript
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./App.{js,jsx,ts,tsx}",
-    "./src/**/*.{js,jsx,ts,tsx}"
-  ],
+  content: ['./App.{js,jsx,ts,tsx}', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {},
   },
   plugins: [],
-}
+};
 ```
 
 ### 步骤 4: 配置 Babel
 
 ```javascript
 // babel.config.js
-module.exports = function(api) {
+module.exports = function (api) {
   api.cache(true);
   return {
     presets: ['babel-preset-expo'],
@@ -180,8 +194,8 @@ export function LanguageSwitcher() {
       <Pressable
         onPress={() => setLocale('zh-CN')}
         className={`px-4 py-2 rounded-md ${
-          locale === 'zh-CN' 
-            ? 'bg-white shadow' 
+          locale === 'zh-CN'
+            ? 'bg-white shadow'
             : 'bg-transparent'
         }`}
       >
@@ -191,8 +205,8 @@ export function LanguageSwitcher() {
       <Pressable
         onPress={() => setLocale('en-US')}
         className={`px-4 py-2 rounded-md ${
-          locale === 'en-US' 
-            ? 'bg-white shadow' 
+          locale === 'en-US'
+            ? 'bg-white shadow'
             : 'bg-transparent'
         }`}
       >
@@ -254,7 +268,7 @@ module.exports = {
   corePlugins: {
     preflight: false, // 小程序不需要重置样式
   },
-}
+};
 ```
 
 ### 步骤 4: 配置 postcss.config.js
@@ -270,7 +284,7 @@ module.exports = {
       transformUnit: 'rpx', // 转换为 rpx
     },
   },
-}
+};
 ```
 
 ### 步骤 5: 配置 Taro config
@@ -287,9 +301,11 @@ const config = {
         plugin: {
           install: {
             plugin: UnifiedWebpackPluginV5,
-            args: [{
-              appType: 'taro',
-            }],
+            args: [
+              {
+                appType: 'taro',
+              },
+            ],
           },
         },
       });
@@ -324,9 +340,7 @@ export function LanguageSwitcher() {
       <View
         onClick={() => setLocale('zh-CN')}
         className={`px-4 py-2 rounded ${
-          locale === 'zh-CN' 
-            ? 'bg-white shadow' 
-            : 'bg-transparent'
+          locale === 'zh-CN' ? 'bg-white shadow' : 'bg-transparent'
         }`}
       >
         <Text className="text-sm font-medium">🇨🇳 中文</Text>
@@ -335,9 +349,7 @@ export function LanguageSwitcher() {
       <View
         onClick={() => setLocale('en-US')}
         className={`px-4 py-2 rounded ${
-          locale === 'en-US' 
-            ? 'bg-white shadow' 
-            : 'bg-transparent'
+          locale === 'en-US' ? 'bg-white shadow' : 'bg-transparent'
         }`}
       >
         <Text className="text-sm font-medium">🇺🇸 English</Text>
@@ -442,23 +454,23 @@ echo "✅ Tailwind CSS setup complete for all platforms!"
 
 ### 使用 Tailwind CSS
 
-| 优势 | 说明 |
-|------|------|
-| **统一性** | 所有平台使用相同的样式语法 |
-| **开发效率** | 快速原型和迭代 |
-| **类型安全** | TypeScript 支持 |
-| **Tree Shaking** | 自动移除未使用的样式 |
-| **深色模式** | 内置支持 |
-| **响应式** | 简单的断点系统 |
+| 优势             | 说明                       |
+| ---------------- | -------------------------- |
+| **统一性**       | 所有平台使用相同的样式语法 |
+| **开发效率**     | 快速原型和迭代             |
+| **类型安全**     | TypeScript 支持            |
+| **Tree Shaking** | 自动移除未使用的样式       |
+| **深色模式**     | 内置支持                   |
+| **响应式**       | 简单的断点系统             |
 
 ### 传统 CSS
 
-| 劣势 | 说明 |
-|------|------|
-| **维护成本** | 多个 CSS 文件难以管理 |
-| **样式冲突** | 全局命名空间 |
-| **包体积** | 所有样式都会打包 |
-| **跨平台** | 每个平台需要不同的 CSS |
+| 劣势         | 说明                   |
+| ------------ | ---------------------- |
+| **维护成本** | 多个 CSS 文件难以管理  |
+| **样式冲突** | 全局命名空间           |
+| **包体积**   | 所有样式都会打包       |
+| **跨平台**   | 每个平台需要不同的 CSS |
 
 ---
 
@@ -559,14 +571,15 @@ export const buttonClasses = {
 
 ## 🎯 总结
 
-| 平台 | 推荐方案 | 配置难度 | 学习曲线 |
-|------|---------|---------|---------|
-| **Backend** | Tailwind CSS | ⭐ | ⭐ |
-| **Desktop** | Tailwind CSS | ⭐⭐ | ⭐ |
-| **Mobile** | NativeWind | ⭐⭐⭐ | ⭐⭐⭐ |
+| 平台        | 推荐方案          | 配置难度 | 学习曲线 |
+| ----------- | ----------------- | -------- | -------- |
+| **Backend** | Tailwind CSS      | ⭐       | ⭐       |
+| **Desktop** | Tailwind CSS      | ⭐⭐     | ⭐       |
+| **Mobile**  | NativeWind        | ⭐⭐⭐   | ⭐⭐⭐   |
 | **MiniApp** | weapp-tailwindcss | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
 
 **推荐优先级**：
+
 1. ✅ Backend - 已完成
 2. 🥈 Desktop - 简单，优先配置
 3. 🥉 Mobile - 中等难度
@@ -575,4 +588,3 @@ export const buttonClasses = {
 ---
 
 **最后更新**: 2025-10-26
-
