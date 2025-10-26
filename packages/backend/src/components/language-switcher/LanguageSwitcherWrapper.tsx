@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { LanguageSwitcher, type Locale } from '@lyricnote/shared';
-import '@lyricnote/shared/dist/i18n/components/LanguageSwitcher.css';
+import '@lyricnote/shared/i18n/components/LanguageSwitcher.css';
 
 interface LanguageSwitcherWrapperProps {
   variant?: 'buttons' | 'dropdown' | 'icon';

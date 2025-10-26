@@ -34,7 +34,8 @@
       "types": "./dist/i18n/web.d.ts",
       "import": "./dist/i18n/web.js",
       "default": "./dist/i18n/web.js"
-    }
+    },
+    "./i18n/components/LanguageSwitcher.css": "./src/i18n/components/LanguageSwitcher.css"
   },
   "scripts": {
     "build": "tsc",
