@@ -22,6 +22,9 @@ export * from './analytics';
 // 导出微信登录和支付（仅类型，工具函数在backend中实现）
 export * from './wechat/types';
 
+// 导出国际化 (i18n)
+export * from './i18n';
+
 // 导出平台适配器（显式导出以避免冲突）
 export {
   // 存储适配器
