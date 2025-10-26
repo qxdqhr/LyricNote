@@ -104,7 +104,7 @@ export default function HomePage() {
         <div className="fixed top-6 right-6 z-50">
           <LanguageSwitcher variant="icon" />
         </div>
-        
+
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">{t('titles.welcome')}</h1>
           <p className="text-gray-600">请在后台配置首页内容</p>

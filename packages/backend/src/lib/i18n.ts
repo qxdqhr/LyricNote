@@ -30,7 +30,7 @@ export async function initializeI18n() {
     isInitialized = true;
   } catch (error) {
     console.error('Failed to initialize i18n:', error);
-    
+
     // 降级方案：使用默认中文
     initI18n({
       locale: 'zh-CN',
@@ -40,7 +40,7 @@ export async function initializeI18n() {
         'en-US': enUS,
       },
     });
-    
+
     isInitialized = true;
   }
 }

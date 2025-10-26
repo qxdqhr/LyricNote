@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { initI18n, useTranslation, zhCN, enUS } from '../index';
-import { WebI18nAdapter } from '../i18n/web';
+import { WebI18nAdapter } from './web';
 
 // =========================
 // 1. 初始化示例

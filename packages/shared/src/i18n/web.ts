@@ -3,8 +3,8 @@
  * 用于 Next.js、React Web 等环境
  */
 
-// 只导出 Web 相关的适配器
-export { WebI18nAdapter, ElectronI18nAdapter } from './adapters';
+// 只导出 Web 相关的适配器（从单独的文件导入，避免引入 React Native）
+export { WebI18nAdapter, ElectronI18nAdapter } from './adapters/web';
 
 // 重新导出核心功能
 export { createI18n, initI18n, getI18n, t } from './i18n';
