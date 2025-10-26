@@ -167,18 +167,27 @@ jobs:
             docker ps -a | grep lyricnote-backend | awk '{print $1}' | xargs -r docker stop || true
             docker ps -a | grep lyricnote-backend | awk '{print $1}' | xargs -r docker rm -f || true
 
-            # 检查并清理占用端口的进程
+            # 强制清理占用端口的所有进程
             echo "🔍 检查端口 ${BACKEND_PORT} 占用情况..."
-            PORT_PID=$(lsof -ti:${BACKEND_PORT} 2>/dev/null || true)
-            if [ ! -z "$PORT_PID" ]; then
-              echo "⚠️  发现进程 $PORT_PID 占用端口 ${BACKEND_PORT}"
+            PORT_PIDS=$(lsof -ti:${BACKEND_PORT} 2>/dev/null || true)
+            if [ ! -z "$PORT_PIDS" ]; then
+              echo "⚠️  发现以下进程占用端口 ${BACKEND_PORT}: $PORT_PIDS"
+              echo "🔪 强制终止这些进程..."
+              echo "$PORT_PIDS" | xargs -r kill -9 || true
+              sleep 3
+              echo "✅ 进程已清理"
             else
               echo "✅ 端口 ${BACKEND_PORT} 未被占用"
             fi
 
-            # 等待端口完全释放
-            echo "⏳ 等待端口释放..."
-            sleep 10
+            # 再次确认端口已释放
+            echo "🔍 再次检查端口状态..."
+            REMAINING=$(lsof -ti:${BACKEND_PORT} 2>/dev/null || true)
+            if [ ! -z "$REMAINING" ]; then
+              echo "⚠️  端口仍被占用,强制清理..."
+              echo "$REMAINING" | xargs -r kill -9 || true
+              sleep 5
+            fi
 
             # 拉取新镜像
             echo "📥 拉取新镜像 tag:${NEW_TAG}..."
